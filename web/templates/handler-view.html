@@ -28,8 +28,8 @@
 
     <p class="my-3">
         Analysis of the <strong>{{ .HandlerName }}</strong> {{ .HandlerType }} message handler
-        discovered <strong>{{ len .ConsumedMessages }}</strong> consumed {{ .ConsumedMessageRole }} type(s)
-        and <strong>{{ len .ProducedMessages }}</strong> produced {{ .ProducedMessageRole }} type(s).
+        discovered <strong>{{ len .ConsumedMessages }}</strong> consumed {{ .ConsumedMessageRole }} type(s){{ if .ProducedMessageRole }}
+        and <strong>{{ len .ProducedMessages }}</strong> produced {{ .ProducedMessageRole }} type(s){{ end }}.
     </p>
 
     {{ if .TimeoutMessages }}
@@ -38,16 +38,14 @@
         </p>
     {{ end }}
 
-    {{ if .ConsumedMessageRole }}
-        <strong style="text-transform: capitalize;">{{ .ConsumedMessageRole }} Messages</strong>
-        <ul>
-            {{ range .ConsumedMessages }}
-            <li><a href="/messages/{{ .MessageTypeName }}"><span class="text-muted">{{ .MessageTypeName.PackagePath }}/</span>{{ .MessageTypeName.Name }}</a></li>
-            {{ end }}
-        </ul>
-    {{ end }}
+    <strong style="text-transform: capitalize;">{{ .ConsumedMessageRole }} Messages</strong>
+    <ul>
+        {{ range .ConsumedMessages }}
+        <li><a href="/messages/{{ .MessageTypeName }}"><span class="text-muted">{{ .MessageTypeName.PackagePath }}/</span>{{ .MessageTypeName.Name }}</a></li>
+        {{ end }}
+    </ul>
 
-    {{ if .ProducedMessageRole }}
+    {{ if .ProducedMessages }}
         <strong style="text-transform: capitalize;">{{ .ProducedMessageRole }} Messages</strong>
         <ul>
             {{ range .ProducedMessages }}

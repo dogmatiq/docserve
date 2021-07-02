@@ -118,7 +118,7 @@ func (h *HandlerViewHandler) ServeHTTP(ctx *gin.Context) error {
 
 	tc := templates.HandlerViewContext{
 		Context: templates.Context{
-			ActiveMenuItem: templates.ApplicationsMenuItem,
+			ActiveMenuItem: templates.HandlersMenuItem,
 		},
 	}
 
