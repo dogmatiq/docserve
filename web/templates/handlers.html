@@ -1,0 +1,22 @@
+{{ define "content" }}
+<table class="table table-striped table-hover">
+    <thead>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Implementation</th>
+        <th>Application</th>
+        <th style="text-align: right;">Messages</th>
+    </thead>
+    <tbody>
+        {{ range .Table }}
+        <tr>
+            <td><a href="/handlers/{{ .HandlerKey }}">{{ .HandlerName }}</a></td>
+            <td>{{ .HandlerType }}</td>
+            <td>{{ .HandlerTypeName }}</td>
+            <td><a href="/application/{{ .AppKey }}">{{ .AppName }}</a></td>
+            <td><a href="/handlers/{{ .HandlerKey }}#messages">{{ .MessageCount }}</a></td>
+        </tr>
+        {{ end }}
+    </tbody>
+</table>
+{{ end }}

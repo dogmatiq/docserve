@@ -21,9 +21,9 @@ func init() {
 			return nil, err
 		}
 
-		if err := persistence.DropSchema(ctx, db); err != nil {
-			return nil, err
-		}
+		// if err := persistence.DropSchema(ctx, db); err != nil {
+		// 	return nil, err
+		// }
 
 		if err := persistence.CreateSchema(ctx, db); err != nil {
 			return nil, err

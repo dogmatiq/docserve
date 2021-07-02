@@ -44,3 +44,6 @@ CREATE TABLE IF NOT EXISTS docserve.handler_message (
         REFERENCES docserve.handler (key)
         ON DELETE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS handler_message_type_name_idx
+    ON docserve.handler_message (type_name);
