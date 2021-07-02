@@ -2,18 +2,20 @@ package templates
 
 import "github.com/dogmatiq/configkit"
 
-type ListHandlersContext struct {
+type HandlerListContext struct {
 	Context
 
-	Table []HandlerListRow
+	TotalRepoCount int
+	TotalAppCount  int
+	Handlers       []HandlerRow
 }
 
-type HandlerListRow struct {
+type HandlerRow struct {
 	HandlerKey      string
 	HandlerName     string
 	HandlerType     configkit.HandlerType
 	HandlerTypeName TypeName
 	AppKey          string
 	AppName         string
-	MessageCount    string
+	MessageCount    int
 }

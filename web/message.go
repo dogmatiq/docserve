@@ -8,15 +8,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ListMessagesHandler struct {
+type MessageListHandler struct {
 	DB *sql.DB
 }
 
-func (h *ListMessagesHandler) Route() (string, string) {
+func (h *MessageListHandler) Route() (string, string) {
 	return http.MethodGet, "/messages"
 }
 
-func (h *ListMessagesHandler) ServeHTTP(ctx *gin.Context) error {
+func (h *MessageListHandler) ServeHTTP(ctx *gin.Context) error {
+	tc := templates.MessageListContext{
+		Context: templates.Context{
+			Title:          "Messages",
+			ActiveMenuItem: templates.MessagesMenuItem,
+		},
+	}
+
 	rows, err := h.DB.QueryContext(
 		ctx,
 		`SELECT
@@ -35,16 +42,10 @@ func (h *ListMessagesHandler) ServeHTTP(ctx *gin.Context) error {
 	if err != nil {
 		return err
 	}
-
-	tc := templates.ListMessagesContext{
-		Context: templates.Context{
-			Title:          "Messages",
-			ActiveMenuItem: templates.MessagesMenuItem,
-		},
-	}
+	defer rows.Close()
 
 	for rows.Next() {
-		var tr templates.MessageListRow
+		var tr templates.MessageRow
 
 		if err := rows.Scan(
 			&tr.MessageTypeName,
@@ -55,14 +56,14 @@ func (h *ListMessagesHandler) ServeHTTP(ctx *gin.Context) error {
 			return err
 		}
 
-		tc.Table = append(tc.Table, tr)
+		tc.Messages = append(tc.Messages, tr)
 	}
 
 	if err := rows.Err(); err != nil {
 		return err
 	}
 
-	ctx.HTML(http.StatusOK, "messages.html", tc)
+	ctx.HTML(http.StatusOK, "message-list.html", tc)
 
 	return nil
 }

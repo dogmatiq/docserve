@@ -10,9 +10,10 @@ import (
 func init() {
 	provide(func(db *sql.DB) http.Handler {
 		return web.NewRouter(
-			&web.ListApplicationsHandler{DB: db},
-			&web.ListHandlersHandler{DB: db},
-			&web.ListMessagesHandler{DB: db},
+			&web.ApplicationListHandler{DB: db},
+			&web.ApplicationViewHandler{DB: db},
+			&web.HandlerListHandler{DB: db},
+			&web.MessageListHandler{DB: db},
 		)
 	})
 

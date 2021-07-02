@@ -1,12 +1,12 @@
 package templates
 
-type ListMessagesContext struct {
+type MessageListContext struct {
 	Context
 
-	Table []MessageListRow
+	Messages []MessageRow
 }
 
-type MessageListRow struct {
+type MessageRow struct {
 	MessageTypeName TypeName
 	Role            string
 	AppCount        int

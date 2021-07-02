@@ -8,15 +8,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ListHandlersHandler struct {
+type HandlerListHandler struct {
 	DB *sql.DB
 }
 
-func (h *ListHandlersHandler) Route() (string, string) {
+func (h *HandlerListHandler) Route() (string, string) {
 	return http.MethodGet, "/handlers"
 }
 
-func (h *ListHandlersHandler) ServeHTTP(ctx *gin.Context) error {
+func (h *HandlerListHandler) ServeHTTP(ctx *gin.Context) error {
+	tc := templates.HandlerListContext{
+		Context: templates.Context{
+			Title:          "Handlers",
+			ActiveMenuItem: templates.HandlersMenuItem,
+		},
+	}
+
+	row := h.DB.QueryRowContext(
+		ctx,
+		`SELECT
+			(SELECT COUNT(*) FROM docserve.repository),
+			(SELECT COUNT(*) FROM docserve.application)`,
+	)
+	if err := row.Scan(
+		&tc.TotalRepoCount,
+		&tc.TotalAppCount,
+	); err != nil {
+		return err
+	}
+
 	rows, err := h.DB.QueryContext(
 		ctx,
 		`SELECT
@@ -38,16 +58,10 @@ func (h *ListHandlersHandler) ServeHTTP(ctx *gin.Context) error {
 	if err != nil {
 		return err
 	}
-
-	tc := templates.ListHandlersContext{
-		Context: templates.Context{
-			Title:          "Handlers",
-			ActiveMenuItem: templates.HandlersMenuItem,
-		},
-	}
+	defer rows.Close()
 
 	for rows.Next() {
-		var tr templates.HandlerListRow
+		var tr templates.HandlerRow
 
 		if err := rows.Scan(
 			&tr.HandlerKey,
@@ -61,14 +75,14 @@ func (h *ListHandlersHandler) ServeHTTP(ctx *gin.Context) error {
 			return err
 		}
 
-		tc.Table = append(tc.Table, tr)
+		tc.Handlers = append(tc.Handlers, tr)
 	}
 
 	if err := rows.Err(); err != nil {
 		return err
 	}
 
-	ctx.HTML(http.StatusOK, "handlers.html", tc)
+	ctx.HTML(http.StatusOK, "handler-list.html", tc)
 
 	return nil
 }
