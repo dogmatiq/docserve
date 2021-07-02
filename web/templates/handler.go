@@ -1,6 +1,9 @@
 package templates
 
-import "github.com/dogmatiq/configkit"
+import (
+	"github.com/dogmatiq/configkit"
+	"github.com/dogmatiq/configkit/message"
+)
 
 type HandlerListContext struct {
 	Context
@@ -18,4 +21,21 @@ type HandlerRow struct {
 	AppKey          string
 	AppName         string
 	MessageCount    int
+}
+
+type HandlerViewContext struct {
+	Context
+
+	HandlerKey      string
+	HandlerName     string
+	HandlerType     configkit.HandlerType
+	HandlerTypeName TypeName
+	AppKey          string
+	AppName         string
+
+	ConsumedMessages    []MessageRow
+	ConsumedMessageRole message.Role
+	ProducedMessages    []MessageRow
+	ProducedMessageRole message.Role
+	TimeoutMessages     []MessageRow
 }

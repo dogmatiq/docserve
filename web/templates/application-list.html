@@ -3,7 +3,7 @@
 
 <p class="my-3">
     Static analysis of <strong>{{ .TotalRepoCount }}</strong> repositories
-    has discovered <strong>{{ len .Applications }}</strong> Dogma applications.
+    has discovered <strong>{{ len .Applications }}</strong> Dogma application(s).
 </p>
 
 <table class="table table-striped table-hover">
@@ -24,7 +24,7 @@
             <td><a href="/applications/{{ .AppKey }}">{{ .AppName }}</a></td>
             <td style="text-align: right;"><a href="/applications/{{ .AppKey }}#handlers">{{ .HandlerCount }}</a></td>
             <td style="text-align: right;"><a href="/applications/{{ .AppKey }}#messages">{{ .MessageCount }}</a></td>
-            <td>{{ block "typename" .AppTypeName }}?{{end}}</td>
+            <td><span class="text-muted">{{ .AppTypeName.PackagePath }}/</span>{{ .AppTypeName.Name }}</td>
         </tr>
         {{ end }}
     </tbody>

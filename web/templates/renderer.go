@@ -16,6 +16,7 @@ func NewRenderer() render.HTMLRender {
 	add(&mt, "application-list.html")
 	add(&mt, "application-view.html")
 	add(&mt, "handler-list.html")
+	add(&mt, "handler-view.html")
 	add(&mt, "message-list.html")
 
 	return mt
@@ -38,7 +39,6 @@ func add(mt *multitemplate.Render, name string) {
 	for _, file := range []string{
 		"layout.html",
 		name,
-		"typename.html",
 	} {
 		content, err := fs.ReadFile(file)
 		if err != nil {

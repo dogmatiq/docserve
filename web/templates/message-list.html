@@ -11,7 +11,7 @@
     <tbody>
         {{ range .Messages }}
         <tr>
-            <td><a href="/messages/{{ .MessageTypeName }}">{{ block "typename" .MessageTypeName }}?{{end}}</a></td>
+            <td><a href="/messages/{{ .MessageTypeName }}"><span class="text-muted">{{ .MessageTypeName.PackagePath }}/</span>{{ .MessageTypeName.Name }}</a></td>
             <td>{{ .Role }}</a></td>
             <td style="text-align: right;"><a href="/messages/{{ .MessageTypeName }}#applications">{{ .AppCount }}</a></td>
             <td style="text-align: right;"><a href="/messages/{{ .MessageTypeName }}#handlers">{{ .HandlerCount }}</a></td>

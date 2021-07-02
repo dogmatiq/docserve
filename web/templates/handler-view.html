@@ -1,0 +1,69 @@
+{{ define "content" }}
+<h1>Handler Details</h1>
+
+<div class="card my-3">
+    <div class="card-body">
+        <dl>
+            <dt data-bs-toggle="tooltip" data-bs-placement="left" title="The human-readable name given to the handler.">
+                Name</dt>
+            <dd>{{ .HandlerName }}</dd>
+            <dt data-bs-toggle="tooltip" data-bs-placement="left"
+                title="The immutable key that serves as a globally unique identifier for the handler.">Key</dt>
+            <dd>{{ .HandlerKey }}</dd>
+            <dt data-bs-toggle="tooltip" data-bs-placement="left"
+                title="The type of handler interface implemented by the handler.">Type</dt>
+            <dd>{{ .HandlerType }}</dd>
+            <dt data-bs-toggle="tooltip" data-bs-placement="left" title="The application that the handler belongs to.">
+                Application</dt>
+            <dd><a href="/applications/{{ .AppKey}}">{{ .AppName }}</a></dd>
+            <dt data-bs-toggle="tooltip" data-bs-placement="left"
+                title="The name of the Go type that implements the handler interface.">Implementation</dt>
+            <dd><span class="text-muted">{{ .HandlerTypeName.PackagePath }}/</span>{{ .HandlerTypeName.Name }}</dd>
+        </dl>
+    </div>
+</div>
+
+<section class="mt-5">
+    <h2 id="messages"><a href="#messages"><i class="bi bi-link"></i></a> Messages</h2>
+
+    <p class="my-3">
+        Analysis of the <strong>{{ .HandlerName }}</strong> {{ .HandlerType }} message handler
+        discovered <strong>{{ len .ConsumedMessages }}</strong> consumed {{ .ConsumedMessageRole }} type(s)
+        and <strong>{{ len .ProducedMessages }}</strong> produced {{ .ProducedMessageRole }} type(s).
+    </p>
+
+    {{ if .TimeoutMessages }}
+        <p class="my-3">
+            Additionally, the process uses <strong>{{ len .TimeoutMessages }}</strong> timeout message(s) internally.
+        </p>
+    {{ end }}
+
+    {{ if .ConsumedMessageRole }}
+        <strong style="text-transform: capitalize;">{{ .ConsumedMessageRole }} Messages</strong>
+        <ul>
+            {{ range .ConsumedMessages }}
+            <li><a href="/messages/{{ .MessageTypeName }}"><span class="text-muted">{{ .MessageTypeName.PackagePath }}/</span>{{ .MessageTypeName.Name }}</a></li>
+            {{ end }}
+        </ul>
+    {{ end }}
+
+    {{ if .ProducedMessageRole }}
+        <strong style="text-transform: capitalize;">{{ .ProducedMessageRole }} Messages</strong>
+        <ul>
+            {{ range .ProducedMessages }}
+            <li><a href="/messages/{{ .MessageTypeName }}"><span class="text-muted">{{ .MessageTypeName.PackagePath }}/</span>{{ .MessageTypeName.Name }}</a></li>
+            {{ end }}
+        </ul>
+    {{ end }}
+
+    {{ if .TimeoutMessages }}
+        <strong>Timeout Messages</strong>
+        <ul>
+            {{ range .TimeoutMessages }}
+            <li><a href="/messages/{{ .MessageTypeName }}"><span class="text-muted">{{ .MessageTypeName.PackagePath }}/</span>{{ .MessageTypeName.Name }}</a></li>
+            {{ end }}
+        </ul>
+    {{ end }}
+
+</section>
+{{ end }}

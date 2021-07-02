@@ -13,6 +13,7 @@ func init() {
 			&web.ApplicationListHandler{DB: db},
 			&web.ApplicationViewHandler{DB: db},
 			&web.HandlerListHandler{DB: db},
+			&web.HandlerViewHandler{DB: db},
 			&web.MessageListHandler{DB: db},
 		)
 	})
