@@ -4,11 +4,11 @@ go 1.16
 
 require (
 	github.com/dogmatiq/configkit v0.11.1-0.20210627063455-14abe13af60d
-	github.com/dogmatiq/dapper v0.4.3 // indirect
+	github.com/dogmatiq/dapper v0.4.3
 	github.com/dogmatiq/dodeca v1.0.0
 	github.com/dogmatiq/linger v0.2.1
-	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19 // indirect
-	github.com/gin-gonic/gin v1.7.2 // indirect
+	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
+	github.com/gin-gonic/gin v1.7.2
 	github.com/google/go-github/v35 v35.3.0
 	github.com/jackc/pgx/v4 v4.11.0
 	github.com/lib/pq v1.6.0 // indirect
@@ -21,6 +21,4 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210502180810-71e4cd670f79 // indirect
 	golang.org/x/tools v0.0.0-20201224043029-2b0845dc783e
-	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
-	gopkg.in/go-playground/validator.v9 v9.29.1 // indirect
 )

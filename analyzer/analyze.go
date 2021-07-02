@@ -168,8 +168,15 @@ func (a *Analyzer) loadPackages(
 
 	cfg := &packages.Config{
 		Context: ctx,
-		Mode:    packages.LoadTypes | packages.NeedSyntax | packages.NeedTypesInfo | packages.NeedDeps,
-		Dir:     dir,
+		Mode: packages.NeedName |
+			packages.NeedFiles |
+			packages.NeedCompiledGoFiles |
+			packages.NeedImports |
+			packages.NeedTypes |
+			packages.NeedSyntax |
+			packages.NeedTypesInfo |
+			packages.NeedDeps,
+		Dir: dir,
 	}
 
 	return packages.Load(cfg, "./...")

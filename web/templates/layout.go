@@ -9,6 +9,6 @@ type MenuItem string
 
 const (
 	ApplicationsMenuItem MenuItem = "applications"
-	HandlersMenuItem              = "handlers"
-	MessagesMenuItem              = "messages"
+	HandlersMenuItem     MenuItem = "handlers"
+	MessagesMenuItem     MenuItem = "messages"
 )

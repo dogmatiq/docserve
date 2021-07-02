@@ -33,12 +33,12 @@ func NewRouter(handlers ...Handler) http.Handler {
 func wrap(handle func(*gin.Context) error) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if err := handle(ctx); err != nil {
-			ctx.AbortWithError(
+			err = ctx.AbortWithError(
 				http.StatusInternalServerError,
 				err,
 			)
-			ctx.Writer.WriteString("Internal server error")
-			fmt.Println(err) // TODO
+			ctx.Writer.WriteString("Internal server error") // nolint:errcheck
+			fmt.Println(err)                                // TODO
 		}
 	}
 }
