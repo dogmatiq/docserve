@@ -12,7 +12,7 @@
         <tr>
             <td><a href="/handlers/{{ .HandlerKey }}">{{ .HandlerName }}</a></td>
             <td>{{ .HandlerType }}</td>
-            <td>{{ .HandlerTypeName }}</td>
+            <td>{{ block "typename" .HandlerTypeName }}?{{end}}</td>
             <td><a href="/application/{{ .AppKey }}">{{ .AppName }}</a></td>
             <td><a href="/handlers/{{ .HandlerKey }}#messages">{{ .MessageCount }}</a></td>
         </tr>

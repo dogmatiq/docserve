@@ -9,7 +9,7 @@
     <tbody>
         {{ range .Table }}
         <tr>
-            <td><a href="/messages/{{ .MessageTypeName }}">{{ .MessageTypeName }}</a></td>
+            <td><a href="/messages/{{ .MessageTypeName }}">{{ block "typename" .MessageTypeName }}?{{end}}</a></td>
             <td>{{ .Role }}</a></td>
             <td style="text-align: right;"><a href="/messages/{{ .MessageTypeName }}#applications">{{ .AppCount }}</a></td>
             <td style="text-align: right;"><a href="/messages/{{ .MessageTypeName }}#handlers">{{ .HandlerCount }}</a></td>

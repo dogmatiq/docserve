@@ -10,7 +10,7 @@
         {{ range .Table }}
         <tr>
             <td><a href="/application/{{ .AppKey }}">{{ .AppName }}</a></td>
-            <td>{{ .AppTypeName }}</td>
+            <td>{{ block "typename" .AppTypeName }}?{{end}}</td>
             <td style="text-align: right;"><a href="/application/{{ .AppKey }}#handlers">{{ .HandlerCount }}</a></td>
             <td style="text-align: right;"><a href="/application/{{ .AppKey }}#messages">{{ .MessageCount }}</a></td>
         </tr>

@@ -9,7 +9,7 @@ type ListApplicationsContext struct {
 type ApplicationListRow struct {
 	AppKey       string
 	AppName      string
-	AppTypeName  string
+	AppTypeName  TypeName
 	HandlerCount int
 	MessageCount int
 }

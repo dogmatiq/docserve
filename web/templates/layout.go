@@ -11,5 +11,4 @@ const (
 	ApplicationsMenuItem MenuItem = "applications"
 	HandlersMenuItem              = "handlers"
 	MessagesMenuItem              = "messages"
-	RepositoriesMenuItem          = "repositories"
 )

@@ -7,7 +7,7 @@ type ListMessagesContext struct {
 }
 
 type MessageListRow struct {
-	MessageTypeName string
+	MessageTypeName TypeName
 	Role            string
 	AppCount        int
 	HandlerCount    int

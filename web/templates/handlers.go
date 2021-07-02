@@ -12,7 +12,7 @@ type HandlerListRow struct {
 	HandlerKey      string
 	HandlerName     string
 	HandlerType     configkit.HandlerType
-	HandlerTypeName string
+	HandlerTypeName TypeName
 	AppKey          string
 	AppName         string
 	MessageCount    string
