@@ -126,6 +126,93 @@ func (h *MessageViewHandler) ServeHTTP(ctx *gin.Context) error {
 
 	tc.Title = tc.MessageTypeName.Name() + " - Message Details"
 
+	rows, err := h.DB.QueryContext(
+		ctx,
+		`SELECT
+			a.key,
+			a.name,
+			a.type_name
+		FROM docserve.application AS a
+		INNER JOIN docserve.handler AS h
+		ON h.application_key = a.key
+		INNER JOIN docserve.handler_message AS m
+		ON m.handler_key = h.key
+		WHERE m.type_name = $1
+		GROUP BY a.key
+		ORDER BY a.name`,
+		typeName,
+	)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var tr templates.ApplicationRow
+
+		if err := rows.Scan(
+			&tr.AppKey,
+			&tr.AppName,
+			&tr.AppTypeName,
+		); err != nil {
+			return err
+		}
+
+		tc.Applications = append(tc.Applications, tr)
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	rows, err = h.DB.QueryContext(
+		ctx,
+		`SELECT
+			h.key,
+			h.name,
+			h.handler_type,
+			h.type_name,
+			a.key,
+			a.name,
+			m.produced,
+			m.consumed
+		FROM docserve.handler AS h
+		INNER JOIN docserve.application AS a
+		ON a.key = h.application_key
+		INNER JOIN docserve.handler_message AS m
+		ON m.handler_key = h.key
+		WHERE m.type_name = $1
+		ORDER BY m.produced DESC, h.name, a.name`,
+		typeName,
+	)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var tr templates.HandlerRow
+
+		if err := rows.Scan(
+			&tr.HandlerKey,
+			&tr.HandlerName,
+			&tr.HandlerType,
+			&tr.HandlerTypeName,
+			&tr.AppKey,
+			&tr.AppName,
+			&tr.IsProducer,
+			&tr.IsConsumer,
+		); err != nil {
+			return err
+		}
+
+		tc.Handlers = append(tc.Handlers, tr)
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	ctx.HTML(http.StatusOK, "message-view.html", tc)
 
 	return nil

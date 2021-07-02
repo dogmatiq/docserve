@@ -21,6 +21,8 @@ type HandlerRow struct {
 	AppKey          string
 	AppName         string
 	MessageCount    int
+	IsProducer      bool
+	IsConsumer      bool
 }
 
 type HandlerViewContext struct {

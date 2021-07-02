@@ -21,4 +21,7 @@ type MessageViewContext struct {
 
 	MessageTypeName TypeName
 	MessageRole     string // could be multiple, comma separated
+
+	Applications []ApplicationRow
+	Handlers     []HandlerRow
 }
