@@ -1,16 +1,24 @@
 package templates
 
-import "github.com/dogmatiq/configkit/message"
-
 type MessageListContext struct {
 	Context
 
-	Messages []MessageRow
+	TotalRepoCount    int
+	TotalAppCount     int
+	TotalHandlerCount int
+	Messages          []MessageRow
 }
 
 type MessageRow struct {
 	MessageTypeName TypeName
-	Role            message.Role
+	MessageRole     string // could be multiple, comma separated
 	AppCount        int
 	HandlerCount    int
+}
+
+type MessageViewContext struct {
+	Context
+
+	MessageTypeName TypeName
+	MessageRole     string // could be multiple, comma separated
 }

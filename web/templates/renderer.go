@@ -18,6 +18,7 @@ func NewRenderer() render.HTMLRender {
 	add(&mt, "handler-list.html")
 	add(&mt, "handler-view.html")
 	add(&mt, "message-list.html")
+	add(&mt, "message-view.html")
 
 	return mt
 }

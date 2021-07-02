@@ -188,7 +188,7 @@ func (h *ApplicationViewHandler) ServeHTTP(ctx *gin.Context) error {
 
 		if err := rows.Scan(
 			&tr.MessageTypeName,
-			&tr.Role,
+			&tr.MessageRole,
 			&tr.HandlerCount,
 		); err != nil {
 			return err

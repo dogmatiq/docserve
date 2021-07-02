@@ -3,6 +3,7 @@ package web
 import (
 	"database/sql"
 	"net/http"
+	"strings"
 
 	"github.com/dogmatiq/docserve/web/templates"
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,21 @@ func (h *MessageListHandler) ServeHTTP(ctx *gin.Context) error {
 			Title:          "Messages",
 			ActiveMenuItem: templates.MessagesMenuItem,
 		},
+	}
+
+	row := h.DB.QueryRowContext(
+		ctx,
+		`SELECT
+			(SELECT COUNT(*) FROM docserve.repository),
+			(SELECT COUNT(*) FROM docserve.application),
+			(SELECT COUNT(*) FROM docserve.handler)`,
+	)
+	if err := row.Scan(
+		&tc.TotalRepoCount,
+		&tc.TotalAppCount,
+		&tc.TotalHandlerCount,
+	); err != nil {
+		return err
 	}
 
 	rows, err := h.DB.QueryContext(
@@ -49,7 +65,7 @@ func (h *MessageListHandler) ServeHTTP(ctx *gin.Context) error {
 
 		if err := rows.Scan(
 			&tr.MessageTypeName,
-			&tr.Role,
+			&tr.MessageRole,
 			&tr.AppCount,
 			&tr.HandlerCount,
 		); err != nil {
@@ -64,6 +80,53 @@ func (h *MessageListHandler) ServeHTTP(ctx *gin.Context) error {
 	}
 
 	ctx.HTML(http.StatusOK, "message-list.html", tc)
+
+	return nil
+}
+
+type MessageViewHandler struct {
+	DB *sql.DB
+}
+
+func (h *MessageViewHandler) Route() (string, string) {
+	return http.MethodGet, "/messages/*typeName"
+}
+
+func (h *MessageViewHandler) ServeHTTP(ctx *gin.Context) error {
+	typeName := strings.TrimPrefix(ctx.Param("typeName"), "/")
+
+	row := h.DB.QueryRowContext(
+		ctx,
+		`SELECT
+			m.type_name,
+			string_agg(DISTINCT m.role, ', ' ORDER BY m.role)
+		FROM docserve.handler_message AS m
+		WHERE m.type_name = $1
+		GROUP BY m.type_name`,
+		typeName,
+	)
+
+	tc := templates.MessageViewContext{
+		Context: templates.Context{
+			ActiveMenuItem: templates.ApplicationsMenuItem,
+		},
+	}
+
+	if err := row.Scan(
+		&tc.MessageTypeName,
+		&tc.MessageRole,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			ctx.HTML(http.StatusNotFound, "error-404.html", tc)
+			return nil
+		}
+
+		return err
+	}
+
+	tc.Title = tc.MessageTypeName.Name() + " - Message Details"
+
+	ctx.HTML(http.StatusOK, "message-view.html", tc)
 
 	return nil
 }

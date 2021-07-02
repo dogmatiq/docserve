@@ -75,7 +75,7 @@
             {{ range .Messages }}
             <tr>
                 <td><a href="/messages/{{ .MessageTypeName }}"><span class="text-muted">{{ .MessageTypeName.PackagePath }}/</span>{{ .MessageTypeName.Name }}</a></td>
-                <td>{{ .Role }}</a></td>
+                <td>{{ .MessageRole }}</a></td>
                 <td style="text-align: right;">{{ .HandlerCount }}</td>
             </tr>
             {{ end }}

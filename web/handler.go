@@ -163,14 +163,14 @@ func (h *HandlerViewHandler) ServeHTTP(ctx *gin.Context) error {
 		var produced, consumed bool
 		if err := rows.Scan(
 			&tr.MessageTypeName,
-			&tr.Role,
+			&tr.MessageRole,
 			&produced,
 			&consumed,
 		); err != nil {
 			return err
 		}
 
-		if tr.Role == message.TimeoutRole {
+		if message.Role(tr.MessageRole) == message.TimeoutRole {
 			tc.TimeoutMessages = append(tc.ProducedMessages, tr)
 		} else if produced {
 			tc.ProducedMessages = append(tc.ProducedMessages, tr)

@@ -1,0 +1,18 @@
+{{ define "content" }}
+<h1>Message Details</h1>
+
+<div class="card my-3">
+    <div class="card-body">
+        <dl>
+            <dt data-bs-toggle="tooltip" data-bs-placement="left"
+                title="The name of the Go type that defines the message type.">Implementation</dt>
+            <dd><span class="text-muted">{{ .MessageTypeName.PackagePath }}/</span>{{ .MessageTypeName.Name }}</dd>
+            <dt data-bs-toggle="tooltip" data-bs-placement="left" data-bs-html="true"
+                title="The role that the message plays within the the applications that use it.">Role
+            </dt>
+            <dd>{{ .MessageRole }}</dd>
+        </dl>
+    </div>
+</div>
+
+{{ end }}
