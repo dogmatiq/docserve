@@ -1,5 +1,8 @@
+GO_EMBEDDED_FILES += $(shell ls web/templates/*.html)
+
 -include .makefiles/Makefile
 -include .makefiles/pkg/go/v1/Makefile
+
 
 .PHONY: run
 run: artifacts/build/debug/$(GOHOSTOS)/$(GOHOSTARCH)/docserve

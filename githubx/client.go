@@ -7,6 +7,10 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// NewClientForRepository returns a GitHub API client that has access to the
+// given repository.
+//
+// c is the client for the GitHub application.
 func NewClientForRepository(
 	ctx context.Context,
 	c *github.Client,
@@ -17,13 +21,31 @@ func NewClientForRepository(
 		return nil, err
 	}
 
-	return github.NewClient(
+	return NewClientForInstallation(ctx, c, install), nil
+}
+
+// NewClientForInstallation returns a GitHub API client that has access to the
+// given installation.
+//
+// c is the client for the GitHub application.
+func NewClientForInstallation(
+	ctx context.Context,
+	c *github.Client,
+	i *github.Installation,
+) *github.Client {
+	ic := github.NewClient(
 		oauth2.NewClient(
 			ctx,
 			&InstallationTokenSource{
 				AppClient:      c,
-				InstallationID: install.GetID(),
+				InstallationID: i.GetID(),
 			},
 		),
-	), nil
+	)
+
+	ic.BaseURL = c.BaseURL
+	ic.UploadURL = c.UploadURL
+	ic.UserAgent = c.UserAgent
+
+	return ic
 }

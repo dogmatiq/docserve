@@ -7,6 +7,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/dogmatiq/docserve/githubx"
 	"github.com/dogmatiq/dodeca/config"
@@ -19,7 +20,7 @@ func init() {
 		env config.Bucket,
 		pk *rsa.PrivateKey,
 	) *github.Client {
-		return github.NewClient(
+		c := github.NewClient(
 			oauth2.NewClient(
 				context.Background(),
 				&githubx.AppTokenSource{
@@ -28,6 +29,17 @@ func init() {
 				},
 			),
 		)
+
+		if u := config.AsURLDefault(env, "GITHUB_URL", ""); u.String() != "" {
+			// GitHub client requires path to have a trailing slash.
+			if !strings.HasSuffix(u.Path, "/") {
+				u.Path += "/"
+			}
+
+			c.BaseURL = u
+		}
+
+		return c
 	})
 
 	provide(func(env config.Bucket) (*rsa.PrivateKey, error) {
