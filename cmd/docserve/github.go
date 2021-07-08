@@ -55,4 +55,16 @@ func init() {
 
 		return x509.ParsePKCS1PrivateKey(block.Bytes)
 	})
+
+	provide(func(env config.Bucket) *oauth2.Config {
+		baseURL := config.AsURLDefault(env, "GITHUB_URL", "")
+
+		return &oauth2.Config{
+			ClientID:     config.AsString(env, "GITHUB_CLIENT_ID"),
+			ClientSecret: config.AsString(env, "GITHUB_CLIENT_SECRET"),
+			Endpoint:     githubx.NewOAuthEndpoint(baseURL),
+			RedirectURL:  "",
+			Scopes:       []string{},
+		}
+	})
 }

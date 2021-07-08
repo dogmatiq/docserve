@@ -11,7 +11,7 @@ import (
 func NewRenderer() render.HTMLRender {
 	mt := multitemplate.New()
 
-	add(&mt, "error-404.html")
+	add(&mt, "error.html")
 
 	add(&mt, "application-list.html")
 	add(&mt, "application-view.html")

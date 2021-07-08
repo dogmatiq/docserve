@@ -41,10 +41,9 @@
                 </div>
             </div>
 
-            <form class="d-flex">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
+            <div class="navbar-nav d-flex">
+                <a class="nav-link" href="{{ .User.GetURL }}"><i class="bi bi-person-circle"></i> {{ .User.GetName }}</a>
+            </div>
         </div>
     </nav>
 

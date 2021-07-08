@@ -1,0 +1,12 @@
+{{ define "content" }}
+<h1>{{ .Title }}</h1>
+
+<p>
+    {{ if .Message }}
+        {{ .Message }}
+    {{ else }}
+        An error occurred. For more information, see the
+        <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/{{ .StatusCode }}">HTTP {{ .StatusCode }} documentation</a>.
+    {{ end }}
+</p>
+{{ end }}

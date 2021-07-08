@@ -21,6 +21,7 @@ func (h *MessageListHandler) ServeHTTP(ctx *gin.Context) error {
 	tc := templates.MessageListContext{
 		Context: templates.Context{
 			Title:          "Messages",
+			User:           currentUser(ctx),
 			ActiveMenuItem: templates.MessagesMenuItem,
 		},
 	}
@@ -108,6 +109,7 @@ func (h *MessageViewHandler) ServeHTTP(ctx *gin.Context) error {
 
 	tc := templates.MessageViewContext{
 		Context: templates.Context{
+			User:           currentUser(ctx),
 			ActiveMenuItem: templates.MessagesMenuItem,
 		},
 	}

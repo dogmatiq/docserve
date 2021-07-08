@@ -6,6 +6,7 @@ import (
 	"github.com/google/go-github/v35/github"
 )
 
+// ListInstallations calls fn for each installation of the application.
 func ListInstallations(
 	ctx context.Context,
 	c *github.Client,
@@ -35,6 +36,7 @@ func ListInstallations(
 	)
 }
 
+// ListRepos calls fn for each repository that the application can access.
 func ListRepos(
 	ctx context.Context,
 	c *github.Client,
@@ -64,6 +66,7 @@ func ListRepos(
 	)
 }
 
+// forEachPage calls req until there are no more pages to query.
 func forEachPage(
 	ctx context.Context,
 	req func(context.Context, int) (*github.Response, error),

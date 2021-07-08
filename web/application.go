@@ -20,6 +20,7 @@ func (h *ApplicationListHandler) ServeHTTP(ctx *gin.Context) error {
 	tc := templates.ApplicationListContext{
 		Context: templates.Context{
 			Title:          "Applications",
+			User:           currentUser(ctx),
 			ActiveMenuItem: templates.ApplicationsMenuItem,
 		},
 	}
@@ -102,6 +103,7 @@ func (h *ApplicationViewHandler) ServeHTTP(ctx *gin.Context) error {
 
 	tc := templates.ApplicationViewContext{
 		Context: templates.Context{
+			User:           currentUser(ctx),
 			ActiveMenuItem: templates.ApplicationsMenuItem,
 		},
 	}

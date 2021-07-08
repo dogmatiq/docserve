@@ -22,6 +22,7 @@ func (h *HandlerListHandler) ServeHTTP(ctx *gin.Context) error {
 	tc := templates.HandlerListContext{
 		Context: templates.Context{
 			Title:          "Handlers",
+			User:           currentUser(ctx),
 			ActiveMenuItem: templates.HandlersMenuItem,
 		},
 	}
@@ -118,6 +119,7 @@ func (h *HandlerViewHandler) ServeHTTP(ctx *gin.Context) error {
 
 	tc := templates.HandlerViewContext{
 		Context: templates.Context{
+			User:           currentUser(ctx),
 			ActiveMenuItem: templates.HandlersMenuItem,
 		},
 	}
