@@ -10,7 +10,6 @@ import (
 
 	"github.com/dogmatiq/configkit"
 	"github.com/dogmatiq/configkit/static"
-	"github.com/dogmatiq/dapper"
 	"github.com/dogmatiq/docserve/githubx"
 	"github.com/dogmatiq/docserve/persistence"
 	"github.com/dogmatiq/dodeca/logging"
@@ -36,8 +35,6 @@ func (a *Analyzer) Analyze(ctx context.Context, r *github.Repository) error {
 }
 
 func (a *Analyzer) analyze(ctx context.Context, r *github.Repository) error {
-	logging.Log(a.Logger, "[%s] analyzing default branch (%s)", r.GetFullName(), r.GetDefaultBranch())
-
 	c, err := githubx.NewClientForRepository(ctx, a.GitHubClient, r)
 	if err != nil {
 		return err
@@ -52,31 +49,56 @@ func (a *Analyzer) analyze(ctx context.Context, r *github.Repository) error {
 	if err != nil {
 		return err
 	}
-	sha := branch.GetCommit().GetSHA()
 
-	logging.Log(a.Logger, "[%s] head commit is %s", r.GetFullName(), sha)
+	commitHash := branch.GetCommit().GetSHA()
+
+	needsSync, err := persistence.RepositoryNeedsSync(
+		ctx,
+		a.DB,
+		r,
+		commitHash,
+	)
+	if err != nil {
+		return err
+	}
+
+	if !needsSync {
+		logging.Log(
+			a.Logger,
+			"[%s] skipping analysis of %s branch (%s), commit has already been analysed",
+			r.GetFullName(),
+			r.GetDefaultBranch(),
+			commitHash,
+		)
+		return nil
+	}
 
 	ok, err := a.mayContainApplications(
 		ctx,
 		c,
 		r,
-		sha,
+		commitHash,
 	)
-	if !ok || err != nil {
-		return err
-	}
-
-	pkgs, err := a.loadPackages(ctx, c, r, sha)
 	if err != nil {
 		return err
 	}
 
-	apps := a.analyzePackages(r, pkgs)
+	var apps []configkit.Application
 
-	return a.sync(
+	if ok {
+		pkgs, err := a.loadPackages(ctx, c, r, commitHash)
+		if err != nil {
+			return err
+		}
+
+		apps = a.analyzePackages(r, pkgs)
+	}
+
+	return persistence.SyncRepository(
 		ctx,
+		a.DB,
 		r,
-		sha,
+		commitHash,
 		apps,
 	)
 }
@@ -85,7 +107,7 @@ func (a *Analyzer) mayContainApplications(
 	ctx context.Context,
 	c *github.Client,
 	r *github.Repository,
-	sha string,
+	commitHash string,
 ) (bool, error) {
 	content, _, res, err := c.Repositories.GetContents(
 		ctx,
@@ -93,12 +115,19 @@ func (a *Analyzer) mayContainApplications(
 		r.GetName(),
 		"go.mod",
 		&github.RepositoryContentGetOptions{
-			Ref: sha,
+			Ref: commitHash,
 		},
 	)
 	if err != nil {
 		if res.StatusCode == http.StatusNotFound {
-			logging.Log(a.Logger, "[%s] skipping analysis, go.mod not found", r.GetFullName())
+			logging.Log(
+				a.Logger,
+				"[%s] skipping analysis of %s branch (%s), go.mod file not present",
+				r.GetFullName(),
+				r.GetDefaultBranch(),
+				commitHash,
+			)
+
 			return false, nil
 		}
 
@@ -107,7 +136,6 @@ func (a *Analyzer) mayContainApplications(
 
 	data, err := content.GetContent()
 	if err != nil {
-		dapper.Print(err)
 		return false, err
 	}
 
@@ -117,17 +145,40 @@ func (a *Analyzer) mayContainApplications(
 		nil,
 	)
 	if err != nil {
-		logging.Log(a.Logger, "[%s] skipping analysis, go.mod is invalid: %s", r.GetFullName(), err)
+		logging.Log(
+			a.Logger,
+			"[%s] skipping analysis of %s branch (%s), go.mod file is invalid: %s",
+			r.GetFullName(),
+			r.GetDefaultBranch(),
+			commitHash,
+			err,
+		)
+
 		return false, nil
 	}
 
 	for _, req := range mod.Require {
 		if req.Mod.Path == "github.com/dogmatiq/dogma" {
+			logging.Log(
+				a.Logger,
+				"[%s] analyzing %s branch (%s), dogma version %s",
+				r.GetFullName(),
+				r.GetDefaultBranch(),
+				commitHash,
+				req.Mod.Version,
+			)
+
 			return true, nil
 		}
 	}
 
-	logging.Log(a.Logger, "[%s] skipping analysis, module does not depend on github.com/dogmatiq/dogma", r.GetFullName())
+	logging.Log(
+		a.Logger,
+		"[%s] skipping analysis of %s branch (%s), go.mod file does not specify github.com/dogmatiq/dogma as a requirement",
+		r.GetFullName(),
+		r.GetDefaultBranch(),
+		commitHash,
+	)
 
 	return false, nil
 }
@@ -215,59 +266,42 @@ func (a *Analyzer) analyzePackages(
 	r *github.Repository,
 	pkgs []*packages.Package,
 ) []configkit.Application {
-	valid := make([]*packages.Package, 0, len(pkgs))
+	n := len(pkgs)
 
-	for _, pkg := range pkgs {
+	for i, pkg := range pkgs {
 		if len(pkg.Errors) == 0 {
-			logging.Log(a.Logger, "[%s] analyzing package: %s", r.GetFullName(), pkg.PkgPath)
-			valid = append(valid, pkg)
+			logging.Log(
+				a.Logger,
+				"[%s] analyzing %s",
+				r.GetFullName(),
+				pkg.PkgPath,
+			)
 		} else {
 			for _, err := range pkg.Errors {
-				logging.Log(a.Logger, "[%s] unable to analyze package %s: %s", r.GetFullName(), pkg.PkgPath, err)
+				logging.Log(
+					a.Logger,
+					"[%s] unable to analyze %s: %s",
+					r.GetFullName(),
+					pkg.PkgPath,
+					err,
+				)
 			}
+
+			pkgs[i], pkgs[n-1] = pkgs[n-1], pkgs[i]
+			n--
 		}
 	}
 
-	apps := static.FromPackages(valid)
+	apps := static.FromPackages(pkgs[:n])
 
 	for _, app := range apps {
-		logging.Log(a.Logger, "[%s] discovered dogma application: %s", r.GetFullName(), app.Identity())
+		logging.Log(
+			a.Logger,
+			"[%s] discovered %s application",
+			r.GetFullName(),
+			app.Identity(),
+		)
 	}
 
 	return apps
-}
-
-func (a *Analyzer) sync(
-	ctx context.Context,
-	r *github.Repository,
-	sha string,
-	apps []configkit.Application,
-) error {
-	tx, err := a.DB.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback() // nolint:errcheck
-
-	if err := persistence.SyncRepository(
-		ctx,
-		tx,
-		r,
-		sha,
-	); err != nil {
-		return err
-	}
-
-	for _, app := range apps {
-		if err := persistence.SyncApplication(
-			ctx,
-			tx,
-			r,
-			app,
-		); err != nil {
-			return err
-		}
-	}
-
-	return tx.Commit()
 }

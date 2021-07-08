@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS docserve.application (
     name          TEXT NOT NULL,
     type_name     TEXT NOT NULL,
     repository_id INT NOT NULL,
+    historical    BOOLEAN NOT NULL DEFAULT FALSE,
 
     CONSTRAINT repository_fkey
         FOREIGN KEY (repository_id)
@@ -24,6 +25,7 @@ CREATE TABLE IF NOT EXISTS docserve.handler (
     application_key TEXT NOT NULL,
     handler_type    TEXT NOT NULL,
     type_name       TEXT NOT NULL,
+    historical      BOOLEAN NOT NULL DEFAULT FALSE,
 
     CONSTRAINT application_fkey
         FOREIGN KEY (application_key)
@@ -35,8 +37,9 @@ CREATE TABLE IF NOT EXISTS docserve.handler_message (
     handler_key TEXT NOT NULL,
     type_name   TEXT NOT NULL,
     role        TEXT NOT NULL,
-    produced    BOOLEAN NOT NULL DEFAULT False,
-    consumed    BOOLEAN NOT NULL DEFAULT False,
+    produced    BOOLEAN NOT NULL DEFAULT FALSE,
+    consumed    BOOLEAN NOT NULL DEFAULT FALSE,
+    historical  BOOLEAN NOT NULL DEFAULT FALSE,
 
     PRIMARY KEY (handler_key, type_name),
     CONSTRAINT handler_fkey
