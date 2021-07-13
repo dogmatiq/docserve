@@ -114,22 +114,37 @@
 <section class="mt-5">
     <h2 id="producers"><a href="#producers"><i class="bi bi-link"></i></a> Producers</h2>
 
-    <p class="my-3">
-        Analysis discovered <strong>{{ len .Producers }}</strong> message
-        handler(s) that produce the <strong>{{ .Impl.Name }}</strong> message.
-    </p>
+    {{ if .Producers }}
+        <p class="my-3">
+            Analysis discovered <strong>{{ len .Producers }}</strong> message
+            handler(s) that produce the <strong>{{ .Impl.Name }}</strong> message.
+        </p>
 
-    {{ block "handler_table" .Producers }}{{ end }}
+        {{ block "handler_table" .Producers }}{{ end }}
+    {{ else }}
+        <p class="my-3">
+            Analysis did not discover any message handler(s) that produce the
+            <strong>{{ .Impl.Name }}</strong> message.
+        </p>
+    {{ end }}
+
 </section>
 
 <section class="mt-5">
     <h2 id="consumers"><a href="#consumers"><i class="bi bi-link"></i></a> Consumers</h2>
 
-    <p class="my-3">
-        Analysis discovered <strong>{{ len .Consumers }}</strong> message
-        handler(s) that consume the <strong>{{ .Impl.Name }}</strong> message.
-    </p>
+    {{ if .Consumers }}
+        <p class="my-3">
+            Analysis discovered <strong>{{ len .Consumers }}</strong> message
+            handler(s) that consume the <strong>{{ .Impl.Name }}</strong> message.
+        </p>
 
-    {{ block "handler_table" .Consumers }}{{ end }}
+        {{ block "handler_table" .Consumers }}{{ end }}
+    {{ else }}
+        <p class="my-3">
+            Analysis did not discover any message handler(s) that consume the
+            <strong>{{ .Impl.Name }}</strong> message.
+        </p>
+    {{ end }}
 </section>
 {{ end }}
