@@ -16,14 +16,14 @@ func handleOAuthCallback(c *oauth2.Config) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := c.Exchange(ctx, ctx.Query("code"))
 		if err != nil {
-			fmt.Println(err) // TODO
+			fmt.Println("unable to perform oauth exchange:", err) // TODO
 			renderError(ctx, http.StatusUnauthorized)
 			return
 		}
 
 		data, err := json.Marshal(token)
 		if err != nil {
-			fmt.Println(err) // TODO
+			fmt.Println("unable to marshal oauth token:", err) // TODO
 			renderError(ctx, http.StatusInternalServerError)
 			ctx.Abort()
 		}
@@ -42,35 +42,40 @@ func handleOAuthCallback(c *oauth2.Config) gin.HandlerFunc {
 	}
 }
 
-func requireOAuth(c *oauth2.Config) gin.HandlerFunc {
+func requireOAuth(c *githubx.Connector) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		data, err := ctx.Cookie("token")
 		if err != nil {
-			redirectToLogin(ctx, c)
+			redirectToLogin(ctx, c.OAuthConfig)
 			return
 		}
 
 		token := &oauth2.Token{}
 		if err := json.Unmarshal([]byte(data), token); err != nil {
-			redirectToLogin(ctx, c)
+			redirectToLogin(ctx, c.OAuthConfig)
 			return
 		}
 
-		client := githubx.NewClientForUser(c, token)
+		client, err := c.UserClient(ctx, token)
+		if err != nil {
+			fmt.Println("unable to create user client:", err) // TODO
+			renderError(ctx, http.StatusInternalServerError)
+			ctx.Abort()
+		}
+
 		user, res, err := client.Users.Get(ctx, "")
 		if err != nil {
 			if res.StatusCode == http.StatusUnauthorized {
-				redirectToLogin(ctx, c)
+				redirectToLogin(ctx, c.OAuthConfig)
 				return
 			}
 
-			fmt.Println(err) // TODO
+			fmt.Println("unable to query connected user:", err) // TODO
 			renderError(ctx, http.StatusInternalServerError)
 			ctx.Abort()
 			return
 		}
 
-		ctx.Set("github-client", client)
 		ctx.Set("github-user", user)
 	}
 }
@@ -81,6 +86,7 @@ func redirectToLogin(ctx *gin.Context, c *oauth2.Config) {
 	ctx.Abort()
 }
 
-func currentUser(ctx *gin.Context) *github.User {
-	return ctx.Value("github-user").(*github.User)
+func currentUser(ctx *gin.Context) (*github.User, bool) {
+	u, ok := ctx.Value("github-user").(*github.User)
+	return u, ok
 }

@@ -3,16 +3,27 @@ package persistence
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/url"
+	"path"
+	"strings"
 
 	"github.com/dogmatiq/configkit"
 	"github.com/google/go-github/v35/github"
 )
 
+type TypeDef struct {
+	Package string
+	Name    string
+	File    string
+	Line    int
+}
+
 func RepositoryNeedsSync(
 	ctx context.Context,
 	db *sql.DB,
 	r *github.Repository,
-	commitHash string,
+	commit string,
 ) (bool, error) {
 	row := db.QueryRowContext(
 		ctx,
@@ -23,7 +34,7 @@ func RepositoryNeedsSync(
 			AND commit_hash = $2
 		)`,
 		r.GetID(),
-		commitHash,
+		commit,
 	)
 
 	var ok bool
@@ -48,8 +59,9 @@ func SyncRepository(
 	ctx context.Context,
 	db *sql.DB,
 	r *github.Repository,
-	commitHash string,
+	commit string,
 	apps []configkit.Application,
+	defs []TypeDef,
 ) error {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -70,7 +82,7 @@ func SyncRepository(
 			commit_hash = excluded.commit_hash`,
 		r.GetID(),
 		r.GetFullName(),
-		commitHash,
+		commit,
 	); err != nil {
 		return err
 	}
@@ -78,7 +90,7 @@ func SyncRepository(
 	if _, err := tx.ExecContext(
 		ctx,
 		`UPDATE docserve.application SET
-			historical = TRUE
+			is_historical = TRUE
 		WHERE repository_id = $1`,
 		r.GetID(),
 	); err != nil {
@@ -87,6 +99,28 @@ func SyncRepository(
 
 	for _, a := range apps {
 		if err := syncApplication(ctx, tx, r, a); err != nil {
+			return err
+		}
+	}
+
+	if _, err := tx.ExecContext(
+		ctx,
+		`UPDATE docserve.type SET
+			url = NULL
+		WHERE repository_id = $1`,
+		r.GetID(),
+	); err != nil {
+		return err
+	}
+
+	for _, t := range defs {
+		if err := syncTypeDef(
+			ctx,
+			tx,
+			r,
+			t,
+			commit,
+		); err != nil {
 			return err
 		}
 	}
@@ -100,23 +134,31 @@ func syncApplication(
 	r *github.Repository,
 	a configkit.Application,
 ) error {
+	typeID, isPointer, err := syncType(ctx, tx, a.TypeName())
+	if err != nil {
+		return err
+	}
+
 	if _, err := tx.ExecContext(
 		ctx,
 		`INSERT INTO docserve.application (
 			key,
 			name,
-			type_name,
+			type_id,
+			is_pointer,
 			repository_id
 		) VALUES (
-			$1, $2, $3, $4
+			$1, $2, $3, $4, $5
 		) ON CONFLICT (key) DO UPDATE SET
 			name = excluded.name,
-			type_name = excluded.type_name,
+			type_id = excluded.type_id,
+			is_pointer = excluded.is_pointer,
 			repository_id = excluded.repository_id,
-			historical = FALSE`,
+			is_historical = FALSE`,
 		a.Identity().Key,
 		a.Identity().Name,
-		a.TypeName(),
+		typeID,
+		isPointer,
 		r.GetID(),
 	); err != nil {
 		return err
@@ -125,7 +167,7 @@ func syncApplication(
 	if _, err := tx.ExecContext(
 		ctx,
 		`UPDATE docserve.handler SET
-			historical = TRUE
+			is_historical = TRUE
 		WHERE application_key = $1`,
 		a.Identity().Key,
 	); err != nil {
@@ -152,6 +194,11 @@ func syncHandler(
 	appKey string,
 	h configkit.Handler,
 ) error {
+	typeID, isPointer, err := syncType(ctx, tx, h.TypeName())
+	if err != nil {
+		return err
+	}
+
 	if _, err := tx.ExecContext(
 		ctx,
 		`INSERT INTO docserve.handler (
@@ -159,20 +206,23 @@ func syncHandler(
 			name,
 			application_key,
 			handler_type,
-			type_name
+			type_id,
+			is_pointer
 		) VALUES (
-			$1, $2, $3, $4, $5
+			$1, $2, $3, $4, $5, $6
 		) ON CONFLICT (key) DO UPDATE SET
 			name = excluded.name,
 			application_key = excluded.application_key,
 			handler_type = excluded.handler_type,
-			type_name = excluded.type_name,
-			historical = FALSE`,
+			type_id = excluded.type_id,
+			is_pointer = excluded.is_pointer,
+			is_historical = FALSE`,
 		h.Identity().Key,
 		h.Identity().Name,
 		appKey,
 		h.HandlerType(),
-		h.TypeName(),
+		typeID,
+		isPointer,
 	); err != nil {
 		return err
 	}
@@ -180,7 +230,7 @@ func syncHandler(
 	if _, err := tx.ExecContext(
 		ctx,
 		`UPDATE docserve.handler_message SET
-			historical = TRUE
+			is_historical = TRUE
 		WHERE handler_key = $1`,
 		h.Identity().Key,
 	); err != nil {
@@ -188,21 +238,28 @@ func syncHandler(
 	}
 
 	for n, r := range h.MessageNames().Produced {
+		typeID, isPointer, err := syncType(ctx, tx, n.String())
+		if err != nil {
+			return err
+		}
+
 		if _, err := tx.ExecContext(
 			ctx,
 			`INSERT INTO docserve.handler_message (
 				handler_key,
-				type_name,
+				type_id,
+				is_pointer,
 				role,
-				produced
+				is_produced
 			) VALUES (
-				$1, $2, $3, TRUE
-			) ON CONFLICT (handler_key, type_name) DO UPDATE SET
+				$1, $2, $3, $4, TRUE
+			) ON CONFLICT (handler_key, type_id, is_pointer) DO UPDATE SET
 				role = excluded.role,
-				produced = excluded.produced,
-				historical = FALSE`,
+				is_produced = excluded.is_produced,
+				is_historical = FALSE`,
 			h.Identity().Key,
-			n.String(),
+			typeID,
+			isPointer,
 			r,
 		); err != nil {
 			return err
@@ -210,21 +267,28 @@ func syncHandler(
 	}
 
 	for n, r := range h.MessageNames().Consumed {
+		typeID, isPointer, err := syncType(ctx, tx, n.String())
+		if err != nil {
+			return err
+		}
+
 		if _, err := tx.ExecContext(
 			ctx,
 			`INSERT INTO docserve.handler_message (
 				handler_key,
-				type_name,
+				type_id,
+				is_pointer,
 				role,
-				consumed
+				is_consumed
 			) VALUES (
-				$1, $2, $3, TRUE
-			) ON CONFLICT (handler_key, type_name) DO UPDATE SET
+				$1, $2, $3, $4, TRUE
+			) ON CONFLICT (handler_key, type_id, is_pointer) DO UPDATE SET
 				role = excluded.role,
-				consumed = excluded.consumed,
-				historical = FALSE`,
+				is_consumed = excluded.is_consumed,
+				is_historical = FALSE`,
 			h.Identity().Key,
-			n.String(),
+			typeID,
+			isPointer,
 			r,
 		); err != nil {
 			return err
@@ -232,4 +296,85 @@ func syncHandler(
 	}
 
 	return nil
+}
+
+func syncType(
+	ctx context.Context,
+	tx *sql.Tx,
+	name string,
+) (typeID int, isPointer bool, err error) {
+	if name[0] == '*' {
+		isPointer = true
+		name = name[1:]
+	}
+
+	var pkg string
+	if n := strings.LastIndexByte(name, '.'); n != -1 {
+		pkg = name[:n]
+		name = name[n+1:]
+	}
+
+	row := tx.QueryRowContext(
+		ctx,
+		`INSERT INTO docserve.type (
+			package,
+			name
+		) VALUES (
+			$1, $2
+		) ON CONFLICT (package, name) DO UPDATE SET
+			package = excluded.package
+		RETURNING id`, // DO UPDATE is a no-op that allows use of RETURNING when row already exists
+		pkg,
+		name,
+	)
+
+	if err := row.Scan(&typeID); err != nil {
+		return 0, false, err
+	}
+
+	return typeID, isPointer, nil
+}
+
+func syncTypeDef(
+	ctx context.Context,
+	tx *sql.Tx,
+	r *github.Repository,
+	t TypeDef,
+	commit string,
+) error {
+	us := r.GetHTMLURL()
+
+	u, err := url.Parse(us)
+	if err != nil {
+		return err
+	}
+
+	u.Path = path.Join(
+		u.Path,
+		"blob",
+		commit,
+		t.File,
+	)
+
+	u.Fragment = fmt.Sprintf("L%d", t.Line)
+
+	_, err = tx.ExecContext(
+		ctx,
+		`INSERT INTO docserve.type (
+			package,
+			name,
+			repository_id,
+			url
+		) VALUES (
+			$1, $2, $3, $4
+		) ON CONFLICT (package, name) DO UPDATE SET
+			repository_id = excluded.repository_id,
+			url = excluded.url`,
+		t.Package,
+		t.Name,
+		r.GetID(),
+		u.String(),
+	)
+
+	return err
 }

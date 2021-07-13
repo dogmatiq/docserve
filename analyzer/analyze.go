@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"io/ioutil"
+	"go/types"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/dogmatiq/configkit"
 	"github.com/dogmatiq/configkit/static"
@@ -14,16 +15,14 @@ import (
 	"github.com/dogmatiq/docserve/persistence"
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/v35/github"
-	"go.uber.org/multierr"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
 )
 
 type Analyzer struct {
-	DB           *sql.DB
-	GitHubClient *github.Client
-	HTTPClient   *http.Client
-	Logger       logging.Logger
+	DB        *sql.DB
+	Connector *githubx.Connector
+	Logger    logging.Logger
 }
 
 func (a *Analyzer) Analyze(ctx context.Context, r *github.Repository) error {
@@ -35,7 +34,7 @@ func (a *Analyzer) Analyze(ctx context.Context, r *github.Repository) error {
 }
 
 func (a *Analyzer) analyze(ctx context.Context, r *github.Repository) error {
-	c, err := githubx.NewClientForRepository(ctx, a.GitHubClient, r)
+	c, err := a.Connector.RepositoryClient(ctx, r.GetID())
 	if err != nil {
 		return err
 	}
@@ -50,13 +49,13 @@ func (a *Analyzer) analyze(ctx context.Context, r *github.Repository) error {
 		return err
 	}
 
-	commitHash := branch.GetCommit().GetSHA()
+	commit := branch.GetCommit().GetSHA()
 
 	needsSync, err := persistence.RepositoryNeedsSync(
 		ctx,
 		a.DB,
 		r,
-		commitHash,
+		commit,
 	)
 	if err != nil {
 		return err
@@ -68,46 +67,58 @@ func (a *Analyzer) analyze(ctx context.Context, r *github.Repository) error {
 			"[%s] skipping analysis of %s branch (%s), commit has already been analysed",
 			r.GetFullName(),
 			r.GetDefaultBranch(),
-			commitHash,
+			commit,
 		)
+
 		return nil
 	}
 
-	ok, err := a.mayContainApplications(
+	ok, err := a.isGoModule(
 		ctx,
 		c,
 		r,
-		commitHash,
+		commit,
 	)
 	if err != nil {
 		return err
 	}
 
-	var apps []configkit.Application
+	var (
+		apps []configkit.Application
+		defs []persistence.TypeDef
+	)
 
 	if ok {
-		pkgs, err := a.loadPackages(ctx, c, r, commitHash)
+		pkgs, dir, err := a.loadPackages(
+			ctx,
+			c,
+			r,
+			commit,
+		)
 		if err != nil {
 			return err
 		}
 
-		apps = a.analyzePackages(r, pkgs)
+		apps, defs = a.analyzePackages(r, pkgs, dir)
 	}
 
 	return persistence.SyncRepository(
 		ctx,
 		a.DB,
 		r,
-		commitHash,
+		commit,
 		apps,
+		defs,
 	)
 }
 
-func (a *Analyzer) mayContainApplications(
+// isGoModule returns true if the given repository has a valid go.mod file in
+// its root directory.
+func (a *Analyzer) isGoModule(
 	ctx context.Context,
 	c *github.Client,
 	r *github.Repository,
-	commitHash string,
+	commit string,
 ) (bool, error) {
 	content, _, res, err := c.Repositories.GetContents(
 		ctx,
@@ -115,7 +126,7 @@ func (a *Analyzer) mayContainApplications(
 		r.GetName(),
 		"go.mod",
 		&github.RepositoryContentGetOptions{
-			Ref: commitHash,
+			Ref: commit,
 		},
 	)
 	if err != nil {
@@ -125,7 +136,7 @@ func (a *Analyzer) mayContainApplications(
 				"[%s] skipping analysis of %s branch (%s), go.mod file not present",
 				r.GetFullName(),
 				r.GetDefaultBranch(),
-				commitHash,
+				commit,
 			)
 
 			return false, nil
@@ -150,72 +161,54 @@ func (a *Analyzer) mayContainApplications(
 			"[%s] skipping analysis of %s branch (%s), go.mod file is invalid: %s",
 			r.GetFullName(),
 			r.GetDefaultBranch(),
-			commitHash,
+			commit,
 			err,
 		)
 
 		return false, nil
 	}
 
-	for _, req := range mod.Require {
-		if req.Mod.Path == "github.com/dogmatiq/dogma" {
-			logging.Log(
-				a.Logger,
-				"[%s] analyzing %s branch (%s), dogma version %s",
-				r.GetFullName(),
-				r.GetDefaultBranch(),
-				commitHash,
-				req.Mod.Version,
-			)
+	if mod.Module.Mod.Path == "github.com/dogmatiq/dogma" {
+		logging.Log(
+			a.Logger,
+			"[%s] skipping analysis of %s branch (%s), found dogma module: %s",
+			r.GetFullName(),
+			r.GetDefaultBranch(),
+			commit,
+			mod.Module.Mod.Path,
+		)
 
-			return true, nil
-		}
+		return false, nil
 	}
 
 	logging.Log(
 		a.Logger,
-		"[%s] skipping analysis of %s branch (%s), go.mod file does not specify github.com/dogmatiq/dogma as a requirement",
+		"[%s] analyzing %s branch (%s), found module %s",
 		r.GetFullName(),
 		r.GetDefaultBranch(),
-		commitHash,
+		commit,
+		mod.Module.Mod.Path,
 	)
 
-	return false, nil
+	return true, nil
 }
 
+// loadPackages parses the Go source in the repository and returns the packages
+// it contains.
 func (a *Analyzer) loadPackages(
 	ctx context.Context,
 	c *github.Client,
 	r *github.Repository,
-	sha string,
-) (_ []*packages.Package, err error) {
-	dir, err := ioutil.TempDir(
-		"",
-		fmt.Sprintf(
-			"dogma-docserve_%s-%s_%s",
-			r.GetOwner().GetLogin(),
-			r.GetName(),
-			sha,
-		),
-	)
+	commit string,
+) ([]*packages.Package, string, error) {
+	dir, err := a.downloadRepository(ctx, c, r, commit)
 	if err != nil {
-		return nil, err
+		return nil, dir, err
 	}
-	defer func() {
-		// Remove the source immediately after we load the packages from it so
-		// that it doesn't spend any longer on disk than it needs to.
-		//
-		// Fail hard if we can't remove it, as there are potential security
-		// implications.
-		err = multierr.Append(
-			err,
-			os.RemoveAll(dir),
-		)
-	}()
 
-	if err := a.download(ctx, c, r, sha, dir); err != nil {
-		return nil, err
-	}
+	// Remove the repository contents immediately after we load the packages
+	// from it so that it doesn't spend any longer on disk than it needs to.
+	defer os.RemoveAll(dir)
 
 	cfg := &packages.Config{
 		Context: ctx,
@@ -230,53 +223,61 @@ func (a *Analyzer) loadPackages(
 		Dir: dir,
 	}
 
-	return packages.Load(cfg, "./...")
+	pkgs, err := packages.Load(cfg, "./...")
+	if err != nil {
+		return nil, "", err
+	}
+
+	return pkgs, dir, nil
 }
 
-func (a *Analyzer) download(
+// downloadRepository downloads the repository contents at the given commit and
+// returns the name of a temporary directory containing the contents.
+func (a *Analyzer) downloadRepository(
 	ctx context.Context,
 	c *github.Client,
 	r *github.Repository,
-	sha, dir string,
-) error {
-	logging.Log(a.Logger, "[%s] downloading source archive to %s", r.GetFullName(), dir)
-
+	commit string,
+) (string, error) {
 	url, _, err := c.Repositories.GetArchiveLink(ctx,
 		r.GetOwner().GetLogin(),
 		r.GetName(),
 		github.Tarball,
 		&github.RepositoryContentGetOptions{
-			Ref: sha,
+			Ref: commit,
 		},
 		true,
 	)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return downloadAndUncompress(
+	var hc *http.Client
+	if a.Connector.Transport != nil {
+		hc = &http.Client{
+			Transport: a.Connector.Transport,
+		}
+	}
+
+	return githubx.GetArchive(
 		ctx,
+		hc,
 		url.String(),
-		dir,
-		a.HTTPClient,
 	)
 }
 
 func (a *Analyzer) analyzePackages(
 	r *github.Repository,
 	pkgs []*packages.Package,
-) []configkit.Application {
-	n := len(pkgs)
+	dir string,
+) ([]configkit.Application, []persistence.TypeDef) {
+	var (
+		apps []configkit.Application
+		defs []persistence.TypeDef
+	)
 
 	for i, pkg := range pkgs {
-		if len(pkg.Errors) == 0 {
-			logging.Log(
-				a.Logger,
-				"[%s] analyzing %s",
-				r.GetFullName(),
-				pkg.PkgPath,
-			)
-		} else {
+		if len(pkg.Errors) != 0 {
 			for _, err := range pkg.Errors {
 				logging.Log(
 					a.Logger,
@@ -287,21 +288,64 @@ func (a *Analyzer) analyzePackages(
 				)
 			}
 
-			pkgs[i], pkgs[n-1] = pkgs[n-1], pkgs[i]
-			n--
+			continue
+		}
+
+		logging.Log(
+			a.Logger,
+			"[%s] analyzing %s",
+			r.GetFullName(),
+			pkg.PkgPath,
+		)
+
+		var discoveredApps []configkit.Application
+
+		func() {
+			defer func() {
+				p := recover()
+				if p != nil {
+					logging.Log(
+						a.Logger,
+						"[%s] panic: %s",
+						r.GetFullName(),
+						p,
+					)
+				}
+			}()
+
+			discoveredApps = static.FromPackages(pkgs[i : i+1])
+		}()
+
+		for _, app := range discoveredApps {
+			logging.Log(
+				a.Logger,
+				"[%s] discovered application: %s",
+				r.GetFullName(),
+				app.Identity(),
+			)
+			apps = append(apps, app)
+		}
+
+		for _, obj := range pkg.TypesInfo.Defs {
+			if t, ok := obj.(*types.TypeName); ok {
+				logging.Log(
+					a.Logger,
+					"[%s] discovered type: %s",
+					r.GetFullName(),
+					t.Name(),
+				)
+
+				pos := pkg.Fset.Position(t.Pos())
+
+				defs = append(defs, persistence.TypeDef{
+					Package: t.Pkg().Path(),
+					Name:    t.Name(),
+					File:    strings.TrimPrefix(pos.Filename, dir),
+					Line:    pos.Line,
+				})
+			}
 		}
 	}
 
-	apps := static.FromPackages(pkgs[:n])
-
-	for _, app := range apps {
-		logging.Log(
-			a.Logger,
-			"[%s] discovered %s application",
-			r.GetFullName(),
-			app.Identity(),
-		)
-	}
-
-	return apps
+	return apps, defs
 }

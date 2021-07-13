@@ -4,20 +4,20 @@ import (
 	"database/sql"
 
 	"github.com/dogmatiq/docserve/analyzer"
+	"github.com/dogmatiq/docserve/githubx"
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/google/go-github/v35/github"
 )
 
 func init() {
 	provide(func(
 		db *sql.DB,
-		c *github.Client,
+		c *githubx.Connector,
 		l logging.Logger,
 	) *analyzer.Analyzer {
 		return &analyzer.Analyzer{
-			DB:           db,
-			GitHubClient: c,
-			Logger:       l,
+			DB:        db,
+			Connector: c,
+			Logger:    l,
 		}
 	})
 

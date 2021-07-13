@@ -1,0 +1,9 @@
+<span class="text-muted">{{ if .IsPointer }}*{{ end }}{{ .Package }}.</span>{{ .Name }}
+{{ if .URL }}
+<a
+    href="{{ .URL }}"
+    title="View source on GitHub"
+    data-bs-toggle="tooltip"
+    data-bs-placement="bottom"
+><i class="bi bi-github"></i></a>
+{{ end }}

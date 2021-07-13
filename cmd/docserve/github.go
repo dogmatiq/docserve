@@ -1,70 +1,39 @@
 package main
 
 import (
-	"context"
-	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/dogmatiq/docserve/githubx"
 	"github.com/dogmatiq/dodeca/config"
-	"github.com/google/go-github/v35/github"
-	"golang.org/x/oauth2"
 )
 
 func init() {
-	provide(func(
-		env config.Bucket,
-		pk *rsa.PrivateKey,
-	) *github.Client {
-		c := github.NewClient(
-			oauth2.NewClient(
-				context.Background(),
-				&githubx.AppTokenSource{
-					AppID:      config.AsInt64(env, "GITHUB_APP_ID"),
-					PrivateKey: pk,
-				},
-			),
-		)
-
-		if u := config.AsURLDefault(env, "GITHUB_URL", ""); u.String() != "" {
-			// GitHub client requires path to have a trailing slash.
-			if !strings.HasSuffix(u.Path, "/") {
-				u.Path += "/"
-			}
-
-			c.BaseURL = u
-		}
-
-		return c
-	})
-
-	provide(func(env config.Bucket) (*rsa.PrivateKey, error) {
+	provide(func(env config.Bucket) (*githubx.Connector, error) {
 		content := config.AsBytes(env, "GITHUB_APP_PRIVATEKEY")
 		block, _ := pem.Decode(content)
 		if block == nil {
-			return nil, errors.New("could not decode PEM key")
+			return nil, errors.New("could not load private key: no valid PEM data found")
 		}
 
 		if block.Type != "RSA PRIVATE KEY" {
-			return nil, fmt.Errorf("unexpected PEM content: %s", block.Type)
+			return nil, fmt.Errorf("could not load private key: expected RSA PRIVATE KEY, found %s", block.Type)
 		}
 
-		return x509.ParsePKCS1PrivateKey(block.Bytes)
-	})
-
-	provide(func(env config.Bucket) *oauth2.Config {
-		baseURL := config.AsURLDefault(env, "GITHUB_URL", "")
-
-		return &oauth2.Config{
-			ClientID:     config.AsString(env, "GITHUB_CLIENT_ID"),
-			ClientSecret: config.AsString(env, "GITHUB_CLIENT_SECRET"),
-			Endpoint:     githubx.NewOAuthEndpoint(baseURL),
-			RedirectURL:  "",
-			Scopes:       []string{},
+		pk, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("could not load private key: %w", err)
 		}
+
+		return githubx.NewConnector(
+			config.AsInt64(env, "GITHUB_APP_ID"),
+			pk,
+			config.AsString(env, "GITHUB_CLIENT_ID"),
+			config.AsString(env, "GITHUB_CLIENT_SECRET"),
+			config.AsURLDefault(env, "GITHUB_URL", ""),
+			nil, // use default http transport
+		)
 	})
 }

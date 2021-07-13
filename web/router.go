@@ -4,28 +4,31 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dogmatiq/docserve/web/templates"
+	"github.com/dogmatiq/docserve/githubx"
+	"github.com/dogmatiq/docserve/web/components"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/oauth2"
+	"github.com/google/go-github/v35/github"
 )
 
 type Handler interface {
 	Route() (string, string)
-	ServeHTTP(*gin.Context) error
+	Template() string
+	ActiveMenuItem() components.MenuItem
+	View(ctx *gin.Context) (string, interface{}, error)
 }
 
 func NewRouter(
-	c *oauth2.Config,
+	c *githubx.Connector,
 	handlers ...Handler,
 ) http.Handler {
 	router := gin.New()
-	router.HTMLRender = templates.NewRenderer()
+	router.HTMLRender = pageTemplates
 
 	router.Use(gin.Recovery())
 
 	router.GET(
 		"/github/auth",
-		handleOAuthCallback(c),
+		handleOAuthCallback(c.OAuthConfig),
 	)
 
 	auth := requireOAuth(c)
@@ -50,36 +53,85 @@ func NewRouter(
 	return router
 }
 
+type templateContext struct {
+	Title          string
+	ActiveMenuItem components.MenuItem
+	User           *github.User
+	View           interface{}
+}
+
 func adaptHandler(h Handler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if err := h.ServeHTTP(ctx); err != nil {
-			fmt.Println(err) // TODO
+		title, view, err := h.View(ctx)
+		if err != nil {
+			fmt.Println("unable to generate view:", err) // TODO
 			renderError(ctx, http.StatusInternalServerError)
 			return
 		}
+
+		if ctx.IsAborted() {
+			code := ctx.Writer.Status()
+			if code == http.StatusOK {
+				panic("handler aborted execution with OK status")
+			}
+
+			renderError(
+				ctx,
+				ctx.Writer.Status(),
+			)
+
+			return
+		}
+
+		u, _ := currentUser(ctx)
+
+		ctx.HTML(
+			http.StatusOK,
+			h.Template(),
+			templateContext{
+				Title:          title,
+				User:           u,
+				ActiveMenuItem: h.ActiveMenuItem(),
+				View:           view,
+			},
+		)
 	}
 }
 
 func renderError(ctx *gin.Context, code int) {
-	var tctx = struct {
-		templates.Context
+	view := struct {
+		StatusText string
 		StatusCode int
 		Message    string
 	}{
-		Context: templates.Context{
-			Title: http.StatusText(code),
-		},
+		StatusText: http.StatusText(code),
 		StatusCode: code,
 	}
 
 	switch code {
 	case http.StatusNotFound:
-		tctx.Message = "The content you have requested can not be found."
+		view.Message = "The content you have requested can not be found."
 	case http.StatusUnauthorized:
-		tctx.Message = "You do not have permission to view this context."
+		view.Message = "You do not have permission to view this context."
 	case http.StatusInternalServerError:
-		tctx.Message = "An unexpected error occurred on the server."
+		view.Message = "An unexpected error occurred on the server."
 	}
 
-	ctx.HTML(http.StatusInternalServerError, "error.html", tctx)
+	u, _ := currentUser(ctx)
+
+	renderer := pageTemplates.Instance(
+		"error.html",
+		templateContext{
+			Title: http.StatusText(code),
+			User:  u,
+			View:  view,
+		},
+	)
+
+	if ctx.Writer.Written() {
+		renderer.Render(ctx.Writer)
+		return
+	}
+
+	ctx.Render(code, renderer)
 }

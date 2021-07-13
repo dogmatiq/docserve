@@ -1,0 +1,74 @@
+{{ define "content" }}
+<h1>Messages</h1>
+
+<p class="my-3">
+    Static analysis of <strong>{{ .TotalRepoCount }}</strong> repositories
+    has discovered <strong>{{ .TotalAppCount }}</strong> Dogma application(s)
+    and <strong>{{ .TotalHandlerCount }} </strong> handlers which use a total of
+    <strong>{{ len .Messages }}</strong> distinct message type(s).
+</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <th
+            title="The short name of the message."
+            data-bs-toggle="tooltip"
+            data-bs-placement="left"
+        >
+            Name
+        </th>
+        <th
+            title="The role(s) that the message plays within the applications that use it."
+            data-bs-toggle="tooltip"
+            data-bs-placement="left"
+            data-bs-html="true"
+        >
+            Role(s)
+        </th>
+        <th
+            title="The name of the Go type that defines the message."
+            data-bs-toggle="tooltip"
+            data-bs-placement="left"
+        >
+            Implementation
+        </th>
+        <th
+            title="The number of applications that use the message."
+            data-bs-toggle="tooltip"
+            data-bs-placement="left"
+            class="numeric-column"
+        >
+            Applications
+        </th>
+        <th
+            title="The number of handlers that produce the message."
+            data-bs-toggle="tooltip"
+            data-bs-placement="left"
+            class="numeric-column"
+        >
+            Producers
+        </th>
+        <th
+            title="The number of handlers that consume the message."
+            data-bs-toggle="tooltip"
+            data-bs-placement="left"
+            class="numeric-column"
+        >
+            Consumers
+        </th>
+    </thead>
+    <tbody>
+        {{ range $m := .Messages }}
+            <tr>
+                <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
+                <td>{{ $m.Roles }}</td>
+                <td>{{ type $m.Impl }}</td>
+                <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#applications">{{ .AppCount }}</a>
+                <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ $m.ProducerCount }}</a></td>
+                <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ $m.ConsumerCount }}</a></td>
+            </td>
+        </tr>
+        {{ end }}
+    </tbody>
+</table>
+{{ end }}

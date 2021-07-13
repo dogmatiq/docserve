@@ -4,12 +4,14 @@ import (
 	"context"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dogmatiq/docserve/analyzer"
 	"github.com/dogmatiq/docserve/githubx"
 	"github.com/dogmatiq/dodeca/config"
 	"github.com/dogmatiq/dodeca/logging"
+	"github.com/dogmatiq/linger"
 	"github.com/google/go-github/v35/github"
 	"go.uber.org/dig"
 	"golang.org/x/sync/errgroup"
@@ -34,37 +36,68 @@ func init() {
 
 func main() {
 	invoke(func(
-		c *github.Client,
+		c *githubx.Connector,
 		o *analyzer.Orchestrator,
 		h http.Handler,
+		l logging.Logger,
 	) error {
 		ctx := context.Background()
 		g, ctx := errgroup.WithContext(ctx)
 
 		g.Go(func() error {
-			return o.Run(ctx)
+			for {
+				if err := o.Run(ctx); err != nil {
+					if err == context.Canceled {
+						return err
+					}
+
+					logging.LogString(l, err.Error())
+				}
+			}
 		})
 
-		g.Go(func() error {
-			return githubx.ListInstallations(
-				ctx,
-				c,
-				func(ctx context.Context, i *github.Installation) error {
-					ic := githubx.NewClientForInstallation(ctx, c, i)
-
-					return githubx.ListRepos(
+		if os.Getenv("SCAN") != "" {
+			g.Go(func() error {
+				for {
+					if err := githubx.ListInstallations(
 						ctx,
-						ic,
-						func(ctx context.Context, r *github.Repository) error {
-							return o.EnqueueAnalyis(ctx, r)
+						c.AppClient,
+						func(ctx context.Context, i *github.Installation) error {
+							ic, err := c.InstallationClient(ctx, i.GetID())
+							if err != nil {
+								return err
+							}
+
+							return githubx.ListRepos(
+								ctx,
+								ic,
+								func(ctx context.Context, r *github.Repository) error {
+									return o.EnqueueAnalyis(ctx, r)
+								},
+							)
 						},
-					)
-				},
-			)
-		})
+					); err != nil {
+						return err
+					}
+
+					if err := linger.Sleep(ctx, 10*time.Minute); err != nil {
+						return err
+					}
+				}
+			})
+		}
 
 		g.Go(func() error {
-			return http.ListenAndServe(":8080", h)
+			s := http.Server{
+				Addr:    ":8080",
+				Handler: h,
+			}
+			go func() {
+				<-ctx.Done()
+				s.Close()
+			}()
+
+			return s.ListenAndServe()
 		})
 
 		return g.Wait()

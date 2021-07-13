@@ -1,10 +1,8 @@
 package githubx
 
 import (
-	"context"
 	"net/url"
 
-	"github.com/google/go-github/v35/github"
 	"golang.org/x/oauth2"
 )
 
@@ -13,13 +11,22 @@ import (
 //
 // If u is empty, the configuration for github.com is returned.
 func NewOAuthEndpoint(u *url.URL) oauth2.Endpoint {
-	if u.String() == "" {
-		u, _ = url.Parse("https://github.com")
-	} else {
-		u, _ = url.Parse(u.String()) // clone
+	ep := oauth2.Endpoint{
+		AuthURL:   "https://github.com/login/oauth/authorize",
+		TokenURL:  "https://github.com/login/oauth/access_token",
+		AuthStyle: oauth2.AuthStyleInParams,
 	}
 
-	var ep oauth2.Endpoint
+	if u == nil ||
+		u.String() == "" ||
+		u.Hostname() == "github.com" ||
+		u.Hostname() == "api.github.com" {
+		return ep
+	}
+
+	// Clone the URL so we can manipulate it's path without messing up the
+	// GitHub client.
+	u, _ = url.Parse(u.String()) // clone
 
 	u.Path = "/login/oauth/authorize"
 	ep.AuthURL = u.String()
@@ -28,22 +35,4 @@ func NewOAuthEndpoint(u *url.URL) oauth2.Endpoint {
 	ep.TokenURL = u.String()
 
 	return ep
-}
-
-func NewClientForUser(c *oauth2.Config, t *oauth2.Token) *github.Client {
-	client := github.NewClient(
-		c.Client(
-			context.Background(),
-			t,
-		),
-	)
-
-	u, _ := url.Parse(c.Endpoint.AuthURL)
-	u.Path = "/"
-
-	if u.Host != "github.com" {
-		client.BaseURL = u
-	}
-
-	return client
 }

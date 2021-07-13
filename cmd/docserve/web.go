@@ -4,24 +4,26 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/dogmatiq/docserve/githubx"
 	"github.com/dogmatiq/docserve/web"
-	"golang.org/x/oauth2"
+	"github.com/dogmatiq/docserve/web/pages/applications"
+	"github.com/dogmatiq/docserve/web/pages/handlers"
+	"github.com/dogmatiq/docserve/web/pages/messages"
 )
 
 func init() {
 	provide(func(
-		c *oauth2.Config,
+		c *githubx.Connector,
 		db *sql.DB,
 	) http.Handler {
 		return web.NewRouter(
 			c,
-			&web.ApplicationListHandler{DB: db},
-			&web.ApplicationViewHandler{DB: db},
-			&web.HandlerListHandler{DB: db},
-			&web.HandlerViewHandler{DB: db},
-			&web.MessageListHandler{DB: db},
-			&web.MessageViewHandler{DB: db},
+			&applications.ListHandler{DB: db},
+			&applications.DetailsHandler{DB: db},
+			&handlers.ListHandler{DB: db},
+			&handlers.DetailsHandler{DB: db},
+			&messages.ListHandler{DB: db},
+			&messages.DetailsHandler{DB: db},
 		)
 	})
-
 }

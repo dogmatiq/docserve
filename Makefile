@@ -1,4 +1,5 @@
-GO_EMBEDDED_FILES += $(shell ls web/templates/*.html)
+GO_EMBEDDED_FILES += persistence/schema.sql
+GO_EMBEDDED_FILES += $(shell find web -iname '*.html')
 
 -include .makefiles/Makefile
 -include .makefiles/pkg/go/v1/Makefile

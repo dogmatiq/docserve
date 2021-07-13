@@ -1,0 +1,104 @@
+{{ define "content" }}
+<h1>Handler Details</h1>
+
+<div class="card my-3">
+    <div class="card-body">
+        <dl>
+            <dt
+                title="The human-readable name given to the handler."
+                data-bs-toggle="tooltip"
+                data-bs-placement="left"
+            >
+                Name
+            </dt>
+            <dd>{{ .Name }}</dd>
+            <dt
+                title="The immutable key that serves as a globally unique identifier for the handler."
+                data-bs-toggle="tooltip"
+                data-bs-placement="left"
+            >
+                Key
+            </dt>
+            <dd>{{ .Key }}</dd>
+            <dt
+                title="The type of handler interface implemented by the handler."
+                data-bs-toggle="tooltip"
+                data-bs-placement="left"
+            >
+                Type
+            </dt>
+            <dd>{{ .Type }}</dd>
+            <dt
+                title="The application that the handler belongs to."
+                data-bs-toggle="tooltip"
+                data-bs-placement="left"
+            >
+                Application
+            </dt>
+            <dd><a href="/applications/{{ .AppKey }}">{{ .AppName }}</a></dd>
+            <dt
+                title="The name of the Go type that implements the handler interface."
+                data-bs-toggle="tooltip"
+                data-bs-placement="left"
+            >
+                Implementation
+            </dt>
+            <dd>{{ type .Impl }}</dd>
+        </dl>
+    </div>
+</div>
+
+<section class="mt-5">
+    <h2 id="messages"><a href="#messages"><i class="bi bi-link"></i></a> Messages</h2>
+
+    <p class="my-3">
+        Analysis of the <strong>{{ .Name }}</strong> {{ .Type }} message handler
+        discovered <strong>{{ len .ConsumedMessages }}</strong> consumed {{ .ConsumedMessageRole }} type(s){{ if .ProducedMessageRole }}
+        and <strong>{{ len .ProducedMessages }}</strong> produced {{ .ProducedMessageRole }} type(s){{ end }}.
+    </p>
+
+    {{ if .TimeoutMessages }}
+        <p class="my-3">
+            Additionally, the process uses <strong>{{ len .TimeoutMessages }}</strong> timeout message(s) internally.
+        </p>
+    {{ end }}
+
+    <strong style="text-transform: capitalize;">Consumed {{ .ConsumedMessageRole }} Messages</strong>
+    <ul>
+        {{ range $m := .ConsumedMessages }}
+            <li>
+                <a href="/messages/{{ $m.Package }}.{{ $m.Name }}">{{ $m.Name }}</a>
+                &mdash;
+                {{ type $m }}
+            </li>
+        {{ end }}
+    </ul>
+
+    {{ if .ProducedMessages }}
+        <strong style="text-transform: capitalize;">Produced {{ .ProducedMessageRole }} Messages</strong>
+        <ul>
+            {{ range $m := .ProducedMessages }}
+                <li>
+                    <a href="/messages/{{ $m.Package }}.{{ $m.Name }}">{{ $m.Name }}</a>
+                    &mdash;
+                    {{ type $m }}
+                </li>
+            {{ end }}
+        </ul>
+    {{ end }}
+
+    {{ if .TimeoutMessages }}
+        <strong>Timeout Messages</strong>
+        <ul>
+            {{ range $m := .TimeoutMessages }}
+                <li>
+                    <a href="/messages/{{ $m.Package }}.{{ $m.Name }}">{{ $m.Name }}</a>
+                    &mdash;
+                    {{ type $m }}
+                </li>
+            {{ end }}
+        </ul>
+    {{ end }}
+
+</section>
+{{ end }}
