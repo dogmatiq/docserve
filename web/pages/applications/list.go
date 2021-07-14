@@ -78,6 +78,19 @@ func (h *ListHandler) loadApplications(ctx context.Context, view *listView) erro
 			COALESCE(t.url, ''),
 			COALESCE(t.docs, ''),
 			(
+				SELECT COUNT(DISTINCT h.application_key)
+				FROM docserve.handler AS h
+				INNER JOIN docserve.handler_message AS m
+				ON m.handler_key = h.key
+				INNER JOIN docserve.handler_message AS xm
+				ON xm.type_id = m.type_id
+				AND xm.handler_key != m.handler_key
+				INNER JOIN docserve.handler AS xh
+				ON xh.key = xm.handler_key
+				AND xh.application_key != h.application_key
+				WHERE xh.application_key = a.key
+			) AS dependency_count,
+			(
 				SELECT COUNT(h.key)
 				FROM docserve.handler AS h
 				WHERE h.application_key = a.key
@@ -110,6 +123,7 @@ func (h *ListHandler) loadApplications(ctx context.Context, view *listView) erro
 			&s.Impl.IsPointer,
 			&s.Impl.URL,
 			&s.Impl.Docs,
+			&s.DependencyCount,
 			&s.HandlerCount,
 			&s.MessageCount,
 		); err != nil {
