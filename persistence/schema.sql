@@ -6,12 +6,40 @@ CREATE TABLE IF NOT EXISTS docserve.repository (
     commit_hash TEXT NOT NULL
 );
 
+-- CREATE TABLE IF NOT EXISTS docserve.package (
+--     id            SERIAL PRIMARY KEY,
+--     repository_id INT,
+--     path          TEXT NOT NULL UNIQUE,
+--     name          TEXT NOT NULL
+
+--     CONSTRAINT repository_fkey
+--         FOREIGN KEY (repository_id)
+--         REFERENCES docserve.repository (id)
+--         ON DELETE SET NULL
+-- );
+
+-- CREATE TABLE IF NOT EXISTS docserve.type (
+--     id            SERIAL PRIMARY KEY,
+--     package_id    INT NOT NULL,
+--     name          TEXT NOT NULL,
+--     url           TEXT,
+--     comments      TEXT,
+
+--     UNIQUE (package_id, name),
+
+--     CONSTRAINT package_fkey
+--         FOREIGN KEY (package_id)
+--         REFERENCES docserve.package (id)
+--         ON DELETE SET NULL
+-- );
+
 CREATE TABLE IF NOT EXISTS docserve.type (
     id            SERIAL PRIMARY KEY,
     package       TEXT NOT NULL,
     name          TEXT NOT NULL,
     repository_id INT,
     url           TEXT,
+    docs          TEXT,
 
     UNIQUE (package, name),
 

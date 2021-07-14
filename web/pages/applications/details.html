@@ -1,5 +1,5 @@
 {{ define "content" }}
-<h1>Application Details</h1>
+<h1>Application Details &mdash; {{ .Name }} </h1>
 
 <div class="card my-3">
     <div class="card-body">
@@ -16,7 +16,7 @@
                 title="The immutable key that serves as a globally unique identifier for the application."
                 data-bs-toggle="tooltip"
                 data-bs-placement="left"
-                >
+            >
                 Key
             </dt>
             <dd>{{ .Key }}</dd>
@@ -28,6 +28,16 @@
                 Implementation
             </dt>
             <dd>{{ type .Impl }}</dd>
+            {{ if .Impl.Docs }}
+                <dt
+                    title="The documentation comments from the source code."
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="left"
+                >
+                    Documentation
+                </dt>
+                <dd>{{ .Impl.Docs }}</dd>
+            {{ end }}
         </dl>
     </div>
 </div>

@@ -96,7 +96,8 @@ func (h *DetailsHandler) loadDetails(
 			t.package,
 			t.name,
 			a.is_pointer,
-			t.url
+			t.url,
+			t.docs
 		FROM docserve.application AS a
 		INNER JOIN docserve.type AS t
 		ON t.id = a.type_id
@@ -111,6 +112,7 @@ func (h *DetailsHandler) loadDetails(
 		&view.Impl.Name,
 		&view.Impl.IsPointer,
 		&view.Impl.URL,
+		&view.Impl.Docs,
 	)
 }
 
@@ -129,6 +131,7 @@ func (h *DetailsHandler) loadHandlers(
 			t.name,
 			h.is_pointer,
 			t.url,
+			t.docs,
 			(
 				SELECT COUNT(DISTINCT m.type_id)
 				FROM docserve.handler_message AS m
@@ -157,6 +160,7 @@ func (h *DetailsHandler) loadHandlers(
 			&s.Impl.Name,
 			&s.Impl.IsPointer,
 			&s.Impl.URL,
+			&s.Impl.Docs,
 			&s.MessageCount,
 		); err != nil {
 			return err
@@ -180,6 +184,7 @@ func (h *DetailsHandler) loadMessages(
 			t.name,
 			m.is_pointer,
 			t.url,
+			t.docs,
 			m.role,
 			(
 				SELECT COUNT(DISTINCT pm.handler_key)
@@ -215,6 +220,7 @@ func (h *DetailsHandler) loadMessages(
 			&s.Impl.Name,
 			&s.Impl.IsPointer,
 			&s.Impl.URL,
+			&s.Impl.Docs,
 			&s.Role,
 			&s.ProducerCount,
 			&s.ConsumerCount,

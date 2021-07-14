@@ -75,6 +75,7 @@ func (h *ListHandler) loadApplications(ctx context.Context, view *listView) erro
 			t.name,
 			a.is_pointer,
 			t.url,
+			t.docs,
 			(
 				SELECT COUNT(h.key)
 				FROM docserve.handler AS h
@@ -107,6 +108,7 @@ func (h *ListHandler) loadApplications(ctx context.Context, view *listView) erro
 			&s.Impl.Name,
 			&s.Impl.IsPointer,
 			&s.Impl.URL,
+			&s.Impl.Docs,
 			&s.HandlerCount,
 			&s.MessageCount,
 		); err != nil {

@@ -89,6 +89,7 @@ func (h *DetailsHandler) loadDetails(
 			t.name,
 			h.is_pointer,
 			t.url,
+			t.docs,
 			a.key,
 			a.name
 		FROM docserve.handler AS h
@@ -108,6 +109,7 @@ func (h *DetailsHandler) loadDetails(
 		&view.Impl.Name,
 		&view.Impl.IsPointer,
 		&view.Impl.URL,
+		&view.Impl.Docs,
 		&view.AppKey,
 		&view.AppName,
 	)
@@ -125,6 +127,7 @@ func (h *DetailsHandler) loadMessages(
 			t.name,
 			m.is_pointer,
 			t.url,
+			t.docs,
 			m.role,
 			m.is_produced,
 			m.is_consumed
@@ -153,6 +156,7 @@ func (h *DetailsHandler) loadMessages(
 			&t.Name,
 			&t.IsPointer,
 			&t.URL,
+			&t.Docs,
 			&role,
 			&isProduced,
 			&isConsumed,

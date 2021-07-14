@@ -93,6 +93,7 @@ func (h *DetailsHandler) loadDetails(
 			t.package,
 			t.name,
 			t.url,
+			t.docs,
 			string_agg(DISTINCT m.role, ', ' ORDER BY m.role)
 		FROM docserve.handler_message AS m
 		INNER JOIN docserve.type AS t
@@ -108,6 +109,7 @@ func (h *DetailsHandler) loadDetails(
 		&view.Impl.Package,
 		&view.Impl.Name,
 		&view.Impl.URL,
+		&view.Impl.Docs,
 		&view.Roles,
 	)
 }
@@ -125,7 +127,8 @@ func (h *DetailsHandler) loadApplications(
 			t.package,
 			t.name,
 			a.is_pointer,
-			t.url
+			t.url,
+			t.docs
 		FROM docserve.application AS a
 		INNER JOIN docserve.type AS t
 		ON t.id = a.type_id
@@ -156,6 +159,7 @@ func (h *DetailsHandler) loadApplications(
 			&s.Impl.Name,
 			&s.Impl.IsPointer,
 			&s.Impl.URL,
+			&s.Impl.Docs,
 		); err != nil {
 			return err
 		}
@@ -181,6 +185,7 @@ func (h *DetailsHandler) loadHandlers(
 			t.name,
 			h.is_pointer,
 			t.url,
+			t.docs,
 			a.key,
 			a.name,
 			m.is_produced,
@@ -218,6 +223,7 @@ func (h *DetailsHandler) loadHandlers(
 			&s.Impl.Name,
 			&s.Impl.IsPointer,
 			&s.Impl.URL,
+			&s.Impl.Docs,
 			&s.AppKey,
 			&s.AppName,
 			&isProduced,

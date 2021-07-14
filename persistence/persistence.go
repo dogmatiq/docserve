@@ -17,6 +17,7 @@ type TypeDef struct {
 	Name    string
 	File    string
 	Line    int
+	Docs    string
 }
 
 func RepositoryNeedsSync(
@@ -106,7 +107,8 @@ func SyncRepository(
 	if _, err := tx.ExecContext(
 		ctx,
 		`UPDATE docserve.type SET
-			url = NULL
+			url = NULL,
+			docs = NULL
 		WHERE repository_id = $1`,
 		r.GetID(),
 	); err != nil {
@@ -364,16 +366,19 @@ func syncTypeDef(
 			package,
 			name,
 			repository_id,
-			url
+			url,
+			docs
 		) VALUES (
-			$1, $2, $3, $4
+			$1, $2, $3, $4, $5
 		) ON CONFLICT (package, name) DO UPDATE SET
 			repository_id = excluded.repository_id,
-			url = excluded.url`,
+			url = excluded.url,
+			docs = excluded.docs`,
 		t.Package,
 		t.Name,
 		r.GetID(),
 		u.String(),
+		t.Docs,
 	)
 
 	return err

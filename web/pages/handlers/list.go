@@ -86,6 +86,7 @@ func (h *ListHandler) loadHandlers(
 			t.name,
 			h.is_pointer,
 			t.url,
+			t.docs,
 			a.key,
 			a.name,
 			(
@@ -116,6 +117,7 @@ func (h *ListHandler) loadHandlers(
 			&s.Impl.Name,
 			&s.Impl.IsPointer,
 			&s.Impl.URL,
+			&s.Impl.Docs,
 			&s.AppKey,
 			&s.AppName,
 			&s.MessageCount,

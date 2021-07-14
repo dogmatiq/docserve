@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"go/types"
+	"go/ast"
+	"go/token"
 	"net/http"
 	"os"
 	"strings"
@@ -276,7 +277,7 @@ func (a *Analyzer) analyzePackages(
 		defs []persistence.TypeDef
 	)
 
-	for i, pkg := range pkgs {
+	for _, pkg := range pkgs {
 		if len(pkg.Errors) != 0 {
 			for _, err := range pkg.Errors {
 				logging.Log(
@@ -298,54 +299,107 @@ func (a *Analyzer) analyzePackages(
 			pkg.PkgPath,
 		)
 
-		var discoveredApps []configkit.Application
+		a, d := a.analyzePackage(r, pkg, dir)
+		apps = append(apps, a...)
+		defs = append(defs, d...)
+	}
 
-		func() {
-			defer func() {
-				p := recover()
-				if p != nil {
-					logging.Log(
-						a.Logger,
-						"[%s] panic: %s",
-						r.GetFullName(),
-						p,
-					)
-				}
-			}()
+	return apps, defs
+}
 
-			discoveredApps = static.FromPackages(pkgs[i : i+1])
-		}()
-
-		for _, app := range discoveredApps {
+func (a *Analyzer) analyzePackage(
+	r *github.Repository,
+	pkg *packages.Package,
+	dir string,
+) ([]configkit.Application, []persistence.TypeDef) {
+	defer func() {
+		if p := recover(); p != nil {
 			logging.Log(
 				a.Logger,
-				"[%s] discovered application: %s",
+				"[%s] recovered from panic: %s",
 				r.GetFullName(),
-				app.Identity(),
+				p,
 			)
-			apps = append(apps, app)
 		}
+	}()
 
-		for _, obj := range pkg.TypesInfo.Defs {
-			if t, ok := obj.(*types.TypeName); ok {
+	apps := static.FromPackages([]*packages.Package{pkg})
+
+	for _, app := range apps {
+		logging.Log(
+			a.Logger,
+			"[%s] discovered application: %s",
+			r.GetFullName(),
+			app.Identity(),
+		)
+	}
+
+	var defs []persistence.TypeDef
+
+	for _, f := range pkg.Syntax {
+		for _, d := range f.Decls {
+			d, ok := d.(*ast.GenDecl)
+			if !ok {
+				continue
+			}
+
+			if d.Tok != token.TYPE {
+				continue
+			}
+
+			for _, s := range d.Specs {
+				s := s.(*ast.TypeSpec)
+
 				logging.Log(
 					a.Logger,
 					"[%s] discovered type: %s",
 					r.GetFullName(),
-					t.Name(),
+					s.Name,
 				)
 
-				pos := pkg.Fset.Position(t.Pos())
+				pos := pkg.Fset.Position(s.Pos())
 
 				defs = append(defs, persistence.TypeDef{
-					Package: t.Pkg().Path(),
-					Name:    t.Name(),
+					Package: pkg.PkgPath,
+					Name:    s.Name.String(),
 					File:    strings.TrimPrefix(pos.Filename, dir),
 					Line:    pos.Line,
+					Docs:    d.Doc.Text(),
 				})
 			}
 		}
 	}
+
+	// for _, obj := range pkg.TypesInfo.Defs {
+	// 	if t, ok := obj.(*types.TypeName); ok {
+	// 		logging.Log(
+	// 			a.Logger,
+	// 			"[%s] discovered type: %s",
+	// 			r.GetFullName(),
+	// 			t.Name(),
+	// 		)
+
+	// 		pos := pkg.Fset.Position(t.Pos())
+	// 		// file := pkg.Fset.File(t.Pos())
+
+	// 		// for i, n := range pkg.GoFiles {
+	// 		// 	if n == file.Name() {
+	// 		// 		f := pkg.Syntax[i]
+	// 		// 		cm := ast.NewCommentMap(pkg.Fset, expr, f.Comments)
+
+	// 		// 		cm.Filter(expr).String()
+	// 		// 	}
+	// 		// }
+
+	// 		defs = append(defs, persistence.TypeDef{
+	// 			Package:  t.Pkg().Path(),
+	// 			Name:     t.Name(),
+	// 			File:     strings.TrimPrefix(pos.Filename, dir),
+	// 			Line:     pos.Line,
+	// 			Comments: "...",
+	// 		})
+	// 	}
+	// }
 
 	return apps, defs
 }

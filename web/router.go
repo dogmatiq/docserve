@@ -129,7 +129,7 @@ func renderError(ctx *gin.Context, code int) {
 	)
 
 	if ctx.Writer.Written() {
-		renderer.Render(ctx.Writer)
+		renderer.Render(ctx.Writer) // nolint:errcheck
 		return
 	}
 

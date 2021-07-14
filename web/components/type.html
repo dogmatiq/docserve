@@ -1,9 +1,19 @@
-<span class="text-muted">{{ if .IsPointer }}*{{ end }}{{ .Package }}.</span>{{ .Name }}
-{{ if .URL }}
-<a
-    href="{{ .URL }}"
-    title="View source on GitHub"
-    data-bs-toggle="tooltip"
-    data-bs-placement="bottom"
-><i class="bi bi-github"></i></a>
-{{ end }}
+<span class="type-component">
+    <span
+        title="{{ .Docs }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="bottom"
+        class="type-name"
+    >
+        <span class="text-muted">{{ if .IsPointer }}*{{ end }}{{ .Package }}.</span>{{ .Name }}
+    </span>
+
+    {{ if .URL }}
+        <a
+            href="{{ .URL }}"
+            title="View source on GitHub"
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+        ><i class="bi bi-github"></i></a>
+    {{ end }}
+</span>
