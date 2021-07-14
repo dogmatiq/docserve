@@ -92,9 +92,9 @@ func (h *DetailsHandler) loadDetails(
 		`SELECT
 			t.package,
 			t.name,
-			t.url,
-			t.docs,
-			string_agg(DISTINCT m.role, ', ' ORDER BY m.role)
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, ''),
+			STRING_AGG(DISTINCT m.role, ', ' ORDER BY m.role)
 		FROM docserve.handler_message AS m
 		INNER JOIN docserve.type AS t
 		ON t.id = m.type_id
@@ -127,8 +127,8 @@ func (h *DetailsHandler) loadApplications(
 			t.package,
 			t.name,
 			a.is_pointer,
-			t.url,
-			t.docs
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, '')
 		FROM docserve.application AS a
 		INNER JOIN docserve.type AS t
 		ON t.id = a.type_id
@@ -184,8 +184,8 @@ func (h *DetailsHandler) loadHandlers(
 			t.package,
 			t.name,
 			h.is_pointer,
-			t.url,
-			t.docs,
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, ''),
 			a.key,
 			a.name,
 			m.is_produced,

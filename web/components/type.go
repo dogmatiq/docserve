@@ -4,6 +4,6 @@ type Type struct {
 	Package   string
 	Name      string
 	IsPointer bool
-	URL       *string
-	Docs      *string
+	URL       string
+	Docs      string
 }

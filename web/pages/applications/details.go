@@ -17,8 +17,22 @@ type detailsView struct {
 	Name string
 	Impl components.Type
 
-	Handlers []handlerSummary
-	Messages []messageSummary
+	Dependencies []dependency
+	Handlers     []handlerSummary
+	Messages     []messageSummary
+}
+
+// dependency contains a summary of information about an application that is
+// related to the application being displayed.
+type dependency struct {
+	Key                    string
+	Name                   string
+	Impl                   components.Type
+	HasPointerMismatch     bool
+	HasRoleMismatch        bool
+	UpstreamMessageCount   int
+	DownstreamMessageCount int
+	TotalMessageCount      int
 }
 
 // handlerSummary contains a summary of information about a handler within an
@@ -72,6 +86,10 @@ func (h *DetailsHandler) View(ctx *gin.Context) (string, interface{}, error) {
 		return "", nil, err
 	}
 
+	if err := h.loadDependencies(ctx, &view, appKey); err != nil {
+		return "", nil, err
+	}
+
 	if err := h.loadHandlers(ctx, &view, appKey); err != nil {
 		return "", nil, err
 	}
@@ -96,8 +114,8 @@ func (h *DetailsHandler) loadDetails(
 			t.package,
 			t.name,
 			a.is_pointer,
-			t.url,
-			t.docs
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, '')
 		FROM docserve.application AS a
 		INNER JOIN docserve.type AS t
 		ON t.id = a.type_id
@@ -116,6 +134,79 @@ func (h *DetailsHandler) loadDetails(
 	)
 }
 
+func (h *DetailsHandler) loadDependencies(
+	ctx context.Context,
+	view *detailsView,
+	appKey string,
+) error {
+	rows, err := h.DB.QueryContext(
+		ctx,
+		`SELECT
+			a.key,
+			a.name,
+			t.package,
+			t.name,
+			a.is_pointer,
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, ''),
+			BOOL_OR(m.is_pointer != xm.is_pointer) AS has_pointer_mismatch,
+			BOOL_OR(m.role != xm.role) AS has_role_mismatch,
+			COUNT(DISTINCT m.type_id) FILTER (WHERE m.is_produced AND xm.is_consumed) AS upstream_count,
+			COUNT(DISTINCT m.type_id) FILTER (WHERE m.is_consumed AND xm.is_produced) AS downstream_count,
+			COUNT(DISTINCT m.type_id)
+		FROM docserve.application AS a
+		INNER JOIN docserve.type AS t
+		ON t.id = a.type_id
+		INNER JOIN docserve.handler AS h
+		ON h.application_key = a.key
+		INNER JOIN docserve.handler_message AS m
+		ON m.handler_key = h.key
+		INNER JOIN docserve.handler_message AS xm
+		ON xm.type_id = m.type_id
+		AND xm.handler_key != m.handler_key
+		INNER JOIN docserve.handler AS xh
+		ON xh.key = xm.handler_key
+		AND xh.application_key != h.application_key
+		WHERE xh.application_key = $1
+		AND (
+			(m.is_consumed AND xm.is_produced)
+			OR (m.is_produced AND xm.is_consumed)
+		)
+		GROUP BY a.key, t.id
+		ORDER BY a.name, a.key`,
+		appKey,
+	)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var d dependency
+
+		if err := rows.Scan(
+			&d.Key,
+			&d.Name,
+			&d.Impl.Package,
+			&d.Impl.Name,
+			&d.Impl.IsPointer,
+			&d.Impl.URL,
+			&d.Impl.Docs,
+			&d.HasPointerMismatch,
+			&d.HasRoleMismatch,
+			&d.UpstreamMessageCount,
+			&d.DownstreamMessageCount,
+			&d.TotalMessageCount,
+		); err != nil {
+			return err
+		}
+
+		view.Dependencies = append(view.Dependencies, d)
+	}
+
+	return rows.Err()
+}
+
 func (h *DetailsHandler) loadHandlers(
 	ctx context.Context,
 	view *detailsView,
@@ -130,8 +221,8 @@ func (h *DetailsHandler) loadHandlers(
 			t.package,
 			t.name,
 			h.is_pointer,
-			t.url,
-			t.docs,
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, ''),
 			(
 				SELECT COUNT(DISTINCT m.type_id)
 				FROM docserve.handler_message AS m
@@ -183,8 +274,8 @@ func (h *DetailsHandler) loadMessages(
 			t.package,
 			t.name,
 			m.is_pointer,
-			t.url,
-			t.docs,
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, ''),
 			m.role,
 			(
 				SELECT COUNT(DISTINCT pm.handler_key)

@@ -85,8 +85,8 @@ func (h *ListHandler) loadHandlers(
 			t.package,
 			t.name,
 			h.is_pointer,
-			t.url,
-			t.docs,
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, ''),
 			a.key,
 			a.name,
 			(

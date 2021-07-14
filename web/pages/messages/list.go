@@ -81,9 +81,9 @@ func (h *ListHandler) loadMessages(
 		`SELECT
 			t.package,
 			t.name,
-			t.url,
-			t.docs,
-			string_agg(DISTINCT m.role, ', ' ORDER BY m.role),
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, ''),
+			STRING_AGG(DISTINCT m.role, ', ' ORDER BY m.role),
 			COUNT(DISTINCT a.key),
 			COUNT(DISTINCT CASE WHEN m.is_produced THEN h.key END),
 			COUNT(DISTINCT CASE WHEN m.is_consumed THEN h.key END)

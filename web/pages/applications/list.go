@@ -18,11 +18,12 @@ type listView struct {
 // appSummary contains a summary of information about an application, for
 // display within a listView.
 type appSummary struct {
-	Key          string
-	Name         string
-	Impl         components.Type
-	HandlerCount int
-	MessageCount int
+	Key             string
+	Name            string
+	Impl            components.Type
+	DependencyCount int
+	HandlerCount    int
+	MessageCount    int
 }
 
 // ListHandler is an implementation of web.Handler that displays a list of
@@ -74,8 +75,8 @@ func (h *ListHandler) loadApplications(ctx context.Context, view *listView) erro
 			t.package,
 			t.name,
 			a.is_pointer,
-			t.url,
-			t.docs,
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, ''),
 			(
 				SELECT COUNT(h.key)
 				FROM docserve.handler AS h
@@ -91,7 +92,7 @@ func (h *ListHandler) loadApplications(ctx context.Context, view *listView) erro
 		FROM docserve.application AS a
 		INNER JOIN docserve.type AS t
 		ON t.id = a.type_id
-		ORDER BY a.name`,
+		ORDER BY a.name, a.key`,
 	)
 	if err != nil {
 		return err

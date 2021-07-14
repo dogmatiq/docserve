@@ -88,8 +88,8 @@ func (h *DetailsHandler) loadDetails(
 			t.package,
 			t.name,
 			h.is_pointer,
-			t.url,
-			t.docs,
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, ''),
 			a.key,
 			a.name
 		FROM docserve.handler AS h
@@ -126,8 +126,8 @@ func (h *DetailsHandler) loadMessages(
 			t.package,
 			t.name,
 			m.is_pointer,
-			t.url,
-			t.docs,
+			COALESCE(t.url, ''),
+			COALESCE(t.docs, ''),
 			m.role,
 			m.is_produced,
 			m.is_consumed

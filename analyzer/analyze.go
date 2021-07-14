@@ -370,36 +370,5 @@ func (a *Analyzer) analyzePackage(
 		}
 	}
 
-	// for _, obj := range pkg.TypesInfo.Defs {
-	// 	if t, ok := obj.(*types.TypeName); ok {
-	// 		logging.Log(
-	// 			a.Logger,
-	// 			"[%s] discovered type: %s",
-	// 			r.GetFullName(),
-	// 			t.Name(),
-	// 		)
-
-	// 		pos := pkg.Fset.Position(t.Pos())
-	// 		// file := pkg.Fset.File(t.Pos())
-
-	// 		// for i, n := range pkg.GoFiles {
-	// 		// 	if n == file.Name() {
-	// 		// 		f := pkg.Syntax[i]
-	// 		// 		cm := ast.NewCommentMap(pkg.Fset, expr, f.Comments)
-
-	// 		// 		cm.Filter(expr).String()
-	// 		// 	}
-	// 		// }
-
-	// 		defs = append(defs, persistence.TypeDef{
-	// 			Package:  t.Pkg().Path(),
-	// 			Name:     t.Name(),
-	// 			File:     strings.TrimPrefix(pos.Filename, dir),
-	// 			Line:     pos.Line,
-	// 			Comments: "...",
-	// 		})
-	// 	}
-	// }
-
 	return apps, defs
 }
