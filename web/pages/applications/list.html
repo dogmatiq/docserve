@@ -8,36 +8,34 @@
 
 <table class="table table-striped table-hover">
     <thead>
-        <th
+        <th><span
             title="The human-readable name given to the application."
             data-bs-toggle="tooltip"
-            data-bs-placement="left"
+            data-bs-placement="top"
         >
             Name
-        </th>
-        <th
+        </span></th>
+        <th><span
             title="The name of the Go type that implements the application interface."
             data-bs-toggle="tooltip"
-            data-bs-placement="left"
+            data-bs-placement="top"
         >
             Implementation
-        </th>
-        <th
+        </span></th>
+        <th class="numeric-column"><span
             title="The number of message handlers registered with the application."
             data-bs-toggle="tooltip"
-            data-bs-placement="left"
-            class="numeric-column"
+            data-bs-placement="top"
         >
             Handlers
-        </th>
-        <th
+        </span></th>
+        <th class="numeric-column"><span
             title="The number of messages produced or consumed by the handlers within the application."
             data-bs-toggle="tooltip"
-            data-bs-placement="left"
-            class="numeric-column"
+            data-bs-placement="top"
         >
             Messages
-        </th>
+        </span></th>
     </thead>
     <tbody>
         {{ range $a := .Applications }}

@@ -5,5 +5,5 @@ type Type struct {
 	Name      string
 	IsPointer bool
 	URL       *string
-	Docs      string
+	Docs      *string
 }

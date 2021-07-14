@@ -4,38 +4,39 @@
 <div class="card my-3">
     <div class="card-body">
         <dl>
-            <dt
+            <dt><span
                 title="The human-readable name given to the application."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Name
-            </dt>
+            </span></dt>
             <dd>{{ .Name }}</dd>
-            <dt
+            <dt><span
                 title="The immutable key that serves as a globally unique identifier for the application."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Key
-            </dt>
+            </span></dt>
             <dd>{{ .Key }}</dd>
-            <dt
+            <dt><span
                 title="The name of the Go type that implements the application interface."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Implementation
-            </dt>
+            </span></dt>
             <dd>{{ type .Impl }}</dd>
+
             {{ if .Impl.Docs }}
-                <dt
+                <dt><span
                     title="The documentation comments from the source code."
                     data-bs-toggle="tooltip"
-                    data-bs-placement="left"
+                    data-bs-placement="top"
                 >
                     Documentation
-                </dt>
+                </span></dt>
                 <dd>{{ .Impl.Docs }}</dd>
             {{ end }}
         </dl>
@@ -52,41 +53,40 @@
 
     <table class="table table-striped table-hover">
         <thead>
-            <th
+            <th><span
                 title="The human-readable name given to the handler."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Name
-            </th>
-            <th
+            </span></th>
+            <th><span
                 title="The type of handler interface implemented by the handler."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Type
-            </th>
-            <th
+            </span></th>
+            <th><span
                 title="The name of the Go type that implements the handler interface."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Implementation
-            </th>
-            <th
+            </span></th>
+            <th class="numeric-column"><span
                 title="The number of messages produced or consumed by the handler."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
-                class="numeric-column"
+                data-bs-placement="top"
             >
                 Messages
-            </th>
+            </span></th>
         </thead>
         <tbody>
             {{ range $h := .Handlers }}
                 <tr>
                     <td><a href="/handlers/{{ $h.Key }}">{{ $h.Name }}</a></td>
-                    <td>{{ $h.Type }}</td>
+                    <td>{{ handlertype $h.Type }}</td>
                     <td>{{ type $h.Impl }}</td>
                     <td class="numeric-column"><a href="/handlers/{{ $h.Key }}#messages">{{ $h.MessageCount }}</a>
                 </tr>
@@ -106,44 +106,42 @@
 
     <table class="table table-striped table-hover">
         <thead>
-            <th
+            <th><span
                 title="The short name of the message."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Name
-            </th>
-            <th
+            </span></th>
+            <th><span
                 title="The role that the message plays within the <strong>{{ .Name }}</strong> application."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
                 data-bs-html="true"
             >
                 Role
-            </th>
-            <th
+            </span></th>
+            <th><span
                 title="The name of the Go type that defines the message."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Implementation
-            </th>
-            <th
+            </span></th>
+            <th class="numeric-column"><span
                 title="The number of handlers that produce the message."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
-                class="numeric-column"
+                data-bs-placement="top"
             >
                 Producers
-            </th>
-            <th
+            </span></th>
+            <th class="numeric-column"><span
                 title="The number of handlers that consume the message."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
-                class="numeric-column"
+                data-bs-placement="top"
             >
                 Consumers
-            </th>
+            </span></th>
         </thead>
         <tbody>
             {{ range $m := .Messages }}

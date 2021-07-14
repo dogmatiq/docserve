@@ -1,40 +1,40 @@
 {{ define "handler_table" }}
 <table class="table table-striped table-hover">
     <thead>
-        <th
+        <th><span
             title="The human-readable name given to the handler."
             data-bs-toggle="tooltip"
-            data-bs-placement="left"
+            data-bs-placement="top"
         >
             Name
-        </th>
-        <th
+        </span></th>
+        <th><span
             title="The type of handler interface implemented by the handler."
             data-bs-toggle="tooltip"
-            data-bs-placement="left"
+            data-bs-placement="top"
         >
             Type
-        </th>
-        <th
+        </span></th>
+        <th><span
             data-bs-toggle="tooltip"
-            data-bs-placement="left"
+            data-bs-placement="top"
             title="The name of the Go type that implements the handler interface."
         >
             Implementation
-        </th>
-        <th
+        </span></th>
+        <th><span
             title="The application that the handler belongs to."
             data-bs-toggle="tooltip"
-            data-bs-placement="left"
+            data-bs-placement="top"
         >
             Application
-        </th>
+        </span></th>
     </thead>
     <tbody>
         {{ range $h := . }}
         <tr>
             <td><a href="/handlers/{{ $h.Key }}">{{ $h.Name }}</a></td>
-            <td>{{ $h.Type }}</td>
+            <td>{{ handlertype $h.Type }}</td>
             <td>{{ type $h.Impl }}</td>
             <td><a href="/applications/{{ .AppKey }}">{{ .AppName }}</a></td>
         </tr>
@@ -44,41 +44,44 @@
 {{ end }}
 
 {{ define "content" }}
-<h1>Message Details &mdash; {{ .Name }} </h1>
+<h1>Message Details &mdash; {{ .Impl.Name }} </h1>
 
 <div class="card my-3">
     <div class="card-body">
         <dl>
-            <dt title="The short name of the message."
+            <dt><span
+                title="The short name of the message."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Name
-            </dt>
+            </span></dt>
             <dd>{{ .Impl.Name }}</dd>
-            <dt title="The role(s) that the message plays within the the applications that use it."
+            <dt><span
+                title="The role(s) that the message plays within the the applications that use it."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Roles
-            </dt>
+            </span></dt>
             <dd>{{ .Roles }}</dd>
-            <dt
-                data-bs-toggle="tooltip"
-                data-bs-placement="left"
+            <dt><span
                 title="The name of the Go type that defines the message type."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
             >
                 Implementation
-            </dt>
+            </span></dt>
             <dd>{{ type .Impl }}</dd>
+
             {{ if .Impl.Docs }}
-                <dt
+                <dt><span
                     title="The documentation comments from the source code."
                     data-bs-toggle="tooltip"
-                    data-bs-placement="left"
+                    data-bs-placement="top"
                 >
                     Documentation
-                </dt>
+                </span></dt>
                 <dd>{{ .Impl.Docs }}</dd>
             {{ end }}
         </dl>
@@ -95,20 +98,20 @@
 
     <table class="table table-striped table-hover">
         <thead>
-            <th
+            <th><span
                 title="The human-readable name given to the application."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Name
-            </th>
-            <th
+            </span></th>
+            <th><span
                 title="The name of the Go type that implements the application interface."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Implementation
-            </th>
+            </span></th>
         </thead>
         <tbody>
             {{ range $a := .Applications }}

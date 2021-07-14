@@ -1,0 +1,37 @@
+<span class="handlertype-component">
+    {{ if eq . "aggregate" }}
+        <span
+            title="An aggregate is a stateful message handler that enforces the business invariants of an application."
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            class="type-name"
+        >aggregate</span>
+    {{ end }}
+
+    {{ if eq . "process" }}
+        <span
+            title="A process is a stateful message handler that coordinates a business process involving multiple other handlers or applications."
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            class="type-name"
+        >process</span>
+    {{ end }}
+
+    {{ if eq . "integration" }}
+        <span
+            title="An integration is a stateless message handler that integrates an application with some non-message-based system."
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            class="type-name"
+        >integration</span>
+    {{ end }}
+
+    {{ if eq . "projection" }}
+        <span
+            title="A projection is a message handler that derives a read-model from the events produced by one or more applications."
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            class="type-name"
+        >projection</span>
+    {{ end }}
+</span>

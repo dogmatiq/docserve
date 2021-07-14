@@ -4,54 +4,55 @@
 <div class="card my-3">
     <div class="card-body">
         <dl>
-            <dt
+            <dt><span
                 title="The human-readable name given to the handler."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Name
-            </dt>
+            </span></dt>
             <dd>{{ .Name }}</dd>
-            <dt
+            <dt><span
                 title="The immutable key that serves as a globally unique identifier for the handler."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Key
-            </dt>
+            </span></dt>
             <dd>{{ .Key }}</dd>
-            <dt
+            <dt><span
                 title="The type of handler interface implemented by the handler."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Type
-            </dt>
-            <dd>{{ .Type }}</dd>
-            <dt
+            </span></dt>
+            <dd>{{ handlertype .Type }}</dd>
+            <dt><span
                 title="The application that the handler belongs to."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Application
-            </dt>
+            </span></dt>
             <dd><a href="/applications/{{ .AppKey }}">{{ .AppName }}</a></dd>
-            <dt
+            <dt><span
                 title="The name of the Go type that implements the handler interface."
                 data-bs-toggle="tooltip"
-                data-bs-placement="left"
+                data-bs-placement="top"
             >
                 Implementation
-            </dt>
+            </span></dt>
             <dd>{{ type .Impl }}</dd>
+
             {{ if .Impl.Docs }}
-                <dt
+                <dt><span
                     title="The documentation comments from the source code."
                     data-bs-toggle="tooltip"
-                    data-bs-placement="left"
+                    data-bs-placement="top"
                 >
                     Documentation
-                </dt>
+                </span></dt>
                 <dd>{{ .Impl.Docs }}</dd>
             {{ end }}
         </dl>
