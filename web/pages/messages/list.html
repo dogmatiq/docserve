@@ -59,7 +59,18 @@
             <tr>
                 <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
                 <td>{{ $m.Roles }}</td>
-                <td>{{ type $m.Impl }}</td>
+                <td>
+                    {{ type $m.Impl }}
+
+                    {{ if $m.HasPointerMismatch }}
+                    <i
+                        title="Pointer Usage Mismatch: Some handlers use this message type directly, whereas others use a pointer."
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        class="bi bi-exclamation-triangle-fill"
+                    ></i>
+                    {{ end }}
+                </td>
                 <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#applications">{{ .AppCount }}</a>
                 <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ $m.ProducerCount }}</a></td>
                 <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ $m.ConsumerCount }}</a></td>
