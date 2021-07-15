@@ -112,7 +112,7 @@
 
             {{ if .User }}
                 <div class="navbar-nav d-flex">
-                    <a class="nav-link" href="{{ .User.GetURL }}"><i class="bi bi-person-circle"></i> {{ .User.GetName }}</a>
+                    <a class="nav-link" href="{{ .User.GetHTMLURL }}"><i class="bi bi-person-circle"></i> {{ .User.GetName }}</a>
                 </div>
             {{ end }}
         </div>
