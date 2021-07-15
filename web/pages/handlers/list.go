@@ -17,13 +17,14 @@ type listView struct {
 }
 
 type handlerSummary struct {
-	Key          string
-	Name         string
-	Type         configkit.HandlerType
-	Impl         components.Type
-	AppKey       string
-	AppName      string
-	MessageCount int
+	Key                  string
+	Name                 string
+	Type                 configkit.HandlerType
+	Impl                 components.Type
+	AppKey               string
+	AppName              string
+	ConsumedMessageCount int
+	ProducedMessageCount int
 }
 
 type ListHandler struct {
@@ -93,7 +94,14 @@ func (h *ListHandler) loadHandlers(
 				SELECT COUNT(DISTINCT m.type_id)
 				FROM docserve.handler_message AS m
 				WHERE m.handler_key = h.key
-			) AS message_count
+				AND m.is_consumed
+			) AS consumed_count,
+			(
+				SELECT COUNT(DISTINCT m.type_id)
+				FROM docserve.handler_message AS m
+				WHERE m.handler_key = h.key
+				AND m.is_produced
+			) AS produced_count
 		FROM docserve.handler AS h
 		INNER JOIN docserve.type AS t
 		ON t.id = h.type_id
@@ -120,7 +128,8 @@ func (h *ListHandler) loadHandlers(
 			&s.Impl.Docs,
 			&s.AppKey,
 			&s.AppName,
-			&s.MessageCount,
+			&s.ConsumedMessageCount,
+			&s.ProducedMessageCount,
 		); err != nil {
 			return err
 		}

@@ -71,14 +71,6 @@
                     Implementation
                 </span></th>
                 <th class="numeric-column"><span
-                    title="The number of messages used for communication between the related application and the <strong>{{ .Name }}</strong> application."
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    data-bs-html="true"
-                >
-                    Messages
-                </span></th>
-                <th class="numeric-column"><span
                     title="The number of messages produced by the related application that are consumed by the <strong>{{ .Name }}</strong> application."
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
@@ -129,7 +121,6 @@
                             <a href="/applications/{{ $r.Key }}">{{ $r.Name }}</a>
                         </td>
                         <td>{{ type $r.Impl }}</td>
-                        <td class="numeric-column">{{ $r.TotalMessageCount }}</td>
                         <td class="numeric-column">{{ $r.UpstreamMessageCount }}</td>
                         <td class="numeric-column">{{ $r.DownstreamMessageCount }}</td>
                     </tr>
@@ -177,11 +168,18 @@
                 Implementation
             </span></th>
             <th class="numeric-column"><span
-                title="The number of messages produced or consumed by the handler."
+                title="The number of messages consumed by the handler."
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
             >
-                Messages
+                Consumed
+            </span></th>
+            <th class="numeric-column"><span
+                title="The number of messages produced by the handler."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+            >
+                Produced
             </span></th>
         </thead>
         <tbody>
@@ -190,7 +188,8 @@
                     <td><a href="/handlers/{{ $h.Key }}">{{ $h.Name }}</a></td>
                     <td>{{ handlertype $h.Type }}</td>
                     <td>{{ type $h.Impl }}</td>
-                    <td class="numeric-column"><a href="/handlers/{{ $h.Key }}#messages">{{ $h.MessageCount }}</a></td>
+                    <td class="numeric-column"><a href="/handlers/{{ $h.Key }}#consumed">{{ $h.ConsumedMessageCount }}</a></td>
+                    <td class="numeric-column"><a href="/handlers/{{ $h.Key }}#produced">{{ $h.ProducedMessageCount }}</a></td>
                 </tr>
             {{ end }}
         </tbody>

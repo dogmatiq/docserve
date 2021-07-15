@@ -21,6 +21,11 @@ func init() {
 			return nil, err
 		}
 
+		db.SetConnMaxIdleTime(30 * time.Second)
+		db.SetConnMaxLifetime(5 * time.Minute)
+		db.SetMaxIdleConns(3)
+		db.SetMaxOpenConns(50)
+
 		// if err := persistence.DropSchema(ctx, db); err != nil {
 		// 	return nil, err
 		// }

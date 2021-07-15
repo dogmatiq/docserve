@@ -38,11 +38,12 @@ type relationship struct {
 // handlerSummary contains a summary of information about a handler within an
 // application, for display within a detailsView.
 type handlerSummary struct {
-	Key          string
-	Name         string
-	Type         configkit.HandlerType
-	Impl         components.Type
-	MessageCount string
+	Key                  string
+	Name                 string
+	Type                 configkit.HandlerType
+	Impl                 components.Type
+	ConsumedMessageCount int
+	ProducedMessageCount int
 }
 
 // handlerSummary contains a summary of information about a message used by an
@@ -227,7 +228,14 @@ func (h *DetailsHandler) loadHandlers(
 				SELECT COUNT(DISTINCT m.type_id)
 				FROM docserve.handler_message AS m
 				WHERE m.handler_key = h.key
-			) AS message_count
+				AND m.is_consumed
+			) AS consumed_count,
+			(
+				SELECT COUNT(DISTINCT m.type_id)
+				FROM docserve.handler_message AS m
+				WHERE m.handler_key = h.key
+				AND m.is_produced
+			) AS produced_count
 		FROM docserve.handler AS h
 		INNER JOIN docserve.type AS t
 		ON t.id = h.type_id
@@ -252,7 +260,8 @@ func (h *DetailsHandler) loadHandlers(
 			&s.Impl.IsPointer,
 			&s.Impl.URL,
 			&s.Impl.Docs,
-			&s.MessageCount,
+			&s.ConsumedMessageCount,
+			&s.ProducedMessageCount,
 		); err != nil {
 			return err
 		}

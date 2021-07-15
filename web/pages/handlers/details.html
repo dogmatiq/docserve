@@ -60,56 +60,131 @@
 </div>
 
 <section class="mt-5">
-    <h2 id="messages"><a href="#messages"><i class="bi bi-link"></i></a> Messages</h2>
+    <h2 id="consumed" style="text-transform: capitalize;"><a href="#consumed"><i class="bi bi-link"></i></a> <span class="role-{{ .ConsumedMessageRole }}"><span class="sticky-note"></span></span> Consumed {{ .ConsumedMessageRole }} Messages</h2>
 
     <p class="my-3">
-        Analysis of the <strong>{{ .Name }}</strong> {{ .Type }} message handler
-        discovered <strong>{{ len .ConsumedMessages }}</strong> consumed {{ .ConsumedMessageRole }} type(s){{ if .ProducedMessageRole }}
-        and <strong>{{ len .ProducedMessages }}</strong> produced {{ .ProducedMessageRole }} type(s){{ end }}.
+        The <strong>{{ .Name }}</strong> {{ .Type }} message handler consumes
+        <strong>{{ len .ConsumedMessages }}</strong> {{ .ConsumedMessageRole }} message(s).
     </p>
 
-    {{ if .TimeoutMessages }}
-        <p class="my-3">
-            Additionally, the process uses <strong>{{ len .TimeoutMessages }}</strong> timeout message(s) internally.
-        </p>
-    {{ end }}
-
-    <strong style="text-transform: capitalize;">Consumed {{ .ConsumedMessageRole }} Messages</strong>
-    <ul>
-        {{ range $m := .ConsumedMessages }}
-            <li>
-                <a href="/messages/{{ $m.Package }}.{{ $m.Name }}">{{ $m.Name }}</a>
-                &mdash;
-                {{ type $m }}
-            </li>
-        {{ end }}
-    </ul>
-
-    {{ if .ProducedMessages }}
-        <strong style="text-transform: capitalize;">Produced {{ .ProducedMessageRole }} Messages</strong>
-        <ul>
-            {{ range $m := .ProducedMessages }}
-                <li>
-                    <a href="/messages/{{ $m.Package }}.{{ $m.Name }}">{{ $m.Name }}</a>
-                    &mdash;
-                    {{ type $m }}
-                </li>
+    <table class="table table-striped table-hover">
+        <thead>
+            <th><span
+                title="The human-readable name given to the handler."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+            >
+                Name
+            </span></th>
+            <th><span
+                title="The name of the Go type that implements the handler interface."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+            >
+                Implementation
+            </span></th>
+            <th class="numeric-column"><span
+                title="The number of handlers that produce the message."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+            >
+                Producers
+            </span></th>
+        </thead>
+        <tbody>
+            {{ range $m := .ConsumedMessages }}
+                <tr>
+                    <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
+                    <td>{{ type $m.Impl }}</td>
+                    <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ $m.HandlerCount }}</a></td>
+                </tr>
             {{ end }}
-        </ul>
-    {{ end }}
-
-    {{ if .TimeoutMessages }}
-        <strong>Timeout Messages</strong>
-        <ul>
-            {{ range $m := .TimeoutMessages }}
-                <li>
-                    <a href="/messages/{{ $m.Package }}.{{ $m.Name }}">{{ $m.Name }}</a>
-                    &mdash;
-                    {{ type $m }}
-                </li>
-            {{ end }}
-        </ul>
-    {{ end }}
-
+        </tbody>
+    </table>
 </section>
+
+{{ if .ProducedMessages }}
+    <section class="mt-5">
+        <h2 id="produced" style="text-transform: capitalize;"><a href="#produced"><i class="bi bi-link"></i></a> <span class="role-{{ .ProducedMessageRole }}"><span class="sticky-note"></span></span> Produced {{ .ProducedMessageRole }} Messages</h2>
+
+        <p class="my-3">
+            The <strong>{{ .Name }}</strong> {{ .Type }} message handler produces
+            <strong>{{ len .ProducedMessages }}</strong> {{ .ProducedMessageRole }} message(s).
+        </p>
+
+        <table class="table table-striped table-hover">
+            <thead>
+                <th><span
+                    title="The human-readable name given to the handler."
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                >
+                    Name
+                </span></th>
+                <th><span
+                    title="The name of the Go type that implements the handler interface."
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                >
+                    Implementation
+                </span></th>
+                <th class="numeric-column"><span
+                    title="The number of handlers that consume the message."
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                >
+                    Consumers
+                </span></th>
+            </thead>
+            <tbody>
+                {{ range $m := .ProducedMessages }}
+                    <tr>
+                        <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
+                        <td>{{ type $m.Impl }}</td>
+                        <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ $m.HandlerCount }}</a></td>
+                    </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </section>
+{{ end }}
+
+{{ if .TimeoutMessages }}
+    <section class="mt-5">
+        <h2 id="timeouts"><a href="#timeouts"><i class="bi bi-link"></i></a> <span class="role-timeout"><span class="sticky-note"></span></span> Scheduled Timeout Messages</h2>
+
+        <p class="my-3">
+            The <strong>{{ .Name }}</strong> process message handler schedules
+            <strong>{{ len .TimeoutMessages }}</strong> timeout message(s).
+        </p>
+
+        <table class="table table-striped table-hover">
+            <thead>
+                <th><span
+                    title="The human-readable name given to the handler."
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                >
+                    Name
+                </span></th>
+                <th><span
+                    title="The name of the Go type that implements the handler interface."
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                >
+                    Implementation
+                </span></th>
+            </thead>
+            <tbody>
+                {{ range $m := .TimeoutMessages }}
+                    <tr>
+                        <td><a href="/messages/{{ $m.Package }}.{{ $m.Name }}">{{ $m.Name }}</a></td>
+                        <td>{{ type $m }}</td>
+                    </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </section>
+{{ end }}
+
 {{ end }}

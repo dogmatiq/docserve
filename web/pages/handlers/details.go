@@ -19,11 +19,16 @@ type detailsView struct {
 	AppKey  string
 	AppName string
 
-	ConsumedMessages    []components.Type
+	ConsumedMessages    []messageSummary
 	ConsumedMessageRole message.Role
-	ProducedMessages    []components.Type
+	ProducedMessages    []messageSummary
 	ProducedMessageRole message.Role
 	TimeoutMessages     []components.Type
+}
+
+type messageSummary struct {
+	Impl         components.Type
+	HandlerCount int
 }
 
 type DetailsHandler struct {
@@ -128,6 +133,14 @@ func (h *DetailsHandler) loadMessages(
 			m.is_pointer,
 			COALESCE(t.url, ''),
 			COALESCE(t.docs, ''),
+			(
+				SELECT COUNT(DISTINCT xm.handler_key)
+				FROM docserve.handler_message AS xm
+				WHERE xm.type_id = m.type_id
+				AND xm.handler_key != m.handler_key
+				AND xm.is_produced != m.is_produced
+				AND xm.is_consumed != m.is_consumed
+				) AS handler_count,
 			m.role,
 			m.is_produced,
 			m.is_consumed
@@ -144,7 +157,7 @@ func (h *DetailsHandler) loadMessages(
 	defer rows.Close()
 
 	for rows.Next() {
-		var t components.Type
+		var s messageSummary
 
 		var (
 			role                   message.Role
@@ -152,11 +165,12 @@ func (h *DetailsHandler) loadMessages(
 		)
 
 		if err := rows.Scan(
-			&t.Package,
-			&t.Name,
-			&t.IsPointer,
-			&t.URL,
-			&t.Docs,
+			&s.Impl.Package,
+			&s.Impl.Name,
+			&s.Impl.IsPointer,
+			&s.Impl.URL,
+			&s.Impl.Docs,
+			&s.HandlerCount,
 			&role,
 			&isProduced,
 			&isConsumed,
@@ -165,11 +179,11 @@ func (h *DetailsHandler) loadMessages(
 		}
 
 		if role == message.TimeoutRole {
-			view.TimeoutMessages = append(view.ProducedMessages, t)
+			view.TimeoutMessages = append(view.TimeoutMessages, s.Impl)
 		} else if isProduced {
-			view.ProducedMessages = append(view.ProducedMessages, t)
+			view.ProducedMessages = append(view.ProducedMessages, s)
 		} else if isConsumed {
-			view.ConsumedMessages = append(view.ConsumedMessages, t)
+			view.ConsumedMessages = append(view.ConsumedMessages, s)
 		}
 	}
 
