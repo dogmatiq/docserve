@@ -58,17 +58,30 @@
         {{ range $m := .Messages }}
             <tr>
                 <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
-                <td>{{ $m.Roles }}</td>
+                <td>
+                    {{ $m.Role }}
+
+                    {{ if $m.HasRoleMismatch }}
+                    <a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#role-mismatch"><i
+                        title="Not all handlers agree that <strong>{{ .Impl.Name }}</strong> is {{ if eq .Role "event" }}an{{ else }}a{{ end }} <strong>{{ .Role }}</strong>."
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-html="true"
+                        class="bi bi-exclamation-triangle-fill"
+                    ></i></a>
+                    {{ end }}
+                </td>
                 <td>
                     {{ type $m.Impl }}
 
                     {{ if $m.HasPointerMismatch }}
-                    <i
-                        title="Pointer Usage Mismatch: Some handlers use this message type directly, whereas others use a pointer."
+                    <a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#pointer-mismatch"><i
+                        title="Some handlers use this message type directly, whereas others use a pointer."
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
+                        data-bs-html="true"
                         class="bi bi-exclamation-triangle-fill"
-                    ></i>
+                    ></i></a>
                     {{ end }}
                 </td>
                 <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#applications">{{ .AppCount }}</a>

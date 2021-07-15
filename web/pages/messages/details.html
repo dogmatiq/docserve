@@ -62,9 +62,9 @@
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
             >
-                Roles
+                Role
             </span></dt>
-            <dd>{{ .Roles }}</dd>
+            <dd>{{ .Role }}</dd>
             <dt><span
                 title="The name of the Go type that defines the message type."
                 data-bs-toggle="tooltip"
@@ -88,15 +88,31 @@
     </div>
 </div>
 
+{{ if .HasRoleMismatch }}
+<div class="alert alert-warning" role="alert">
+    <h4 id="role-mismatch" class="alert-heading">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Role Mismatch
+    </h4>
+    <p class="mb-0">
+        Not all handlers agree that <strong>{{ .Impl.Name }}</strong> is
+        {{ if eq .Role "event" }}an{{ else }}a{{ end }} <strong>{{ .Role }}</strong>.
+        Any given message should only be used in one role.
+    </p>
+</div>
+{{ end }}
+
 {{ if .HasPointerMismatch }}
 <div class="alert alert-warning" role="alert">
-    <h4 class="alert-heading">
+    <h4 id="pointer-mismatch" class="alert-heading">
         <i class="bi bi-exclamation-triangle-fill"></i>
         Pointer Usage Mismatch
     </h4>
     <p class="mb-0">
-        Some handlers use this message type directly, whereas others use a pointer.
-        All handlers should consistently use exactly the same type for a given message.
+        Some handlers use the <strong>{{ .Impl.Package }}.{{ .Impl.Name }}</strong>
+        type directly, whereas others use a pointer. Dogma does <strong>not</strong>
+        treat these types as equivalent. All handlers should use exactly the
+        same type for a given messsage.
     </p>
 </div>
 {{ end }}

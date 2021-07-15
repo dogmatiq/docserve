@@ -18,9 +18,9 @@ type listView struct {
 
 type messageSummary struct {
 	Impl               components.Type
-	Roles              string // comma separated
-	HasPointerMismatch bool
+	Role               string
 	HasRoleMismatch    bool
+	HasPointerMismatch bool
 	AppCount           int
 	ProducerCount      int
 	ConsumerCount      int
@@ -85,7 +85,8 @@ func (h *ListHandler) loadMessages(
 			t.name,
 			COALESCE(t.url, ''),
 			COALESCE(t.docs, ''),
-			STRING_AGG(DISTINCT m.role, ', ' ORDER BY m.role),
+			MODE() WITHIN GROUP (ORDER BY m.role) AS role,
+			COUNT(DISTINCT m.role) > 1 AS has_role_mismatch,
 			COUNT(DISTINCT m.is_pointer) > 1 AS has_pointer_mismatch,
 			COUNT(DISTINCT a.key),
 			COUNT(DISTINCT CASE WHEN m.is_produced THEN h.key END),
@@ -113,7 +114,8 @@ func (h *ListHandler) loadMessages(
 			&s.Impl.Name,
 			&s.Impl.URL,
 			&s.Impl.Docs,
-			&s.Roles,
+			&s.Role,
+			&s.HasRoleMismatch,
 			&s.HasPointerMismatch,
 			&s.AppCount,
 			&s.ProducerCount,
