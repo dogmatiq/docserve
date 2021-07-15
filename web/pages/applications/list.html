@@ -22,21 +22,21 @@
         >
             Implementation
         </span></th>
-        <th class="numeric-column"><span
+        <th class="numeric"><span
             title="The number of other applications that communicate with the application."
             data-bs-toggle="tooltip"
             data-bs-placement="top"
         >
             Relationships
         </span></th>
-        <th class="numeric-column"><span
+        <th class="numeric"><span
             title="The number of message handlers registered with the application."
             data-bs-toggle="tooltip"
             data-bs-placement="top"
         >
             Handlers
         </span></th>
-        <th class="numeric-column"><span
+        <th class="numeric"><span
             title="The number of messages produced or consumed by the handlers within the application."
             data-bs-toggle="tooltip"
             data-bs-placement="top"
@@ -49,9 +49,9 @@
             <tr>
                 <td><a href="/applications/{{ $a.Key }}">{{ $a.Name }}</a></td>
                 <td>{{ type $a.Impl }}</td>
-                <td class="numeric-column"><a href="/applications/{{ $a.Key }}#relationships">{{ $a.RelationshipCount }}</a></td>
-                <td class="numeric-column"><a href="/applications/{{ $a.Key }}#handlers">{{ $a.HandlerCount }}</a></td>
-                <td class="numeric-column"><a href="/applications/{{ $a.Key }}#messages">{{ $a.MessageCount }}</a></td>
+                <td class="numeric"><a href="/applications/{{ $a.Key }}#relationships">{{ $a.RelationshipCount }}</a></td>
+                <td class="numeric"><a href="/applications/{{ $a.Key }}#handlers">{{ $a.HandlerCount }}</a></td>
+                <td class="numeric"><a href="/applications/{{ $a.Key }}#messages">{{ $a.MessageCount }}</a></td>
             </tr>
         {{ end }}
     </tbody>

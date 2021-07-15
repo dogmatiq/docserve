@@ -83,7 +83,7 @@
             >
                 Implementation
             </span></th>
-            <th class="numeric-column"><span
+            <th class="numeric"><span
                 title="The number of handlers that produce the message."
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
@@ -96,7 +96,7 @@
                 <tr>
                     <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
                     <td>{{ type $m.Impl }}</td>
-                    <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ $m.HandlerCount }}</a></td>
+                    <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ $m.HandlerCount }}</a></td>
                 </tr>
             {{ end }}
         </tbody>
@@ -128,7 +128,7 @@
                 >
                     Implementation
                 </span></th>
-                <th class="numeric-column"><span
+                <th class="numeric"><span
                     title="The number of handlers that consume the message."
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
@@ -141,7 +141,7 @@
                     <tr>
                         <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
                         <td>{{ type $m.Impl }}</td>
-                        <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ $m.HandlerCount }}</a></td>
+                        <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ $m.HandlerCount }}</a></td>
                     </tr>
                 {{ end }}
             </tbody>

@@ -32,21 +32,21 @@
         >
             Implementation
         </span></th>
-        <th class="numeric-column"><span
+        <th class="numeric"><span
             title="The number of applications that use the message."
             data-bs-toggle="tooltip"
             data-bs-placement="top"
         >
             Applications
         </span></th>
-        <th class="numeric-column"><span
+        <th class="numeric"><span
             title="The number of handlers that produce the message."
             data-bs-toggle="tooltip"
             data-bs-placement="top"
         >
             Producers
         </span></th>
-        <th class="numeric-column"><span
+        <th class="numeric"><span
             title="The number of handlers that consume the message."
             data-bs-toggle="tooltip"
             data-bs-placement="top"
@@ -84,9 +84,9 @@
                     ></i></a>
                     {{ end }}
                 </td>
-                <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#applications">{{ .AppCount }}</a>
-                <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ $m.ProducerCount }}</a></td>
-                <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ $m.ConsumerCount }}</a></td>
+                <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#applications">{{ .AppCount }}</a>
+                <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ $m.ProducerCount }}</a></td>
+                <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ $m.ConsumerCount }}</a></td>
             </td>
         </tr>
         {{ end }}

@@ -37,14 +37,14 @@
         >
             Application
         </span></th>
-        <th class="numeric-column"><span
+        <th class="numeric"><span
             title="The number of messages consumed by the handler."
             data-bs-toggle="tooltip"
             data-bs-placement="top"
         >
             Consumed
         </span></th>
-        <th class="numeric-column"><span
+        <th class="numeric"><span
             title="The number of messages produced by the handler."
             data-bs-toggle="tooltip"
             data-bs-placement="top"
@@ -59,8 +59,8 @@
                 <td>{{ handlertype $h.Type }}</td>
                 <td>{{ type $h.Impl }}</td>
                 <td><a href="/applications/{{ $h.AppKey }}">{{ $h.AppName }}</a></td>
-                <td class="numeric-column"><a href="/handlers/{{ $h.Key }}#consumed">{{ $h.ConsumedMessageCount }}</a></td>
-                <td class="numeric-column"><a href="/handlers/{{ $h.Key }}#produced">{{ $h.ProducedMessageCount }}</a></td>
+                <td class="numeric"><a href="/handlers/{{ $h.Key }}#consumed">{{ $h.ConsumedMessageCount }}</a></td>
+                <td class="numeric"><a href="/handlers/{{ $h.Key }}#produced">{{ $h.ProducedMessageCount }}</a></td>
         </tr>
         {{ end }}
     </tbody>
