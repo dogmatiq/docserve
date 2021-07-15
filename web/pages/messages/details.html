@@ -88,6 +88,19 @@
     </div>
 </div>
 
+{{ if .HasPointerMismatch }}
+<div class="alert alert-warning" role="alert">
+    <h4 class="alert-heading">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Pointer Usage Mismatch
+    </h4>
+    <p class="mb-0">
+        Some handlers use this message type directly, whereas others use a pointer.
+        All handlers should consistently use exactly the same type for a given message.
+    </p>
+</div>
+{{ end }}
+
 <section class="mt-5">
     <h2 id="applications"><a href="#applications"><i class="bi bi-link"></i></a> Applications</h2>
 
@@ -140,7 +153,6 @@
             <strong>{{ .Impl.Name }}</strong> message.
         </p>
     {{ end }}
-
 </section>
 
 <section class="mt-5">

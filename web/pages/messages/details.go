@@ -12,8 +12,10 @@ import (
 )
 
 type detailsView struct {
-	Impl  components.Type
-	Roles string // comma separated
+	Impl               components.Type
+	Roles              string // comma separated
+	HasPointerMismatch bool
+	HasRoleMismatch    bool
 
 	Applications []applicationSummary
 	Producers    []handlerSummary
@@ -27,12 +29,13 @@ type applicationSummary struct {
 }
 
 type handlerSummary struct {
-	Key     string
-	Name    string
-	Type    configkit.HandlerType
-	Impl    components.Type
-	AppName string
-	AppKey  string
+	Key              string
+	Name             string
+	Type             configkit.HandlerType
+	Impl             components.Type
+	AppName          string
+	AppKey           string
+	MessageIsPointer bool
 }
 
 type DetailsHandler struct {
@@ -94,7 +97,8 @@ func (h *DetailsHandler) loadDetails(
 			t.name,
 			COALESCE(t.url, ''),
 			COALESCE(t.docs, ''),
-			STRING_AGG(DISTINCT m.role, ', ' ORDER BY m.role)
+			STRING_AGG(DISTINCT m.role, ', ' ORDER BY m.role),
+			COUNT(DISTINCT m.is_pointer) > 1 AS has_pointer_mismatch
 		FROM docserve.handler_message AS m
 		INNER JOIN docserve.type AS t
 		ON t.id = m.type_id
@@ -111,6 +115,7 @@ func (h *DetailsHandler) loadDetails(
 		&view.Impl.URL,
 		&view.Impl.Docs,
 		&view.Roles,
+		&view.HasPointerMismatch,
 	)
 }
 
@@ -188,6 +193,7 @@ func (h *DetailsHandler) loadHandlers(
 			COALESCE(t.docs, ''),
 			a.key,
 			a.name,
+			m.is_pointer,
 			m.is_produced,
 			m.is_consumed
 		FROM docserve.handler AS h
@@ -226,6 +232,7 @@ func (h *DetailsHandler) loadHandlers(
 			&s.Impl.Docs,
 			&s.AppKey,
 			&s.AppName,
+			&s.MessageIsPointer,
 			&isProduced,
 			&isConsumed,
 		); err != nil {
