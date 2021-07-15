@@ -59,7 +59,7 @@
             <tr>
                 <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
                 <td>
-                    {{ $m.Role }}
+                    {{ role $m.Role }}
 
                     {{ if $m.HasRoleMismatch }}
                     <a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#role-mismatch"><i

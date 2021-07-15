@@ -249,7 +249,7 @@
             {{ range $m := .Messages }}
                 <tr>
                     <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
-                    <td>{{ $m.Role }}</td>
+                    <td>{{ role $m.Role }}</td>
                     <td>{{ type $m.Impl }}</td>
                     <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ $m.ProducerCount }}</a></td>
                     <td class="numeric-column"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ $m.ConsumerCount }}</a></td>

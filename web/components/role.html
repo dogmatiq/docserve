@@ -1,0 +1,28 @@
+<span class="role-component">
+    {{ if eq . "command" }}
+        <span
+            title="A command message represents a request for the application to perform some action."
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            class="type-name"
+        >command</span>
+    {{ end }}
+
+    {{ if eq . "event" }}
+        <span
+            title="An event message encapsulates information about an action that the application has already performed."
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            class="type-name"
+        >event</span>
+    {{ end }}
+
+    {{ if eq . "timeout" }}
+        <span
+            title="A timeout message is used to schedule part of a process to occur at a specific time."
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            class="type-name"
+        >timeout</span>
+    {{ end }}
+</span>
