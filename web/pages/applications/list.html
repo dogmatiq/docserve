@@ -49,9 +49,9 @@
             <tr>
                 <td><a href="/applications/{{ $a.Key }}">{{ $a.Name }}</a></td>
                 <td>{{ type $a.Impl }}</td>
-                <td class="numeric"><a href="/applications/{{ $a.Key }}#relationships">{{ $a.RelationshipCount }}</a></td>
-                <td class="numeric"><a href="/applications/{{ $a.Key }}#handlers">{{ $a.HandlerCount }}</a></td>
-                <td class="numeric"><a href="/applications/{{ $a.Key }}#messages">{{ $a.MessageCount }}</a></td>
+                <td class="numeric"><a href="/applications/{{ $a.Key }}#relationships">{{ numeric $a.RelationshipCount }}</a></td>
+                <td class="numeric"><a href="/applications/{{ $a.Key }}#handlers">{{ numeric $a.HandlerCount }}</a></td>
+                <td class="numeric"><a href="/applications/{{ $a.Key }}#messages">{{ numeric $a.MessageCount }}</a></td>
             </tr>
         {{ end }}
     </tbody>

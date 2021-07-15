@@ -96,7 +96,7 @@
                 <tr>
                     <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
                     <td>{{ type $m.Impl }}</td>
-                    <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ $m.HandlerCount }}</a></td>
+                    <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ numeric $m.HandlerCount }}</a></td>
                 </tr>
             {{ end }}
         </tbody>
@@ -141,7 +141,7 @@
                     <tr>
                         <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
                         <td>{{ type $m.Impl }}</td>
-                        <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ $m.HandlerCount }}</a></td>
+                        <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ numeric $m.HandlerCount }}</a></td>
                     </tr>
                 {{ end }}
             </tbody>

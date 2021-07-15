@@ -84,9 +84,9 @@
                     ></i></a>
                     {{ end }}
                 </td>
-                <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#applications">{{ .AppCount }}</a>
-                <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ $m.ProducerCount }}</a></td>
-                <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ $m.ConsumerCount }}</a></td>
+                <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#applications">{{ numeric .AppCount }}</a>
+                <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ numeric $m.ProducerCount }}</a></td>
+                <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ numeric $m.ConsumerCount }}</a></td>
             </td>
         </tr>
         {{ end }}

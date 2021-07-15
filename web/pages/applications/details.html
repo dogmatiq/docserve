@@ -121,8 +121,8 @@
                             <a href="/applications/{{ $r.Key }}">{{ $r.Name }}</a>
                         </td>
                         <td>{{ type $r.Impl }}</td>
-                        <td class="numeric">{{ $r.UpstreamMessageCount }}</td>
-                        <td class="numeric">{{ $r.DownstreamMessageCount }}</td>
+                        <td class="numeric">{{ numeric $r.UpstreamMessageCount }}</td>
+                        <td class="numeric">{{ numeric $r.DownstreamMessageCount }}</td>
                     </tr>
                 {{ end }}
             </tbody>
@@ -188,8 +188,8 @@
                     <td><a href="/handlers/{{ $h.Key }}">{{ $h.Name }}</a></td>
                     <td>{{ handlertype $h.Type }}</td>
                     <td>{{ type $h.Impl }}</td>
-                    <td class="numeric"><a href="/handlers/{{ $h.Key }}#consumed">{{ $h.ConsumedMessageCount }}</a></td>
-                    <td class="numeric"><a href="/handlers/{{ $h.Key }}#produced">{{ $h.ProducedMessageCount }}</a></td>
+                    <td class="numeric"><a href="/handlers/{{ $h.Key }}#consumed">{{ numeric $h.ConsumedMessageCount }}</a></td>
+                    <td class="numeric"><a href="/handlers/{{ $h.Key }}#produced">{{ numeric $h.ProducedMessageCount }}</a></td>
                 </tr>
             {{ end }}
         </tbody>
@@ -250,8 +250,8 @@
                     <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
                     <td>{{ role $m.Role }}</td>
                     <td>{{ type $m.Impl }}</td>
-                    <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ $m.ProducerCount }}</a></td>
-                    <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ $m.ConsumerCount }}</a></td>
+                    <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ numeric $m.ProducerCount }}</a></td>
+                    <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ numeric $m.ConsumerCount }}</a></td>
                 </tr>
             {{ end }}
         </tbody>

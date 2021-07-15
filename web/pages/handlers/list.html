@@ -59,8 +59,8 @@
                 <td>{{ handlertype $h.Type }}</td>
                 <td>{{ type $h.Impl }}</td>
                 <td><a href="/applications/{{ $h.AppKey }}">{{ $h.AppName }}</a></td>
-                <td class="numeric"><a href="/handlers/{{ $h.Key }}#consumed">{{ $h.ConsumedMessageCount }}</a></td>
-                <td class="numeric"><a href="/handlers/{{ $h.Key }}#produced">{{ $h.ProducedMessageCount }}</a></td>
+                <td class="numeric"><a href="/handlers/{{ $h.Key }}#consumed">{{ numeric $h.ConsumedMessageCount }}</a></td>
+                <td class="numeric"><a href="/handlers/{{ $h.Key }}#produced">{{ numeric $h.ProducedMessageCount }}</a></td>
         </tr>
         {{ end }}
     </tbody>
