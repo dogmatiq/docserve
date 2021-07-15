@@ -17,14 +17,14 @@ type detailsView struct {
 	Name string
 	Impl components.Type
 
-	Dependencies []dependency
-	Handlers     []handlerSummary
-	Messages     []messageSummary
+	Relationships []relationship
+	Handlers      []handlerSummary
+	Messages      []messageSummary
 }
 
-// dependency contains a summary of information about an application that is
+// relationship contains a summary of information about an application that is
 // related to the application being displayed.
-type dependency struct {
+type relationship struct {
 	Key                    string
 	Name                   string
 	Impl                   components.Type
@@ -86,7 +86,7 @@ func (h *DetailsHandler) View(ctx *gin.Context) (string, interface{}, error) {
 		return "", nil, err
 	}
 
-	if err := h.loadDependencies(ctx, &view, appKey); err != nil {
+	if err := h.loadRelationships(ctx, &view, appKey); err != nil {
 		return "", nil, err
 	}
 
@@ -134,7 +134,7 @@ func (h *DetailsHandler) loadDetails(
 	)
 }
 
-func (h *DetailsHandler) loadDependencies(
+func (h *DetailsHandler) loadRelationships(
 	ctx context.Context,
 	view *detailsView,
 	appKey string,
@@ -182,26 +182,26 @@ func (h *DetailsHandler) loadDependencies(
 	defer rows.Close()
 
 	for rows.Next() {
-		var d dependency
+		var r relationship
 
 		if err := rows.Scan(
-			&d.Key,
-			&d.Name,
-			&d.Impl.Package,
-			&d.Impl.Name,
-			&d.Impl.IsPointer,
-			&d.Impl.URL,
-			&d.Impl.Docs,
-			&d.HasPointerMismatch,
-			&d.HasRoleMismatch,
-			&d.UpstreamMessageCount,
-			&d.DownstreamMessageCount,
-			&d.TotalMessageCount,
+			&r.Key,
+			&r.Name,
+			&r.Impl.Package,
+			&r.Impl.Name,
+			&r.Impl.IsPointer,
+			&r.Impl.URL,
+			&r.Impl.Docs,
+			&r.HasPointerMismatch,
+			&r.HasRoleMismatch,
+			&r.UpstreamMessageCount,
+			&r.DownstreamMessageCount,
+			&r.TotalMessageCount,
 		); err != nil {
 			return err
 		}
 
-		view.Dependencies = append(view.Dependencies, d)
+		view.Relationships = append(view.Relationships, r)
 	}
 
 	return rows.Err()

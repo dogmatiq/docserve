@@ -44,11 +44,11 @@
 </div>
 
 <section class="mt-5">
-    <h2 id="dependencies"><a href="#dependencies"><i class="bi bi-link"></i></a> Dependencies</h2>
+    <h2 id="relationships"><a href="#relationships"><i class="bi bi-link"></i></a> Application Relationships</h2>
 
-    {{ if .Dependencies }}
+    {{ if .Relationships }}
         <p class="my-3">
-            Analysis discovered <strong>{{ len .Dependencies }}</strong> other
+            Analysis discovered <strong>{{ len .Relationships }}</strong> other
             application(s) that communicate with the <strong>{{ .Name }}</strong>
             application.
         </p>
@@ -56,7 +56,7 @@
         <table class="table table-striped table-hover">
             <thead>
                 <th><span
-                    title="Describes the communication paths between the <strong>{{ .Name }}</strong> application and the dependency."
+                    title="Describes the communication paths between the related application and the <strong>{{ .Name }}</strong> application."
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
                     data-bs-html="true"
@@ -71,7 +71,7 @@
                     Implementation
                 </span></th>
                 <th class="numeric-column"><span
-                    title="The number of messages used for communication between the dependency and the <strong>{{ .Name }}</strong> application."
+                    title="The number of messages used for communication between the related application and the <strong>{{ .Name }}</strong> application."
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
                     data-bs-html="true"
@@ -79,7 +79,7 @@
                     Messages
                 </span></th>
                 <th class="numeric-column"><span
-                    title="The number of messages produced by the dependency that are consumed by the <strong>{{ .Name }}</strong> application."
+                    title="The number of messages produced by the related application that are consumed by the <strong>{{ .Name }}</strong> application."
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
                     data-bs-html="true"
@@ -87,7 +87,7 @@
                     Upstream
                 </span></th>
                 <th class="numeric-column"><span
-                    title="The number of messages produced by the <strong>{{ .Name }}</strong> application that are consumed by the dependency."
+                    title="The number of messages produced by the <strong>{{ .Name }}</strong> application that are consumed by the related application."
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
                     data-bs-html="true"
@@ -96,29 +96,29 @@
                 </span></th>
             </thead>
             <tbody>
-                {{ range $d := .Dependencies }}
+                {{ range $r := .Relationships }}
                     <tr>
                         <td>
                             {{ $.Name }}
-                            {{ if and $d.UpstreamMessageCount $d.DownstreamMessageCount }}
+                            {{ if and $r.UpstreamMessageCount $r.DownstreamMessageCount }}
                                 <i
-                                    title="The <strong>{{ $.Name }}</strong> and {{ $d.Name }} applications communicate bidirectionally using <strong>{{ $d.TotalMessageCount }}</strong> message(s)."
+                                    title="The <strong>{{ $.Name }}</strong> and {{ $r.Name }} applications communicate bidirectionally using <strong>{{ $r.TotalMessageCount }}</strong> message(s)."
                                     data-bs-toggle="tooltip"
                                     data-bs-placement="top"
                                     data-bs-html="true"
                                     class="bi bi-arrow-left-right"></i>
                             {{ else }}
-                                {{ if $d.UpstreamMessageCount }}
+                                {{ if $r.UpstreamMessageCount }}
                                 <i
-                                    title="The <strong>{{ $.Name }}</strong> application consumes <strong>{{ $d.UpstreamMessageCount }}</strong> message(s) from the <strong>{{ $d.Name }}</strong> application."
+                                    title="The <strong>{{ $.Name }}</strong> application consumes <strong>{{ $r.UpstreamMessageCount }}</strong> message(s) from the <strong>{{ $r.Name }}</strong> application."
                                     data-bs-toggle="tooltip"
                                     data-bs-placement="top"
                                     data-bs-html="true"
                                     class="bi bi-arrow-left"></i>
                                 {{ end }}
-                                {{ if $d.DownstreamMessageCount }}
+                                {{ if $r.DownstreamMessageCount }}
                                 <i
-                                    title="The <strong>{{ $d.Name }}</strong> application consumes <strong>{{ $d.DownstreamMessageCount }}</strong> message(s) from the <strong>{{ $.Name }}</strong> application."
+                                    title="The <strong>{{ $r.Name }}</strong> application consumes <strong>{{ $r.DownstreamMessageCount }}</strong> message(s) from the <strong>{{ $.Name }}</strong> application."
                                     data-bs-toggle="tooltip"
                                     data-bs-placement="top"
                                     data-bs-html="true"
@@ -126,12 +126,12 @@
                                 {{ end }}
                             {{ end }}
 
-                            <a href="/applications/{{ $d.Key }}">{{ $d.Name }}</a>
+                            <a href="/applications/{{ $r.Key }}">{{ $r.Name }}</a>
                         </td>
-                        <td>{{ type $d.Impl }}</td>
-                        <td class="numeric-column">{{ $d.TotalMessageCount }}</td>
-                        <td class="numeric-column">{{ $d.UpstreamMessageCount }}</td>
-                        <td class="numeric-column">{{ $d.DownstreamMessageCount }}</td>
+                        <td>{{ type $r.Impl }}</td>
+                        <td class="numeric-column">{{ $r.TotalMessageCount }}</td>
+                        <td class="numeric-column">{{ $r.UpstreamMessageCount }}</td>
+                        <td class="numeric-column">{{ $r.DownstreamMessageCount }}</td>
                     </tr>
                 {{ end }}
             </tbody>

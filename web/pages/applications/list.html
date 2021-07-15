@@ -27,7 +27,7 @@
             data-bs-toggle="tooltip"
             data-bs-placement="top"
         >
-            Dependencies
+            Relationships
         </span></th>
         <th class="numeric-column"><span
             title="The number of message handlers registered with the application."
@@ -49,7 +49,7 @@
             <tr>
                 <td><a href="/applications/{{ $a.Key }}">{{ $a.Name }}</a></td>
                 <td>{{ type $a.Impl }}</td>
-                <td class="numeric-column"><a href="/applications/{{ $a.Key }}#dependencies">{{ $a.DependencyCount }}</a></td>
+                <td class="numeric-column"><a href="/applications/{{ $a.Key }}#relationships">{{ $a.RelationshipCount }}</a></td>
                 <td class="numeric-column"><a href="/applications/{{ $a.Key }}#handlers">{{ $a.HandlerCount }}</a></td>
                 <td class="numeric-column"><a href="/applications/{{ $a.Key }}#messages">{{ $a.MessageCount }}</a></td>
             </tr>
