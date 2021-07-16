@@ -23,10 +23,10 @@
     <div class="col">{{ block "app_card" .Right }}{{ end }}</div>
 </div>
 
-<section class="mt-5">
-    <h2 id="upstream"><a href="#upstream"><i class="bi bi-link"></i></a> Upstream Messages</h2>
+{{ if .UpstreamMessages }}
+    <section class="mt-5">
+        <h2 id="upstream"><a href="#upstream"><i class="bi bi-link"></i></a> Upstream Messages</h2>
 
-    {{ if .UpstreamMessages }}
         <p class="my-3">
             Analysis discovered <strong>{{ len .UpstreamMessages }}</strong>
             message(s) that are produced by the <strong>{{ .Right.Name }}</strong>
@@ -35,19 +35,13 @@
         </p>
 
         {{ block "message_table" .UpstreamMessages }}{{ end }}
-    {{ else }}
-        <p class="my-3">
-            Analysis did not discover any messages that are produced by the <strong>{{ .Right.Name }}</strong>
-            application and consumed by the <strong>{{ .Left.Name }}</strong>
-            application.
-        </p>
-    {{ end }}
-</section>
+    </section>
+{{ end }}
 
-<section class="mt-5">
-    <h2 id="downstream"><a href="#downstream"><i class="bi bi-link"></i></a> Downstream Messages</h2>
+{{ if .DownstreamMessages }}
+    <section class="mt-5">
+        <h2 id="downstream"><a href="#downstream"><i class="bi bi-link"></i></a> Downstream Messages</h2>
 
-    {{ if .DownstreamMessages }}
         <p class="my-3">
             Analysis discovered <strong>{{ len .DownstreamMessages }}</strong>
             message(s) that are produced by the <strong>{{ .Left.Name }}</strong>
@@ -56,14 +50,9 @@
         </p>
 
         {{ block "message_table" .DownstreamMessages }}{{ end }}
-    {{ else }}
-        <p class="my-3">
-            Analysis did not discover any messages that are produced by the <strong>{{ .Left.Name }}</strong>
-            application and consumed by the <strong>{{ .Right.Name }}</strong>
-            application.
-        </p>
-    {{ end }}
-</section>
+    </section>
+{{ end }}
+
 {{ end }}
 
 {{ define "app_card" }}
