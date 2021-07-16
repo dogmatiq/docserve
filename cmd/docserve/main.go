@@ -17,6 +17,9 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// version is the current version, set automatically by the makefiles.
+var version string
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
 

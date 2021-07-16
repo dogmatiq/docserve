@@ -12,19 +12,19 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func handleOAuthCallback(c *oauth2.Config) gin.HandlerFunc {
+func handleOAuthCallback(version string, c *oauth2.Config) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := c.Exchange(ctx, ctx.Query("code"))
 		if err != nil {
 			fmt.Println("unable to perform oauth exchange:", err) // TODO
-			renderError(ctx, http.StatusUnauthorized)
+			renderError(ctx, version, http.StatusUnauthorized)
 			return
 		}
 
 		data, err := json.Marshal(token)
 		if err != nil {
 			fmt.Println("unable to marshal oauth token:", err) // TODO
-			renderError(ctx, http.StatusInternalServerError)
+			renderError(ctx, version, http.StatusInternalServerError)
 			ctx.Abort()
 		}
 
@@ -42,7 +42,7 @@ func handleOAuthCallback(c *oauth2.Config) gin.HandlerFunc {
 	}
 }
 
-func requireOAuth(c *githubx.Connector) gin.HandlerFunc {
+func requireOAuth(version string, c *githubx.Connector) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		data, err := ctx.Cookie("token")
 		if err != nil {
@@ -59,7 +59,7 @@ func requireOAuth(c *githubx.Connector) gin.HandlerFunc {
 		client, err := c.UserClient(ctx, token)
 		if err != nil {
 			fmt.Println("unable to create user client:", err) // TODO
-			renderError(ctx, http.StatusInternalServerError)
+			renderError(ctx, version, http.StatusInternalServerError)
 			ctx.Abort()
 		}
 
@@ -71,7 +71,7 @@ func requireOAuth(c *githubx.Connector) gin.HandlerFunc {
 			}
 
 			fmt.Println("unable to query connected user:", err) // TODO
-			renderError(ctx, http.StatusInternalServerError)
+			renderError(ctx, version, http.StatusInternalServerError)
 			ctx.Abort()
 			return
 		}

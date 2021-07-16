@@ -18,6 +18,7 @@ type Handler interface {
 }
 
 func NewRouter(
+	version string,
 	c *githubx.Connector,
 	handlers ...Handler,
 ) http.Handler {
@@ -26,12 +27,23 @@ func NewRouter(
 
 	router.Use(gin.Recovery())
 
-	router.GET(
-		"/github/auth",
-		handleOAuthCallback(c.OAuthConfig),
+	assets := http.FileServer(
+		http.FS(assetsFS),
 	)
 
-	auth := requireOAuth(c)
+	assetsHandler := func(ctx *gin.Context) {
+		assets.ServeHTTP(ctx.Writer, ctx.Request)
+	}
+
+	router.GET("/assets/*path", assetsHandler)
+	router.HEAD("/assets/*path", assetsHandler)
+
+	router.GET(
+		"/github/auth",
+		handleOAuthCallback(version, c.OAuthConfig),
+	)
+
+	auth := requireOAuth(version, c)
 
 	for _, h := range handlers {
 		method, path := h.Route()
@@ -40,13 +52,13 @@ func NewRouter(
 			method,
 			path,
 			auth,
-			adaptHandler(h),
+			adaptHandler(version, h),
 		)
 	}
 
 	router.NoRoute(
 		func(ctx *gin.Context) {
-			renderError(ctx, http.StatusNotFound)
+			renderError(ctx, version, http.StatusNotFound)
 		},
 	)
 
@@ -57,15 +69,16 @@ type templateContext struct {
 	Title          string
 	ActiveMenuItem components.MenuItem
 	User           *github.User
+	Version        string
 	View           interface{}
 }
 
-func adaptHandler(h Handler) gin.HandlerFunc {
+func adaptHandler(version string, h Handler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		title, view, err := h.View(ctx)
 		if err != nil {
 			fmt.Println("unable to generate view:", err) // TODO
-			renderError(ctx, http.StatusInternalServerError)
+			renderError(ctx, version, http.StatusInternalServerError)
 			return
 		}
 
@@ -77,6 +90,7 @@ func adaptHandler(h Handler) gin.HandlerFunc {
 
 			renderError(
 				ctx,
+				version,
 				ctx.Writer.Status(),
 			)
 
@@ -92,13 +106,14 @@ func adaptHandler(h Handler) gin.HandlerFunc {
 				Title:          title,
 				User:           u,
 				ActiveMenuItem: h.ActiveMenuItem(),
+				Version:        version,
 				View:           view,
 			},
 		)
 	}
 }
 
-func renderError(ctx *gin.Context, code int) {
+func renderError(ctx *gin.Context, version string, code int) {
 	view := struct {
 		StatusText string
 		StatusCode int
@@ -122,9 +137,10 @@ func renderError(ctx *gin.Context, code int) {
 	renderer := pageTemplates.Instance(
 		"error.html",
 		templateContext{
-			Title: http.StatusText(code),
-			User:  u,
-			View:  view,
+			Title:   http.StatusText(code),
+			User:    u,
+			Version: version,
+			View:    view,
 		},
 	)
 

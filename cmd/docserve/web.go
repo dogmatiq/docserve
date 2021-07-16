@@ -17,6 +17,7 @@ func init() {
 		db *sql.DB,
 	) http.Handler {
 		return web.NewRouter(
+			version,
 			c,
 			&applications.ListHandler{DB: db},
 			&applications.DetailsHandler{DB: db},
