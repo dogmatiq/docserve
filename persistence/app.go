@@ -1,0 +1,251 @@
+package persistence
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+
+	"github.com/dogmatiq/configkit"
+	"github.com/google/go-github/v35/github"
+)
+
+func syncApplications(
+	ctx context.Context,
+	tx *sql.Tx,
+	r *github.Repository,
+	apps []configkit.Application,
+) error {
+	if _, err := tx.ExecContext(
+		ctx,
+		`UPDATE docserve.application SET
+			is_historical = TRUE
+		WHERE repository_id = $1`,
+		r.GetID(),
+	); err != nil {
+		return fmt.Errorf("unable to mark applications as historical: %w", err)
+	}
+
+	for _, a := range apps {
+		if err := syncApplication(ctx, tx, r, a); err != nil {
+			return err
+		}
+	}
+
+	if _, err := tx.ExecContext(
+		ctx,
+		`DELETE FROM docserve.application
+		WHERE repository_id = $1
+		AND is_historical`,
+		r.GetID(),
+	); err != nil {
+		return fmt.Errorf("unable delete historical applications: %w", err)
+	}
+
+	return nil
+}
+
+func syncApplication(
+	ctx context.Context,
+	tx *sql.Tx,
+	r *github.Repository,
+	a configkit.Application,
+) error {
+	typeID, isPointer, err := syncTypeRef(ctx, tx, a.TypeName())
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.ExecContext(
+		ctx,
+		`INSERT INTO docserve.application (
+			key,
+			name,
+			type_id,
+			is_pointer,
+			repository_id
+		) VALUES (
+			$1, $2, $3, $4, $5
+		) ON CONFLICT (key) DO UPDATE SET
+			name = excluded.name,
+			type_id = excluded.type_id,
+			is_pointer = excluded.is_pointer,
+			repository_id = excluded.repository_id,
+			is_historical = FALSE`,
+		a.Identity().Key,
+		a.Identity().Name,
+		typeID,
+		isPointer,
+		r.GetID(),
+	); err != nil {
+		return fmt.Errorf("unable to sync application: %w", err)
+	}
+
+	return syncHandlers(ctx, tx, a)
+}
+
+func syncHandlers(
+	ctx context.Context,
+	tx *sql.Tx,
+	a configkit.Application,
+) error {
+	if _, err := tx.ExecContext(
+		ctx,
+		`UPDATE docserve.handler SET
+			is_historical = TRUE
+		WHERE application_key = $1`,
+		a.Identity().Key,
+	); err != nil {
+		return fmt.Errorf("unable to mark handlers as historical: %w", err)
+	}
+
+	for _, h := range a.Handlers() {
+		if err := syncHandler(
+			ctx,
+			tx,
+			a.Identity().Key,
+			h,
+		); err != nil {
+			return err
+		}
+	}
+
+	if _, err := tx.ExecContext(
+		ctx,
+		`DELETE FROM docserve.handler
+		WHERE application_key = $1
+		AND is_historical`,
+		a.Identity().Key,
+	); err != nil {
+		return fmt.Errorf("unable to delete historical handlers: %w", err)
+	}
+
+	return nil
+}
+
+func syncHandler(
+	ctx context.Context,
+	tx *sql.Tx,
+	appKey string,
+	h configkit.Handler,
+) error {
+	typeID, isPointer, err := syncTypeRef(ctx, tx, h.TypeName())
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.ExecContext(
+		ctx,
+		`INSERT INTO docserve.handler (
+			key,
+			name,
+			application_key,
+			handler_type,
+			type_id,
+			is_pointer
+		) VALUES (
+			$1, $2, $3, $4, $5, $6
+		) ON CONFLICT (key) DO UPDATE SET
+			name = excluded.name,
+			application_key = excluded.application_key,
+			handler_type = excluded.handler_type,
+			type_id = excluded.type_id,
+			is_pointer = excluded.is_pointer,
+			is_historical = FALSE`,
+		h.Identity().Key,
+		h.Identity().Name,
+		appKey,
+		h.HandlerType(),
+		typeID,
+		isPointer,
+	); err != nil {
+		return fmt.Errorf("unable to sync handler: %w", err)
+	}
+
+	return syncMessages(ctx, tx, h)
+}
+
+func syncMessages(
+	ctx context.Context,
+	tx *sql.Tx,
+	h configkit.Handler,
+) error {
+	if _, err := tx.ExecContext(
+		ctx,
+		`UPDATE docserve.handler_message SET
+			is_historical = TRUE
+		WHERE handler_key = $1`,
+		h.Identity().Key,
+	); err != nil {
+		return fmt.Errorf("unable to mark handler messages as historical: %w", err)
+	}
+
+	for n, r := range h.MessageNames().Produced {
+		typeID, isPointer, err := syncTypeRef(ctx, tx, n.String())
+		if err != nil {
+			return err
+		}
+
+		if _, err := tx.ExecContext(
+			ctx,
+			`INSERT INTO docserve.handler_message (
+				handler_key,
+				type_id,
+				is_pointer,
+				role,
+				is_produced
+			) VALUES (
+				$1, $2, $3, $4, TRUE
+			) ON CONFLICT (handler_key, type_id, is_pointer) DO UPDATE SET
+				role = excluded.role,
+				is_produced = excluded.is_produced,
+				is_historical = FALSE`,
+			h.Identity().Key,
+			typeID,
+			isPointer,
+			r,
+		); err != nil {
+			return fmt.Errorf("unable to sync message: %w", err)
+		}
+	}
+
+	for n, r := range h.MessageNames().Consumed {
+		typeID, isPointer, err := syncTypeRef(ctx, tx, n.String())
+		if err != nil {
+			return err
+		}
+
+		if _, err := tx.ExecContext(
+			ctx,
+			`INSERT INTO docserve.handler_message (
+				handler_key,
+				type_id,
+				is_pointer,
+				role,
+				is_consumed
+			) VALUES (
+				$1, $2, $3, $4, TRUE
+			) ON CONFLICT (handler_key, type_id, is_pointer) DO UPDATE SET
+				role = excluded.role,
+				is_consumed = excluded.is_consumed,
+				is_historical = FALSE`,
+			h.Identity().Key,
+			typeID,
+			isPointer,
+			r,
+		); err != nil {
+			return fmt.Errorf("unable to sync message: %w", err)
+		}
+	}
+
+	if _, err := tx.ExecContext(
+		ctx,
+		`DELETE FROM docserve.handler_message
+		WHERE handler_key = $1
+		AND is_historical`,
+		h.Identity().Key,
+	); err != nil {
+		return fmt.Errorf("unable to remove historical messages: %w", err)
+	}
+
+	return nil
+}
