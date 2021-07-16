@@ -3,35 +3,10 @@ CREATE SCHEMA IF NOT EXISTS docserve;
 CREATE TABLE IF NOT EXISTS docserve.repository (
     id          INT PRIMARY KEY,
     full_name   TEXT NOT NULL,
-    commit_hash TEXT NOT NULL
+    commit_hash TEXT NOT NULL,
+    url         TEXT NOT NULL,
+    description TEXT NOT NULL
 );
-
--- CREATE TABLE IF NOT EXISTS docserve.package (
---     id            SERIAL PRIMARY KEY,
---     repository_id INT,
---     path          TEXT NOT NULL UNIQUE,
---     name          TEXT NOT NULL
-
---     CONSTRAINT repository_fkey
---         FOREIGN KEY (repository_id)
---         REFERENCES docserve.repository (id)
---         ON DELETE SET NULL
--- );
-
--- CREATE TABLE IF NOT EXISTS docserve.type (
---     id            SERIAL PRIMARY KEY,
---     package_id    INT NOT NULL,
---     name          TEXT NOT NULL,
---     url           TEXT,
---     comments      TEXT,
-
---     UNIQUE (package_id, name),
-
---     CONSTRAINT package_fkey
---         FOREIGN KEY (package_id)
---         REFERENCES docserve.package (id)
---         ON DELETE SET NULL
--- );
 
 CREATE TABLE IF NOT EXISTS docserve.type (
     id            SERIAL PRIMARY KEY,

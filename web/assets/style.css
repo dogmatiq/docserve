@@ -21,6 +21,10 @@ dl :last-child {
     margin: 0;
 }
 
+.type-component {
+    white-space: nowrap;
+}
+
 .type-component .bi {
     color: rgb(108, 117, 125);
 }

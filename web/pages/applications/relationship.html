@@ -1,0 +1,182 @@
+{{ define "content" }}
+<h1>Application Relationship &mdash; {{ .Left.Name }} &hellip; {{ .Right.Name }}</h1>
+
+<div class="row align-items-center my-3">
+    <div class="col">{{ block "app_card" .Left }}{{ end }}</div>
+    <div class="col col-1" style="font-size: 5rem;">
+        <a href="/relationships/{{ .Right.Key }}...{{ .Left.Key }}">
+            {{ if .UpstreamMessages }}
+                {{ if .DownstreamMessages }}
+                <i class="bi bi-arrow-left-right"></i>
+                {{ else }}
+                <i class="bi bi-arrow-left"></i>
+                {{ end }}
+            {{ else }}
+                {{ if .DownstreamMessages }}
+                <i class="bi bi-arrow-right"></i>
+                {{ else }}
+                <i class="bi bi-arrow-cross"></i>
+                {{ end }}
+            {{ end }}
+        </a>
+    </div>
+    <div class="col">{{ block "app_card" .Right }}{{ end }}</div>
+</div>
+
+<section class="mt-5">
+    <h2 id="upstream"><a href="#upstream"><i class="bi bi-link"></i></a> Upstream Messages</h2>
+
+    {{ if .UpstreamMessages }}
+        <p class="my-3">
+            Analysis discovered <strong>{{ len .UpstreamMessages }}</strong>
+            message(s) that are produced by the <strong>{{ .Right.Name }}</strong>
+            application and consumed by the <strong>{{ .Left.Name }}</strong>
+            application.
+        </p>
+
+        {{ block "message_table" .UpstreamMessages }}{{ end }}
+    {{ else }}
+        <p class="my-3">
+            Analysis did not discover any messages that are produced by the <strong>{{ .Right.Name }}</strong>
+            application and consumed by the <strong>{{ .Left.Name }}</strong>
+            application.
+        </p>
+    {{ end }}
+</section>
+
+<section class="mt-5">
+    <h2 id="downstream"><a href="#downstream"><i class="bi bi-link"></i></a> Downstream Messages</h2>
+
+    {{ if .DownstreamMessages }}
+        <p class="my-3">
+            Analysis discovered <strong>{{ len .DownstreamMessages }}</strong>
+            message(s) that are produced by the <strong>{{ .Left.Name }}</strong>
+            application and consumed by the <strong>{{ .Right.Name }}</strong>
+            application.
+        </p>
+
+        {{ block "message_table" .DownstreamMessages }}{{ end }}
+    {{ else }}
+        <p class="my-3">
+            Analysis did not discover any messages that are produced by the <strong>{{ .Left.Name }}</strong>
+            application and consumed by the <strong>{{ .Right.Name }}</strong>
+            application.
+        </p>
+    {{ end }}
+</section>
+{{ end }}
+
+{{ define "app_card" }}
+<div class="card">
+    <div class="card-body">
+        <dl>
+            <dt><span
+                title="The human-readable name given to the application."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+            >
+                Application Name
+            </span></dt>
+            <dd><a href="/applications/{{ .Key }}">{{ .Name }}</a></dd>
+            <dt><span
+                title="The name of the Go type that implements the application interface."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+            >
+                Implementation
+            </span></dt>
+            <dd>{{ type .Impl }}</dd>
+
+            {{ if .Impl.Docs }}
+                <dt><span
+                    title="The documentation comments from the source code."
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                >
+                    Documentation
+                </span></dt>
+                <dd>{{ .Impl.Docs }}</dd>
+            {{ end }}
+        </dl>
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "message_table" }}
+    <table class="table table-striped table-hover">
+        <thead>
+            <th><span
+                title="The short name of the message."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+            >
+                Name
+            </span></th>
+            <th><span
+                title="The role that the message plays within the application."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-bs-html="true"
+            >
+                Role
+            </span></th>
+            <th><span
+                title="The name of the Go type that defines the message."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+            >
+                Implementation
+            </span></th>
+            <th class="numeric"><span
+                title="The number of handlers that produce the message."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+            >
+                Producers
+            </span></th>
+            <th class="numeric"><span
+                title="The number of handlers that consume the message."
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+            >
+                Consumers
+            </span></th>
+        </thead>
+        <tbody>
+            {{ range $m := . }}
+                <tr>
+                    <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
+                    <td>
+                        {{ role $m.Role }}
+
+                        {{ if $m.HasRoleMismatch }}
+                        <a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#role-mismatch"><i
+                            title="Not all handlers agree that <strong>{{ $m.Impl.Name }}</strong> is {{ if eq $m.Role "event" }}an{{ else }}a{{ end }} <strong>{{ $m.Role }}</strong>."
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            data-bs-html="true"
+                            class="bi bi-exclamation-triangle-fill"
+                        ></i></a>
+                        {{ end }}
+                    </td>
+                    <td>
+                        {{ type $m.Impl }}
+
+                        {{ if $m.HasPointerMismatch }}
+                        <a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#pointer-mismatch"><i
+                            title="Some handlers use this message type directly, whereas others use a pointer."
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            data-bs-html="true"
+                            class="bi bi-exclamation-triangle-fill"
+                        ></i></a>
+                        {{ end }}
+                    </td>
+                    <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ numeric $m.ProducerCount }}</a></td>
+                    <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ numeric $m.ConsumerCount }}</a></td>
+                </tr>
+            {{ end }}
+        </tbody>
+    </table>
+{{ end }}

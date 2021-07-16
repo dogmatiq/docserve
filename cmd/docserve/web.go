@@ -21,6 +21,7 @@ func init() {
 			c,
 			&applications.ListHandler{DB: db},
 			&applications.DetailsHandler{DB: db},
+			&applications.RelationshipHandler{DB: db},
 			&handlers.ListHandler{DB: db},
 			&handlers.DetailsHandler{DB: db},
 			&messages.ListHandler{DB: db},

@@ -55,13 +55,21 @@
 
         <table class="table table-striped table-hover">
             <thead>
-                <th><span
-                    title="Describes the communication paths between the related application and the <strong>{{ .Name }}</strong> application."
+                <th colspan="2"><span
+                    title="The direction of communication between the related application and the <strong>{{ .Name }}</strong> application."
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
                     data-bs-html="true"
                 >
-                    Relationship
+                    Dir.
+                </span></th>
+                <th><span
+                    title="The name of the application that is related to the <strong>{{ .Name }}</strong> application."
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-html="true"
+                >
+                    Application
                 </span></th>
                 <th><span
                     title="The name of the Go type that implements the application interface."
@@ -90,8 +98,9 @@
             <tbody>
                 {{ range $r := .Relationships }}
                     <tr>
-                        <td>
-                            {{ $.Name }}
+                        <td style="width: 1px; text-align: right;">{{ $.Name }}</td>
+                        <td style="width: 1px; text-align: center;">
+                            <a href="/relationships/{{ $.Key }}...{{ $r.Key }}">
                             {{ if and $r.UpstreamMessageCount $r.DownstreamMessageCount }}
                                 <i
                                     title="The <strong>{{ $.Name }}</strong> and {{ $r.Name }} applications communicate bidirectionally using <strong>{{ $r.TotalMessageCount }}</strong> message(s)."
@@ -117,12 +126,12 @@
                                     class="bi bi-arrow-right"></i>
                                 {{ end }}
                             {{ end }}
-
-                            <a href="/applications/{{ $r.Key }}">{{ $r.Name }}</a>
+                            </a>
                         </td>
+                        <td><a href="/applications/{{ $r.Key }}">{{ $r.Name }}</a></td>
                         <td>{{ type $r.Impl }}</td>
-                        <td class="numeric">{{ numeric $r.UpstreamMessageCount }}</td>
-                        <td class="numeric">{{ numeric $r.DownstreamMessageCount }}</td>
+                        <td class="numeric"><a href="/relationships/{{ $.Key }}...{{ $r.Key }}#upstream">{{ numeric $r.UpstreamMessageCount }}</a></td>
+                        <td class="numeric"><a href="/relationships/{{ $.Key }}...{{ $r.Key }}#downstream">{{ numeric $r.DownstreamMessageCount }}</a></td>
                     </tr>
                 {{ end }}
             </tbody>

@@ -63,7 +63,7 @@
 
                     {{ if $m.HasRoleMismatch }}
                     <a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#role-mismatch"><i
-                        title="Not all handlers agree that <strong>{{ .Impl.Name }}</strong> is {{ if eq .Role "event" }}an{{ else }}a{{ end }} <strong>{{ .Role }}</strong>."
+                        title="Not all handlers agree that <strong>{{ $m.Impl.Name }}</strong> is {{ if eq $m.Role "event" }}an{{ else }}a{{ end }} <strong>{{ $m.Role }}</strong>."
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
                         data-bs-html="true"

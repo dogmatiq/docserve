@@ -35,6 +35,26 @@ func (a *Analyzer) Analyze(ctx context.Context, r *github.Repository) error {
 }
 
 func (a *Analyzer) analyze(ctx context.Context, r *github.Repository) error {
+	if r.GetIsTemplate() {
+		logging.Log(
+			a.Logger,
+			"[%s] skipping analysis of template repository",
+			r.GetFullName(),
+		)
+
+		return nil
+	}
+
+	if r.GetFork() {
+		logging.Log(
+			a.Logger,
+			"[%s] skipping analysis of forked repository",
+			r.GetFullName(),
+		)
+
+		return nil
+	}
+
 	c, err := a.Connector.RepositoryClient(ctx, r.GetID())
 	if err != nil {
 		return err
