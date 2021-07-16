@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dogmatiq/docserve/githubx"
+	"github.com/dogmatiq/browser/githubx"
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v35/github"
 	"golang.org/x/oauth2"

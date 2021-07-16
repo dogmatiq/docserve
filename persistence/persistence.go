@@ -19,7 +19,7 @@ func RepositoryNeedsSync(
 		ctx,
 		`SELECT NOT EXISTS (
 			SELECT *
-			FROM docserve.repository
+			FROM dogmabrowser.repository
 			WHERE id = $1
 			AND commit_hash = $2
 			AND is_stale = FALSE
@@ -45,7 +45,7 @@ func RemoveRepository(
 	// the repository without removing basic type information.
 	if _, err := tx.ExecContext(
 		ctx,
-		`UPDATE docserve.type SET
+		`UPDATE dogmabrowser.type SET
 			repository_id = NULL,
 			url = NULL
 		WHERE repository_id = $1`,
@@ -56,7 +56,7 @@ func RemoveRepository(
 
 	if _, err := tx.ExecContext(
 		ctx,
-		`DELETE FROM docserve.repository
+		`DELETE FROM dogmabrowser.repository
 		WHERE github_id = $1`,
 		r.GetID(),
 	); err != nil {
@@ -82,7 +82,7 @@ func SyncRepository(
 
 	if _, err := tx.ExecContext(
 		ctx,
-		`INSERT INTO docserve.repository AS r (
+		`INSERT INTO dogmabrowser.repository AS r (
 			id,
 			full_name,
 			commit_hash

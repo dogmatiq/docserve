@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dogmatiq/browser/web/components"
 	"github.com/dogmatiq/configkit/message"
-	"github.com/dogmatiq/docserve/web/components"
 	"github.com/gin-gonic/gin"
 )
 
@@ -117,8 +117,8 @@ func (h *RelationshipHandler) loadApplication(
 			a.is_pointer,
 			COALESCE(t.url, ''),
 			COALESCE(t.docs, '')
-		FROM docserve.application AS a
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.application AS a
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = a.type_id
 		WHERE a.key = $1`,
 		appKey,
@@ -154,14 +154,14 @@ func (h *RelationshipHandler) loadMessages(
 			BOOL_OR(pm.is_pointer != cm.is_pointer) AS has_pointer_mismatch,
 			COUNT(DISTINCT pm.handler_key) AS producer_count,
 			COUNT(DISTINCT cm.handler_key) AS consumer_count
-		FROM docserve.handler_message AS pm
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.handler_message AS pm
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = pm.type_id
-		INNER JOIN docserve.handler_message AS cm
+		INNER JOIN dogmabrowser.handler_message AS cm
 		ON cm.type_id = t.id
-		INNER JOIN docserve.handler AS ph
+		INNER JOIN dogmabrowser.handler AS ph
 		ON ph.key = pm.handler_key
-		INNER JOIN docserve.handler AS ch
+		INNER JOIN dogmabrowser.handler AS ch
 		ON ch.key = cm.handler_key
 		WHERE ph.application_key = $1
 		AND pm.is_produced

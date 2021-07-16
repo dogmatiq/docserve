@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/dogmatiq/docserve/persistence"
+	"github.com/dogmatiq/browser/persistence"
 	"github.com/dogmatiq/dodeca/config"
 	_ "github.com/jackc/pgx/v4/stdlib"
 )

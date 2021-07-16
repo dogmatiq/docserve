@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/dogmatiq/browser/web/components"
 	"github.com/dogmatiq/configkit"
-	"github.com/dogmatiq/docserve/web/components"
 	"github.com/gin-gonic/gin"
 )
 
@@ -64,8 +64,8 @@ func (h *ListHandler) loadStats(
 	row := h.DB.QueryRowContext(
 		ctx,
 		`SELECT
-			(SELECT COUNT(*) FROM docserve.repository),
-			(SELECT COUNT(*) FROM docserve.application)`,
+			(SELECT COUNT(*) FROM dogmabrowser.repository),
+			(SELECT COUNT(*) FROM dogmabrowser.application)`,
 	)
 	return row.Scan(
 		&view.TotalRepoCount,
@@ -92,20 +92,20 @@ func (h *ListHandler) loadHandlers(
 			a.name,
 			(
 				SELECT COUNT(DISTINCT m.type_id)
-				FROM docserve.handler_message AS m
+				FROM dogmabrowser.handler_message AS m
 				WHERE m.handler_key = h.key
 				AND m.is_consumed
 			) AS consumed_count,
 			(
 				SELECT COUNT(DISTINCT m.type_id)
-				FROM docserve.handler_message AS m
+				FROM dogmabrowser.handler_message AS m
 				WHERE m.handler_key = h.key
 				AND m.is_produced
 			) AS produced_count
-		FROM docserve.handler AS h
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.handler AS h
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = h.type_id
-		INNER JOIN docserve.application AS a
+		INNER JOIN dogmabrowser.application AS a
 		ON a.key = h.application_key
 		ORDER BY h.name, a.name`,
 	)

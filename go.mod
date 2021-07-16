@@ -1,4 +1,4 @@
-module github.com/dogmatiq/docserve
+module github.com/dogmatiq/browser
 
 go 1.16
 

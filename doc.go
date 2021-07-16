@@ -1,1 +1,1 @@
-package docserve
+package browser

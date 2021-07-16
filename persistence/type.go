@@ -37,7 +37,7 @@ func syncTypeRef(
 
 	row := tx.QueryRowContext(
 		ctx,
-		`INSERT INTO docserve.type (
+		`INSERT INTO dogmabrowser.type (
 			package,
 			name
 		) VALUES (
@@ -65,7 +65,7 @@ func syncTypeDefs(
 ) error {
 	if _, err := tx.ExecContext(
 		ctx,
-		`UPDATE docserve.type SET
+		`UPDATE dogmabrowser.type SET
 			needs_removal = TRUE
 		WHERE repository_id = $1`,
 		r.GetID(),
@@ -87,12 +87,12 @@ func syncTypeDefs(
 
 	if _, err := tx.ExecContext(
 		ctx,
-		`DELETE FROM docserve.type AS t
+		`DELETE FROM dogmabrowser.type AS t
 		WHERE repository_id = $1
 		AND needs_removal
-		AND NOT EXISTS (SELECT * FROM docserve.application WHERE type_id = t.id)
-		AND NOT EXISTS (SELECT * FROM docserve.handler WHERE type_id = t.id)
-		AND NOT EXISTS (SELECT * FROM docserve.handler_message WHERE type_id = t.id)`,
+		AND NOT EXISTS (SELECT * FROM dogmabrowser.application WHERE type_id = t.id)
+		AND NOT EXISTS (SELECT * FROM dogmabrowser.handler WHERE type_id = t.id)
+		AND NOT EXISTS (SELECT * FROM dogmabrowser.handler_message WHERE type_id = t.id)`,
 		r.GetID(),
 	); err != nil {
 		return fmt.Errorf("unable to remove types: %w", err)
@@ -126,7 +126,7 @@ func syncTypeDef(
 
 	if _, err = tx.ExecContext(
 		ctx,
-		`INSERT INTO docserve.type (
+		`INSERT INTO dogmabrowser.type (
 			package,
 			name,
 			repository_id,

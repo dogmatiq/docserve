@@ -17,7 +17,7 @@ func syncApplications(
 ) error {
 	if _, err := tx.ExecContext(
 		ctx,
-		`UPDATE docserve.application SET
+		`UPDATE dogmabrowser.application SET
 			needs_removal = TRUE
 		WHERE repository_id = $1`,
 		r.GetID(),
@@ -33,7 +33,7 @@ func syncApplications(
 
 	if _, err := tx.ExecContext(
 		ctx,
-		`DELETE FROM docserve.application
+		`DELETE FROM dogmabrowser.application
 		WHERE repository_id = $1
 		AND needs_removal`,
 		r.GetID(),
@@ -57,7 +57,7 @@ func syncApplication(
 
 	if _, err := tx.ExecContext(
 		ctx,
-		`INSERT INTO docserve.application (
+		`INSERT INTO dogmabrowser.application (
 			key,
 			name,
 			type_id,
@@ -90,7 +90,7 @@ func syncHandlers(
 ) error {
 	if _, err := tx.ExecContext(
 		ctx,
-		`UPDATE docserve.handler SET
+		`UPDATE dogmabrowser.handler SET
 			needs_removal = TRUE
 		WHERE application_key = $1`,
 		a.Identity().Key,
@@ -111,7 +111,7 @@ func syncHandlers(
 
 	if _, err := tx.ExecContext(
 		ctx,
-		`DELETE FROM docserve.handler
+		`DELETE FROM dogmabrowser.handler
 		WHERE application_key = $1
 		AND needs_removal`,
 		a.Identity().Key,
@@ -135,7 +135,7 @@ func syncHandler(
 
 	if _, err := tx.ExecContext(
 		ctx,
-		`INSERT INTO docserve.handler (
+		`INSERT INTO dogmabrowser.handler (
 			key,
 			name,
 			application_key,
@@ -171,7 +171,7 @@ func syncMessages(
 ) error {
 	if _, err := tx.ExecContext(
 		ctx,
-		`UPDATE docserve.handler_message SET
+		`UPDATE dogmabrowser.handler_message SET
 			needs_removal = TRUE
 		WHERE handler_key = $1`,
 		h.Identity().Key,
@@ -187,7 +187,7 @@ func syncMessages(
 
 		if _, err := tx.ExecContext(
 			ctx,
-			`INSERT INTO docserve.handler_message (
+			`INSERT INTO dogmabrowser.handler_message (
 				handler_key,
 				type_id,
 				is_pointer,
@@ -216,7 +216,7 @@ func syncMessages(
 
 		if _, err := tx.ExecContext(
 			ctx,
-			`INSERT INTO docserve.handler_message (
+			`INSERT INTO dogmabrowser.handler_message (
 				handler_key,
 				type_id,
 				is_pointer,
@@ -239,7 +239,7 @@ func syncMessages(
 
 	if _, err := tx.ExecContext(
 		ctx,
-		`DELETE FROM docserve.handler_message
+		`DELETE FROM dogmabrowser.handler_message
 		WHERE handler_key = $1
 		AND needs_removal`,
 		h.Identity().Key,

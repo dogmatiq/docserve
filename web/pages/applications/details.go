@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/dogmatiq/browser/web/components"
 	"github.com/dogmatiq/configkit"
 	"github.com/dogmatiq/configkit/message"
-	"github.com/dogmatiq/docserve/web/components"
 	"github.com/gin-gonic/gin"
 )
 
@@ -117,8 +117,8 @@ func (h *DetailsHandler) loadDetails(
 			a.is_pointer,
 			COALESCE(t.url, ''),
 			COALESCE(t.docs, '')
-		FROM docserve.application AS a
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.application AS a
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = a.type_id
 		WHERE a.key = $1`,
 		appKey,
@@ -155,19 +155,19 @@ func (h *DetailsHandler) loadRelationships(
 			COUNT(DISTINCT m.type_id) FILTER (WHERE m.is_produced AND xm.is_consumed) AS upstream_count,
 			COUNT(DISTINCT m.type_id) FILTER (WHERE m.is_consumed AND xm.is_produced) AS downstream_count,
 			COUNT(DISTINCT m.type_id)
-		FROM docserve.application AS a
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.application AS a
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = a.type_id
-		INNER JOIN docserve.handler AS h
+		INNER JOIN dogmabrowser.handler AS h
 		ON h.application_key = a.key
-		INNER JOIN docserve.handler_message AS m
+		INNER JOIN dogmabrowser.handler_message AS m
 		ON m.handler_key = h.key
 		AND m.role != 'timeout'
-		INNER JOIN docserve.handler_message AS xm
+		INNER JOIN dogmabrowser.handler_message AS xm
 		ON xm.type_id = m.type_id
 		AND xm.handler_key != m.handler_key
 		AND xm.role != 'timeout'
-		INNER JOIN docserve.handler AS xh
+		INNER JOIN dogmabrowser.handler AS xh
 		ON xh.key = xm.handler_key
 		AND xh.application_key != h.application_key
 		WHERE xh.application_key = $1
@@ -228,18 +228,18 @@ func (h *DetailsHandler) loadHandlers(
 			COALESCE(t.docs, ''),
 			(
 				SELECT COUNT(DISTINCT m.type_id)
-				FROM docserve.handler_message AS m
+				FROM dogmabrowser.handler_message AS m
 				WHERE m.handler_key = h.key
 				AND m.is_consumed
 			) AS consumed_count,
 			(
 				SELECT COUNT(DISTINCT m.type_id)
-				FROM docserve.handler_message AS m
+				FROM dogmabrowser.handler_message AS m
 				WHERE m.handler_key = h.key
 				AND m.is_produced
 			) AS produced_count
-		FROM docserve.handler AS h
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.handler AS h
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = h.type_id
 		WHERE h.application_key = $1
 		ORDER BY h.name`,
@@ -290,20 +290,20 @@ func (h *DetailsHandler) loadMessages(
 			m.role,
 			(
 				SELECT COUNT(DISTINCT pm.handler_key)
-				FROM docserve.handler_message AS pm
+				FROM dogmabrowser.handler_message AS pm
 				WHERE pm.type_id = m.type_id
 				AND pm.is_produced = TRUE
 			) AS produced_count,
 			(
 				SELECT COUNT(DISTINCT pm.handler_key)
-				FROM docserve.handler_message AS pm
+				FROM dogmabrowser.handler_message AS pm
 				WHERE pm.type_id = m.type_id
 				AND pm.is_consumed = TRUE
 			) AS consumed_count
-		FROM docserve.handler_message AS m
-		INNER JOIN docserve.handler AS h
+		FROM dogmabrowser.handler_message AS m
+		INNER JOIN dogmabrowser.handler AS h
 		ON h.key = m.handler_key
-		INNER JOIN docserve.type AS t
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = m.type_id
 		WHERE h.application_key = $1
 		ORDER BY t.name, t.package`,

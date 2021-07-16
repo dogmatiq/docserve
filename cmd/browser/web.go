@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/dogmatiq/docserve/githubx"
-	"github.com/dogmatiq/docserve/web"
-	"github.com/dogmatiq/docserve/web/pages/applications"
-	"github.com/dogmatiq/docserve/web/pages/handlers"
-	"github.com/dogmatiq/docserve/web/pages/messages"
+	"github.com/dogmatiq/browser/githubx"
+	"github.com/dogmatiq/browser/web"
+	"github.com/dogmatiq/browser/web/pages/applications"
+	"github.com/dogmatiq/browser/web/pages/handlers"
+	"github.com/dogmatiq/browser/web/pages/messages"
 )
 
 func init() {

@@ -10,10 +10,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/dogmatiq/browser/githubx"
+	"github.com/dogmatiq/browser/persistence"
 	"github.com/dogmatiq/configkit"
 	"github.com/dogmatiq/configkit/static"
-	"github.com/dogmatiq/docserve/githubx"
-	"github.com/dogmatiq/docserve/persistence"
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/v35/github"
 	"golang.org/x/mod/modfile"

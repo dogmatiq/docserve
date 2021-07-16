@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/dogmatiq/docserve/analyzer"
-	"github.com/dogmatiq/docserve/githubx"
+	"github.com/dogmatiq/browser/analyzer"
+	"github.com/dogmatiq/browser/githubx"
 	"github.com/dogmatiq/dodeca/config"
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/dogmatiq/linger"

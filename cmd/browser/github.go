@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/dogmatiq/docserve/githubx"
+	"github.com/dogmatiq/browser/githubx"
 	"github.com/dogmatiq/dodeca/config"
 )
 

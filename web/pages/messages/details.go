@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dogmatiq/browser/web/components"
 	"github.com/dogmatiq/configkit"
-	"github.com/dogmatiq/docserve/web/components"
 	"github.com/gin-gonic/gin"
 )
 
@@ -99,8 +99,8 @@ func (h *DetailsHandler) loadDetails(
 			MODE() WITHIN GROUP (ORDER BY m.role) AS role,
 			COUNT(DISTINCT m.role) > 1 AS has_role_mismatch,
 			COUNT(DISTINCT m.is_pointer) > 1 AS has_pointer_mismatch
-		FROM docserve.handler_message AS m
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.handler_message AS m
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = m.type_id
 		WHERE t.package = $1
 		AND t.name = $2
@@ -135,14 +135,14 @@ func (h *DetailsHandler) loadApplications(
 			a.is_pointer,
 			COALESCE(t.url, ''),
 			COALESCE(t.docs, '')
-		FROM docserve.application AS a
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.application AS a
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = a.type_id
-		INNER JOIN docserve.handler AS h
+		INNER JOIN dogmabrowser.handler AS h
 		ON h.application_key = a.key
-		INNER JOIN docserve.handler_message AS m
+		INNER JOIN dogmabrowser.handler_message AS m
 		ON m.handler_key = h.key
-		INNER JOIN docserve.type AS mt
+		INNER JOIN dogmabrowser.type AS mt
 		ON mt.id = m.type_id
 		WHERE mt.package = $1
 		AND mt.name = $2
@@ -196,14 +196,14 @@ func (h *DetailsHandler) loadHandlers(
 			a.name,
 			m.is_produced,
 			m.is_consumed
-		FROM docserve.handler AS h
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.handler AS h
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = h.type_id
-		INNER JOIN docserve.application AS a
+		INNER JOIN dogmabrowser.application AS a
 		ON a.key = h.application_key
-		INNER JOIN docserve.handler_message AS m
+		INNER JOIN dogmabrowser.handler_message AS m
 		ON m.handler_key = h.key
-		INNER JOIN docserve.type AS mt
+		INNER JOIN dogmabrowser.type AS mt
 		ON mt.id = m.type_id
 		WHERE mt.package = $1
 		AND mt.name = $2

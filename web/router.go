@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dogmatiq/docserve/githubx"
-	"github.com/dogmatiq/docserve/web/components"
+	"github.com/dogmatiq/browser/githubx"
+	"github.com/dogmatiq/browser/web/components"
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v35/github"
 )

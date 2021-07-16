@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/dogmatiq/docserve/persistence"
+	"github.com/dogmatiq/browser/persistence"
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/google/go-github/v35/github"
 )

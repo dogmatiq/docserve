@@ -7,7 +7,7 @@ GO_EMBEDDED_FILES += $(shell find web/assets)
 
 
 .PHONY: run
-run: artifacts/build/debug/$(GOHOSTOS)/$(GOHOSTARCH)/docserve
+run: artifacts/build/debug/$(GOHOSTOS)/$(GOHOSTARCH)/browser
 	DEBUG=true $<
 
 .makefiles/%:

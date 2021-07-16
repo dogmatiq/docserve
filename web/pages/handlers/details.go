@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/dogmatiq/browser/web/components"
 	"github.com/dogmatiq/configkit"
 	"github.com/dogmatiq/configkit/message"
-	"github.com/dogmatiq/docserve/web/components"
 	"github.com/gin-gonic/gin"
 )
 
@@ -97,10 +97,10 @@ func (h *DetailsHandler) loadDetails(
 			COALESCE(t.docs, ''),
 			a.key,
 			a.name
-		FROM docserve.handler AS h
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.handler AS h
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = h.type_id
-		INNER JOIN docserve.application AS a
+		INNER JOIN dogmabrowser.application AS a
 		ON a.key = h.application_key
 		WHERE h.key = $1`,
 		handlerKey,
@@ -135,7 +135,7 @@ func (h *DetailsHandler) loadMessages(
 			COALESCE(t.docs, ''),
 			(
 				SELECT COUNT(DISTINCT xm.handler_key)
-				FROM docserve.handler_message AS xm
+				FROM dogmabrowser.handler_message AS xm
 				WHERE xm.type_id = m.type_id
 				AND xm.handler_key != m.handler_key
 				AND xm.is_produced != m.is_produced
@@ -144,8 +144,8 @@ func (h *DetailsHandler) loadMessages(
 			m.role,
 			m.is_produced,
 			m.is_consumed
-		FROM docserve.handler_message AS m
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.handler_message AS m
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = m.type_id
 		WHERE m.handler_key = $1
 		ORDER BY t.name, t.package`,

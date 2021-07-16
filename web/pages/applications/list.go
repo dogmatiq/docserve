@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/dogmatiq/docserve/web/components"
+	"github.com/dogmatiq/browser/web/components"
 	"github.com/gin-gonic/gin"
 )
 
@@ -62,7 +62,7 @@ func (h *ListHandler) loadStats(ctx context.Context, view *listView) error {
 	return h.DB.QueryRowContext(
 		ctx,
 		`SELECT COUNT(*)
-		FROM docserve.repository`,
+		FROM dogmabrowser.repository`,
 	).Scan(&view.TotalRepoCount)
 }
 
@@ -79,33 +79,33 @@ func (h *ListHandler) loadApplications(ctx context.Context, view *listView) erro
 			COALESCE(t.docs, ''),
 			(
 				SELECT COUNT(DISTINCT h.application_key)
-				FROM docserve.handler AS h
-				INNER JOIN docserve.handler_message AS m
+				FROM dogmabrowser.handler AS h
+				INNER JOIN dogmabrowser.handler_message AS m
 				ON m.handler_key = h.key
 				AND m.role != 'timeout'
-				INNER JOIN docserve.handler_message AS xm
+				INNER JOIN dogmabrowser.handler_message AS xm
 				ON xm.type_id = m.type_id
 				AND xm.handler_key != m.handler_key
 				AND xm.role != 'timeout'
-				INNER JOIN docserve.handler AS xh
+				INNER JOIN dogmabrowser.handler AS xh
 				ON xh.key = xm.handler_key
 				AND xh.application_key != h.application_key
 				WHERE xh.application_key = a.key
 			) AS relationship_count,
 			(
 				SELECT COUNT(h.key)
-				FROM docserve.handler AS h
+				FROM dogmabrowser.handler AS h
 				WHERE h.application_key = a.key
 			) AS handler_count,
 			(
 				SELECT COUNT(DISTINCT m.type_id)
-				FROM docserve.handler AS h
-				INNER JOIN docserve.handler_message AS m
+				FROM dogmabrowser.handler AS h
+				INNER JOIN dogmabrowser.handler_message AS m
 				ON m.handler_key = h.key
 				WHERE h.application_key = a.key
 			) AS message_count
-		FROM docserve.application AS a
-		INNER JOIN docserve.type AS t
+		FROM dogmabrowser.application AS a
+		INNER JOIN dogmabrowser.type AS t
 		ON t.id = a.type_id
 		ORDER BY a.name, a.key`,
 	)

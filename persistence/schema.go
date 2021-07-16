@@ -15,6 +15,6 @@ func CreateSchema(ctx context.Context, db *sql.DB) error {
 }
 
 func DropSchema(ctx context.Context, db *sql.DB) error {
-	_, err := db.ExecContext(ctx, `DROP SCHEMA IF EXISTS docserve CASCADE`)
+	_, err := db.ExecContext(ctx, `DROP SCHEMA IF EXISTS dogmabrowser CASCADE`)
 	return err
 }
