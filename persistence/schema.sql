@@ -3,9 +3,7 @@ CREATE SCHEMA IF NOT EXISTS docserve;
 CREATE TABLE IF NOT EXISTS docserve.repository (
     id          INT PRIMARY KEY,
     full_name   TEXT NOT NULL,
-    commit_hash TEXT NOT NULL,
-    url         TEXT NOT NULL,
-    description TEXT NOT NULL
+    commit_hash TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS docserve.type (
