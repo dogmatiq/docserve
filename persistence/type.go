@@ -66,11 +66,11 @@ func syncTypeDefs(
 	if _, err := tx.ExecContext(
 		ctx,
 		`UPDATE docserve.type SET
-			is_historical = TRUE
+			needs_removal = TRUE
 		WHERE repository_id = $1`,
 		r.GetID(),
 	); err != nil {
-		return fmt.Errorf("unable to mark types as historical: %w", err)
+		return fmt.Errorf("unable to mark types for removal: %w", err)
 	}
 
 	for _, t := range defs {
@@ -89,13 +89,13 @@ func syncTypeDefs(
 		ctx,
 		`DELETE FROM docserve.type AS t
 		WHERE repository_id = $1
-		AND is_historical
+		AND needs_removal
 		AND NOT EXISTS (SELECT * FROM docserve.application WHERE type_id = t.id)
 		AND NOT EXISTS (SELECT * FROM docserve.handler WHERE type_id = t.id)
 		AND NOT EXISTS (SELECT * FROM docserve.handler_message WHERE type_id = t.id)`,
 		r.GetID(),
 	); err != nil {
-		return fmt.Errorf("unable to delete historical types: %w", err)
+		return fmt.Errorf("unable to remove types: %w", err)
 	}
 
 	return nil
@@ -138,7 +138,7 @@ func syncTypeDef(
 			repository_id = excluded.repository_id,
 			url = excluded.url,
 			docs = excluded.docs,
-			is_historical = FALSE`,
+			needs_removal = FALSE`,
 		t.Package,
 		t.Name,
 		r.GetID(),

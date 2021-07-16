@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS docserve.type (
     id            SERIAL PRIMARY KEY,
     package       TEXT NOT NULL,
     name          TEXT NOT NULL,
-    is_historical BOOLEAN NOT NULL DEFAULT FALSE,
+    needs_removal BOOLEAN NOT NULL DEFAULT FALSE,
     repository_id INT,
     url           TEXT,
     docs          TEXT,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS docserve.application (
     type_id       INT NOT NULL,
     is_pointer    BOOLEAN NOT NULL,
     repository_id INT NOT NULL,
-    is_historical BOOLEAN NOT NULL DEFAULT FALSE,
+    needs_removal BOOLEAN NOT NULL DEFAULT FALSE,
 
     CONSTRAINT repository_fkey
         FOREIGN KEY (repository_id)
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS docserve.handler (
     handler_type    TEXT NOT NULL,
     type_id         INT NOT NULL,
     is_pointer      BOOLEAN NOT NULL,
-    is_historical   BOOLEAN NOT NULL DEFAULT FALSE,
+    needs_removal   BOOLEAN NOT NULL DEFAULT FALSE,
 
     CONSTRAINT application_fkey
         FOREIGN KEY (application_key)
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS docserve.handler_message (
     role          TEXT NOT NULL,
     is_produced   BOOLEAN NOT NULL DEFAULT FALSE,
     is_consumed   BOOLEAN NOT NULL DEFAULT FALSE,
-    is_historical BOOLEAN NOT NULL DEFAULT FALSE,
+    needs_removal BOOLEAN NOT NULL DEFAULT FALSE,
 
     PRIMARY KEY (handler_key, type_id, is_pointer),
 

@@ -18,11 +18,11 @@ func syncApplications(
 	if _, err := tx.ExecContext(
 		ctx,
 		`UPDATE docserve.application SET
-			is_historical = TRUE
+			needs_removal = TRUE
 		WHERE repository_id = $1`,
 		r.GetID(),
 	); err != nil {
-		return fmt.Errorf("unable to mark applications as historical: %w", err)
+		return fmt.Errorf("unable to mark applications for removal: %w", err)
 	}
 
 	for _, a := range apps {
@@ -35,10 +35,10 @@ func syncApplications(
 		ctx,
 		`DELETE FROM docserve.application
 		WHERE repository_id = $1
-		AND is_historical`,
+		AND needs_removal`,
 		r.GetID(),
 	); err != nil {
-		return fmt.Errorf("unable delete historical applications: %w", err)
+		return fmt.Errorf("unable remove applications: %w", err)
 	}
 
 	return nil
@@ -70,7 +70,7 @@ func syncApplication(
 			type_id = excluded.type_id,
 			is_pointer = excluded.is_pointer,
 			repository_id = excluded.repository_id,
-			is_historical = FALSE`,
+			needs_removal = FALSE`,
 		a.Identity().Key,
 		a.Identity().Name,
 		typeID,
@@ -91,11 +91,11 @@ func syncHandlers(
 	if _, err := tx.ExecContext(
 		ctx,
 		`UPDATE docserve.handler SET
-			is_historical = TRUE
+			needs_removal = TRUE
 		WHERE application_key = $1`,
 		a.Identity().Key,
 	); err != nil {
-		return fmt.Errorf("unable to mark handlers as historical: %w", err)
+		return fmt.Errorf("unable to mark handlers for removal: %w", err)
 	}
 
 	for _, h := range a.Handlers() {
@@ -113,10 +113,10 @@ func syncHandlers(
 		ctx,
 		`DELETE FROM docserve.handler
 		WHERE application_key = $1
-		AND is_historical`,
+		AND needs_removal`,
 		a.Identity().Key,
 	); err != nil {
-		return fmt.Errorf("unable to delete historical handlers: %w", err)
+		return fmt.Errorf("unable to remove handlers: %w", err)
 	}
 
 	return nil
@@ -150,7 +150,7 @@ func syncHandler(
 			handler_type = excluded.handler_type,
 			type_id = excluded.type_id,
 			is_pointer = excluded.is_pointer,
-			is_historical = FALSE`,
+			needs_removal = FALSE`,
 		h.Identity().Key,
 		h.Identity().Name,
 		appKey,
@@ -172,11 +172,11 @@ func syncMessages(
 	if _, err := tx.ExecContext(
 		ctx,
 		`UPDATE docserve.handler_message SET
-			is_historical = TRUE
+			needs_removal = TRUE
 		WHERE handler_key = $1`,
 		h.Identity().Key,
 	); err != nil {
-		return fmt.Errorf("unable to mark handler messages as historical: %w", err)
+		return fmt.Errorf("unable to mark messages for removal: %w", err)
 	}
 
 	for n, r := range h.MessageNames().Produced {
@@ -198,7 +198,7 @@ func syncMessages(
 			) ON CONFLICT (handler_key, type_id, is_pointer) DO UPDATE SET
 				role = excluded.role,
 				is_produced = excluded.is_produced,
-				is_historical = FALSE`,
+				needs_removal = FALSE`,
 			h.Identity().Key,
 			typeID,
 			isPointer,
@@ -227,7 +227,7 @@ func syncMessages(
 			) ON CONFLICT (handler_key, type_id, is_pointer) DO UPDATE SET
 				role = excluded.role,
 				is_consumed = excluded.is_consumed,
-				is_historical = FALSE`,
+				needs_removal = FALSE`,
 			h.Identity().Key,
 			typeID,
 			isPointer,
@@ -241,10 +241,10 @@ func syncMessages(
 		ctx,
 		`DELETE FROM docserve.handler_message
 		WHERE handler_key = $1
-		AND is_historical`,
+		AND needs_removal`,
 		h.Identity().Key,
 	); err != nil {
-		return fmt.Errorf("unable to remove historical messages: %w", err)
+		return fmt.Errorf("unable to remove messages: %w", err)
 	}
 
 	return nil
