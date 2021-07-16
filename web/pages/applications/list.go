@@ -82,9 +82,11 @@ func (h *ListHandler) loadApplications(ctx context.Context, view *listView) erro
 				FROM docserve.handler AS h
 				INNER JOIN docserve.handler_message AS m
 				ON m.handler_key = h.key
+				AND m.role != 'timeout'
 				INNER JOIN docserve.handler_message AS xm
 				ON xm.type_id = m.type_id
 				AND xm.handler_key != m.handler_key
+				AND xm.role != 'timeout'
 				INNER JOIN docserve.handler AS xh
 				ON xh.key = xm.handler_key
 				AND xh.application_key != h.application_key

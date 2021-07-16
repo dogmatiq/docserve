@@ -165,8 +165,10 @@ func (h *RelationshipHandler) loadMessages(
 		ON ch.key = cm.handler_key
 		WHERE ph.application_key = $1
 		AND pm.is_produced
+		AND pm.role != 'timeout'
 		AND ch.application_key = $2
 		AND cm.is_consumed
+		AND cm.role != 'timeout'
 		GROUP BY t.id
 		ORDER BY t.name, t.package`,
 		producerAppKey,
