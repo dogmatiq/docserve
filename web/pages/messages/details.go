@@ -81,7 +81,7 @@ func (h *DetailsHandler) View(ctx *gin.Context) (string, interface{}, error) {
 		return "", nil, err
 	}
 
-	return view.Impl.Name + " - Message Details", view, nil
+	return view.Impl.Name, view, nil
 }
 
 func (h *DetailsHandler) loadDetails(

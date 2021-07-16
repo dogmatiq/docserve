@@ -76,7 +76,7 @@ func (h *DetailsHandler) View(ctx *gin.Context) (string, interface{}, error) {
 		return "", nil, err
 	}
 
-	return view.Name + " - Handler Details", view, nil
+	return view.Name, view, nil
 }
 
 func (h *DetailsHandler) loadDetails(
