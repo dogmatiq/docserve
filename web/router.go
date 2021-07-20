@@ -1,6 +1,7 @@
 package web
 
 import (
+	"crypto/rsa"
 	"fmt"
 	"net/http"
 
@@ -20,6 +21,7 @@ type Handler interface {
 func NewRouter(
 	version string,
 	c *githubx.Connector,
+	key *rsa.PrivateKey,
 	handlers ...Handler,
 ) http.Handler {
 	router := gin.New()
@@ -40,10 +42,10 @@ func NewRouter(
 
 	router.GET(
 		"/github/auth",
-		handleOAuthCallback(version, c.OAuthConfig),
+		handleOAuthCallback(version, c.OAuthConfig, &key.PublicKey),
 	)
 
-	auth := requireOAuth(version, c)
+	auth := requireOAuth(version, c, key)
 
 	for _, h := range handlers {
 		method, path := h.Route()

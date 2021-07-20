@@ -1,6 +1,7 @@
 package web
 
 import (
+	"crypto/rsa"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,28 +11,59 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v35/github"
 	"golang.org/x/oauth2"
+	jose "gopkg.in/square/go-jose.v2"
+	"gopkg.in/square/go-jose.v2/jwt"
 )
 
-func handleOAuthCallback(version string, c *oauth2.Config) gin.HandlerFunc {
+func handleOAuthCallback(version string, c *oauth2.Config, key *rsa.PublicKey) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token, err := c.Exchange(ctx, ctx.Query("code"))
+		oauthToken, err := c.Exchange(ctx, ctx.Query("code"))
 		if err != nil {
 			fmt.Println("unable to perform oauth exchange:", err) // TODO
 			renderError(ctx, version, http.StatusUnauthorized)
 			return
 		}
 
-		data, err := json.Marshal(token)
+		oauthTokenJSON, err := json.Marshal(oauthToken)
 		if err != nil {
 			fmt.Println("unable to marshal oauth token:", err) // TODO
 			renderError(ctx, version, http.StatusInternalServerError)
 			ctx.Abort()
 		}
 
+		opts := &jose.EncrypterOptions{}
+		opts.WithType("JWT")
+		opts.WithContentType("JWT")
+
+		enc, err := jose.NewEncrypter(
+			jose.A128CBC_HS256,
+			jose.Recipient{
+				Algorithm: jose.RSA_OAEP_256,
+				Key:       key,
+			},
+			opts,
+		)
+		if err != nil {
+			fmt.Println("unable to create token encrypter:", err) // TODO
+			renderError(ctx, version, http.StatusInternalServerError)
+			ctx.Abort()
+		}
+
+		claims := jwt.Claims{
+			Issuer:  "dogmatiq/browser",
+			Subject: string(oauthTokenJSON),
+		}
+		token, err := jwt.Encrypted(enc).Claims(claims).CompactSerialize()
+		if err != nil {
+			fmt.Println("unable to encrypt token:", err) // TODO
+			renderError(ctx, version, http.StatusInternalServerError)
+			ctx.Abort()
+		}
+
 		ctx.SetCookie(
 			"token",
-			string(data),
-			int(time.Until(token.Expiry).Seconds()),
+			token,
+			int(time.Until(oauthToken.Expiry).Seconds()),
 			"",
 			"",
 			true,
@@ -42,21 +74,36 @@ func handleOAuthCallback(version string, c *oauth2.Config) gin.HandlerFunc {
 	}
 }
 
-func requireOAuth(version string, c *githubx.Connector) gin.HandlerFunc {
+func requireOAuth(version string, c *githubx.Connector, key *rsa.PrivateKey) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		data, err := ctx.Cookie("token")
+		token, err := ctx.Cookie("token")
 		if err != nil {
 			redirectToLogin(ctx, c.OAuthConfig)
 			return
 		}
 
-		token := &oauth2.Token{}
-		if err := json.Unmarshal([]byte(data), token); err != nil {
+		parsedJWT, err := jwt.ParseEncrypted(token)
+		if err != nil {
+			fmt.Println("unable to parse encrypted token:", err) // TODO
 			redirectToLogin(ctx, c.OAuthConfig)
 			return
 		}
 
-		client, err := c.UserClient(ctx, token)
+		var claims jwt.Claims
+		if err := parsedJWT.Claims(key, &claims); err != nil {
+			fmt.Println("unable to decrypt claims:", err) // TODO
+			redirectToLogin(ctx, c.OAuthConfig)
+			return
+		}
+
+		var oauthToken oauth2.Token
+		if err := json.Unmarshal([]byte(claims.Subject), &oauthToken); err != nil {
+			fmt.Println("unable to unmarshal oauth token:", err) // TODO
+			redirectToLogin(ctx, c.OAuthConfig)
+			return
+		}
+
+		client, err := c.UserClient(ctx, &oauthToken)
 		if err != nil {
 			fmt.Println("unable to create user client:", err) // TODO
 			renderError(ctx, version, http.StatusInternalServerError)

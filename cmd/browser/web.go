@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rsa"
 	"database/sql"
 	"net/http"
 
@@ -15,10 +16,12 @@ func init() {
 	provide(func(
 		c *githubx.Connector,
 		db *sql.DB,
+		pk *rsa.PrivateKey,
 	) http.Handler {
 		return web.NewRouter(
 			version,
 			c,
+			pk,
 			&applications.ListHandler{DB: db},
 			&applications.DetailsHandler{DB: db},
 			&applications.RelationshipHandler{DB: db},
