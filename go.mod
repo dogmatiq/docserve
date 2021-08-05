@@ -13,7 +13,7 @@ require (
 	github.com/lib/pq v1.6.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
-	go.uber.org/dig v1.11.0
+	go.uber.org/dig v1.12.0
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b // indirect
 	golang.org/x/mod v0.4.2
 	golang.org/x/oauth2 v0.0.0-20210622215436-a8dc77f794b6
