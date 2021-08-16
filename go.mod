@@ -7,7 +7,7 @@ require (
 	github.com/dogmatiq/dodeca v1.1.0
 	github.com/dogmatiq/linger v0.2.1
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
-	github.com/gin-gonic/gin v1.7.2
+	github.com/gin-gonic/gin v1.7.4
 	github.com/google/go-github/v35 v35.3.0
 	github.com/jackc/pgx/v4 v4.11.0
 	github.com/lib/pq v1.6.0 // indirect
