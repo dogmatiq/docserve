@@ -5,9 +5,8 @@ GO_EMBEDDED_FILES += $(shell find web/assets)
 -include .makefiles/Makefile
 -include .makefiles/pkg/go/v1/Makefile
 
-
 .PHONY: run
-run: artifacts/build/debug/$(GOHOSTOS)/$(GOHOSTARCH)/browser
+run: $(GO_DEBUG_DIR)/browser
 	DEBUG=true $<
 
 .makefiles/%:
