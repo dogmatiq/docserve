@@ -2,11 +2,15 @@ package web
 
 import (
 	"crypto/rsa"
+	"database/sql"
 	"fmt"
 	"net/http"
 
 	"github.com/dogmatiq/browser/githubx"
 	"github.com/dogmatiq/browser/web/components"
+	"github.com/dogmatiq/browser/web/pages/applications"
+	"github.com/dogmatiq/browser/web/pages/handlers"
+	"github.com/dogmatiq/browser/web/pages/messages"
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v35/github"
 )
@@ -22,7 +26,7 @@ func NewRouter(
 	version string,
 	c *githubx.Connector,
 	key *rsa.PrivateKey,
-	handlers ...Handler,
+	db *sql.DB,
 ) http.Handler {
 	router := gin.New()
 	router.HTMLRender = pageTemplates
@@ -46,6 +50,16 @@ func NewRouter(
 	)
 
 	auth := requireOAuth(version, c, key)
+
+	handlers := [...]Handler{
+		&applications.ListHandler{DB: db},
+		&applications.DetailsHandler{DB: db},
+		&applications.RelationshipHandler{DB: db},
+		&handlers.ListHandler{DB: db},
+		&handlers.DetailsHandler{DB: db},
+		&messages.ListHandler{DB: db},
+		&messages.DetailsHandler{DB: db},
+	}
 
 	for _, h := range handlers {
 		method, path := h.Route()
