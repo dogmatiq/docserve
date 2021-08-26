@@ -5,11 +5,45 @@
     height: 2rem;
 }
 
-.content a {
+#search_results {
+    position: absolute;
+    z-index: 10;
+    top: 3em;
+    width: 35vw;
+}
+
+#search_results .card {
+    max-height: 75vh;
+    overflow-y: scroll;
+}
+
+#search_results .result:last-child {
+    margin-bottom: 0;
+}
+
+#search_results a {
+    font-weight: bold;
+}
+
+#search_results a mark {
+    color: #0d6efd;
+    background: yellow;
+    margin: 0;
+    padding: 0;
+}
+
+#search_results .docs {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #6c757d;
+}
+
+a {
     text-decoration: none;
 }
 
-.content a:hover {
+a:hover {
     text-decoration: underline;
 }
 

@@ -49,6 +49,11 @@ func NewRouter(
 		handleOAuthCallback(version, c.OAuthConfig, &key.PublicKey),
 	)
 
+	router.GET(
+		"/search/terms.json",
+		searchTerms(version, db),
+	)
+
 	auth := requireOAuth(version, c, key)
 
 	handlers := [...]Handler{

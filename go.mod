@@ -6,6 +6,7 @@ require (
 	github.com/dogmatiq/configkit v0.11.1-0.20210627063455-14abe13af60d
 	github.com/dogmatiq/dodeca v1.2.0
 	github.com/dogmatiq/linger v0.2.1
+	github.com/fatih/camelcase v1.0.0 // indirect
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.7.4
 	github.com/google/go-github/v35 v35.3.0
