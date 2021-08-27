@@ -1,4 +1,5 @@
-const searchInput = document.getElementById('search')
+const searchForm = document.getElementById('search')
+const searchInput = searchForm.getElementsByTagName('input')[0]
 const searchResults = document.getElementById('search_results')
 const searchItems = (async () => {
     const res = await window.fetch('/search/items.json')
@@ -109,21 +110,43 @@ function findMatchingRegions(name, query) {
     return indices;
 }
 
+searchForm.addEventListener("submit", (event) => {
+    event.preventDefault()
+
+    const group = searchResults.getElementsByClassName("list-group")[0]
+    let active = group.getElementsByClassName('active')[0]
+
+    if (!active) {
+        active = group.getElementsByClassName('result')[0]
+    }
+
+    if (active) {
+        active.getElementsByTagName('a')[0].click()
+    }
+})
+
+var prevQuery = ""
 searchInput.addEventListener("search", async (event) => {
-    if (searchInput.value.length === 0) {
+    const query = searchInput.value
+    if (query === prevQuery) {
+        return
+    }
+    prevQuery = query
+
+    if (query.length === 0) {
         searchResults.style.display = 'none'
         return
     }
 
-    const query = searchInput.value
     const results = filterItems(query, await searchItems)
 
-    const card = searchResults.getElementsByClassName("card-body")[0]
-    card.innerHTML = ''
+    const group = searchResults.getElementsByClassName("list-group")[0]
+    group.innerHTML = ''
     
     for (const r of results) {
-        const container = document.createElement('p')
-        container.className = 'result'
+        const container = document.createElement('li')
+        container.classList.add('list-group-item')
+        container.classList.add('result')
 
         const link = document.createElement('a')
         link.setAttribute("href", r.item.uri)
@@ -152,13 +175,13 @@ searchInput.addEventListener("search", async (event) => {
 
         const type = document.createElement('span')
         const sticky = document.createElement('span')
-        sticky.className = 'sticky-note'
+        sticky.classList.add('sticky-note')
 
         switch (r.item.type) {
             case "command":
             case "event":
             case "timeout":
-                type.className = 'role-' + r.item.type
+                type.classList.add('role-' + r.item.type)
                 type.appendChild(sticky)
                 type.append(" ")
                 break;
@@ -167,7 +190,7 @@ searchInput.addEventListener("search", async (event) => {
             case "process":
             case "projection":
             case "integration":
-                type.className = 'handlertype-' + r.item.type
+                type.classList.add('handlertype-' + r.item.type)
                 type.appendChild(sticky)
                 type.append(" ")
                 break;
@@ -178,7 +201,7 @@ searchInput.addEventListener("search", async (event) => {
 
         if (r.item.docs) {
             const docs = document.createElement('div')
-            docs.className = 'docs'
+            docs.classList.add('docs')
             
             const text = document.createTextNode(r.item.docs)
             docs.appendChild(text)
@@ -186,15 +209,74 @@ searchInput.addEventListener("search", async (event) => {
             container.appendChild(docs)
         }
 
-        card.appendChild(container)
+        group.appendChild(container)
     }
 
-    if (!card.innerHTML) {
-        const message = document.createElement('span')
-        message.className = 'text-muted'
+    if (!group.innerHTML) {
+        const message = document.createElement('li')
+        message.classList.add('list-group-item')
+        message.classList.add('text-muted')
         message.innerText = "No results match this query."
-        card.appendChild(message)
+        group.appendChild(message)
     }
 
     searchResults.style.display = 'block'
+});
+
+searchInput.addEventListener('keydown', (event) => {
+    if (searchResults.style.display !== 'block') {
+        return
+    }
+
+    if (event.altKey || event.ctrlKey || event.shiftKey || event.metaKey) {
+        return
+    }
+
+    const group = searchResults.getElementsByClassName("list-group")[0]
+    const active = group.getElementsByClassName('active')[0]
+
+    switch (event.key) {
+        case "ArrowUp":
+            if (active) {
+                const prev = active.previousSibling
+                active.classList.remove('active')
+
+                if (prev) {
+                    prev.classList.add('active')
+                    prev.scrollIntoViewIfNeeded(true)
+                }
+            }
+            break;
+        
+        case "ArrowDown":
+            if (active) {
+                const next = active.nextSibling
+
+                if (next) {
+                    active.classList.remove('active')
+                    next.classList.add('active')
+                    next.scrollIntoViewIfNeeded(false)
+                }
+            } else {
+                const next = group.firstChild
+                if (next && next.classList.contains('result')) {
+                    next.classList.add('active') 
+                    next.scrollIntoViewIfNeeded(false)
+                }
+            }
+            break;
+    }
+
+})
+
+document.addEventListener("keyup", (event) => {
+    if (event.altKey || event.ctrlKey || event.shiftKey || event.metaKey) {
+        return
+    }
+
+    if (event.key !== "/") return
+    if (/^(?:input|textarea|select|button)$/i.test(event.target.tagName)) return
+
+    event.preventDefault();
+    searchInput.focus();
 });

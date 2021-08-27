@@ -12,13 +12,9 @@
     width: 35vw;
 }
 
-#search_results .card {
+#search_results .list-group {
     max-height: 75vh;
     overflow-y: scroll;
-}
-
-#search_results .result:last-child {
-    margin-bottom: 0;
 }
 
 #search_results a {
@@ -37,6 +33,18 @@
     overflow: hidden;
     text-overflow: ellipsis;
     color: #6c757d;
+}
+
+#search_results .active a {
+    color: white;
+}
+
+#search_results .active a mark {
+    color: black;
+}
+
+#search_results .active .docs {
+    color: #b3b3b3;
 }
 
 a {
