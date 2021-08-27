@@ -62,6 +62,7 @@ func applicationSearchItems(ctx context.Context, db *sql.DB) ([]searchItem, erro
 	if err != nil {
 		return nil, fmt.Errorf("unable to query applications: %w", err)
 	}
+	defer rows.Close()
 
 	var items []searchItem
 
@@ -109,6 +110,7 @@ func handlerSearchItems(ctx context.Context, db *sql.DB) ([]searchItem, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to query handlers: %w", err)
 	}
+	defer rows.Close()
 
 	var items []searchItem
 
@@ -155,6 +157,7 @@ func messageSearchItems(ctx context.Context, db *sql.DB) ([]searchItem, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to query handlers: %w", err)
 	}
+	defer rows.Close()
 
 	var items []searchItem
 
