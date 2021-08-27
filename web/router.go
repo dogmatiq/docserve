@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dogmatiq/browser/analyzer"
 	"github.com/dogmatiq/browser/githubx"
 	"github.com/dogmatiq/browser/web/components"
 	"github.com/dogmatiq/browser/web/pages/applications"
@@ -28,10 +29,12 @@ type Handler interface {
 func NewRouter(
 	version string,
 	c *githubx.Connector,
+	o *analyzer.Orchestrator,
 	key *rsa.PrivateKey,
+	hookSecret []byte,
 	db *sql.DB,
 ) http.Handler {
-	router := gin.New()
+	router := gin.Default()
 	router.HTMLRender = pageTemplates
 
 	router.Use(gin.Recovery())
@@ -50,6 +53,11 @@ func NewRouter(
 	router.GET(
 		"/github/auth",
 		handleOAuthCallback(version, c.OAuthConfig, &key.PublicKey),
+	)
+
+	router.POST(
+		"/github/hook",
+		handleGitHubHook(version, hookSecret, o),
 	)
 
 	router.GET(

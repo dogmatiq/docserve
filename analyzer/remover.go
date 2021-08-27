@@ -6,16 +6,17 @@ import (
 
 	"github.com/dogmatiq/browser/persistence"
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/google/go-github/v35/github"
 )
 
+// Remover removes information about repositories from the database.
 type Remover struct {
 	DB     *sql.DB
 	Logger logging.Logger
 }
 
-func (rm *Remover) Remove(ctx context.Context, r *github.Repository) error {
-	logging.Log(rm.Logger, "[%s] removing repository", r.GetFullName())
+// Remove removes all analysis results from the given repository.
+func (rm *Remover) Remove(ctx context.Context, repoID int64) error {
+	logging.Log(rm.Logger, "[#%d] removing repository", repoID)
 
 	tx, err := rm.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -23,7 +24,7 @@ func (rm *Remover) Remove(ctx context.Context, r *github.Repository) error {
 	}
 	defer tx.Rollback() // nolint:errcheck
 
-	if err := persistence.RemoveRepository(ctx, tx, r); err != nil {
+	if err := persistence.RemoveRepository(ctx, tx, repoID); err != nil {
 		return err
 	}
 

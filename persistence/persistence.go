@@ -39,7 +39,7 @@ func RepositoryNeedsSync(
 func RemoveRepository(
 	ctx context.Context,
 	tx *sql.Tx,
-	r *github.Repository,
+	repoID int64,
 ) error {
 	// Un-link the type definitions from the repository so that we can delete
 	// the repository without removing basic type information.
@@ -49,7 +49,7 @@ func RemoveRepository(
 			repository_id = NULL,
 			url = NULL
 		WHERE repository_id = $1`,
-		r.GetID(),
+		repoID,
 	); err != nil {
 		return fmt.Errorf("unable to decouple types from repository: %w", err)
 	}
@@ -57,8 +57,8 @@ func RemoveRepository(
 	if _, err := tx.ExecContext(
 		ctx,
 		`DELETE FROM dogmabrowser.repository
-		WHERE github_id = $1`,
-		r.GetID(),
+		WHERE id = $1`,
+		repoID,
 	); err != nil {
 		return fmt.Errorf("unable to remove repository: %w", err)
 	}

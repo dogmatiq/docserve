@@ -4,14 +4,12 @@ import (
 	"context"
 	"math/rand"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/dogmatiq/browser/analyzer"
 	"github.com/dogmatiq/browser/githubx"
 	"github.com/dogmatiq/dodeca/config"
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/dogmatiq/linger"
 	"github.com/google/go-github/v35/github"
 	"go.uber.org/dig"
 	"golang.org/x/sync/errgroup"
@@ -59,36 +57,26 @@ func main() {
 			}
 		})
 
-		if os.Getenv("SCAN") != "" {
-			g.Go(func() error {
-				for {
-					if err := githubx.ListInstallations(
+		g.Go(func() error {
+			return githubx.ListInstallations(
+				ctx,
+				c.AppClient,
+				func(ctx context.Context, i *github.Installation) error {
+					ic, err := c.InstallationClient(ctx, i.GetID())
+					if err != nil {
+						return err
+					}
+
+					return githubx.ListRepos(
 						ctx,
-						c.AppClient,
-						func(ctx context.Context, i *github.Installation) error {
-							ic, err := c.InstallationClient(ctx, i.GetID())
-							if err != nil {
-								return err
-							}
-
-							return githubx.ListRepos(
-								ctx,
-								ic,
-								func(ctx context.Context, r *github.Repository) error {
-									return o.EnqueueAnalyis(ctx, r)
-								},
-							)
+						ic,
+						func(ctx context.Context, r *github.Repository) error {
+							return o.EnqueueAnalyis(ctx, r.GetID())
 						},
-					); err != nil {
-						return err
-					}
-
-					if err := linger.Sleep(ctx, 10*time.Minute); err != nil {
-						return err
-					}
-				}
-			})
-		}
+					)
+				},
+			)
+		})
 
 		g.Go(func() error {
 			s := http.Server{

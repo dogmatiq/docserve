@@ -109,10 +109,13 @@ func (c *Connector) InstallationClient(ctx context.Context, id int64) (*github.C
 //
 // The client uses an access token that is only granted access to the specified
 // repository.
-func (c *Connector) RepositoryClient(ctx context.Context, id int64) (*github.Client, error) {
-	i, _, err := c.AppClient.Apps.FindRepositoryInstallationByID(ctx, id)
+func (c *Connector) RepositoryClient(ctx context.Context, id int64) (*github.Client, bool, error) {
+	i, res, err := c.AppClient.Apps.FindRepositoryInstallationByID(ctx, id)
+	if res.StatusCode == http.StatusNotFound {
+		return nil, false, nil
+	}
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	return c.newClient(
@@ -121,7 +124,7 @@ func (c *Connector) RepositoryClient(ctx context.Context, id int64) (*github.Cli
 			RepositoryIDs: []int64{id},
 			Permissions:   c.Permissions,
 		},
-	), nil
+	), true, nil
 }
 
 // UserClient returns a GitHub client that is authenticated as a GitHub user who

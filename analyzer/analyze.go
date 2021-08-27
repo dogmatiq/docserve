@@ -20,25 +20,62 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+// Analyzer performs static analysis on repositories and stores the results in
+// the database.
 type Analyzer struct {
 	DB        *sql.DB
 	Connector *githubx.Connector
 	Logger    logging.Logger
 }
 
-func (a *Analyzer) Analyze(ctx context.Context, r *github.Repository) error {
-	if err := a.analyze(ctx, r); err != nil {
+// Analyze analyzes the repo with the given ID.
+func (a *Analyzer) Analyze(ctx context.Context, repoID int64) error {
+	c, ok, err := a.Connector.RepositoryClient(ctx, repoID)
+	if err != nil {
+		return fmt.Errorf("unable to obtain github client for repository #%d: %w", repoID, err)
+	}
+	if !ok {
+		logging.Log(
+			a.Logger,
+			"[#%d] skipping analysis of inaccessible repository",
+			repoID,
+		)
+
+		return nil
+	}
+
+	r, res, err := c.Repositories.GetByID(ctx, repoID)
+	if res.StatusCode == http.StatusNotFound {
+		logging.Log(
+			a.Logger,
+			"[#%d] skipping analysis of non-existant repository",
+			repoID,
+		)
+
+		return nil
+	}
+
+	if err != nil {
+		return fmt.Errorf("unable to find repository #%d", repoID)
+	}
+
+	if err := a.analyze(ctx, c, r); err != nil {
 		return fmt.Errorf("unable to analyze %s: %w", r.GetFullName(), err)
 	}
 
 	return nil
 }
 
-func (a *Analyzer) analyze(ctx context.Context, r *github.Repository) error {
+func (a *Analyzer) analyze(
+	ctx context.Context,
+	c *github.Client,
+	r *github.Repository,
+) error {
 	if r.GetIsTemplate() {
 		logging.Log(
 			a.Logger,
-			"[%s] skipping analysis of template repository",
+			"[#%d %s] skipping analysis of template repository",
+			r.GetID(),
 			r.GetFullName(),
 		)
 
@@ -48,16 +85,12 @@ func (a *Analyzer) analyze(ctx context.Context, r *github.Repository) error {
 	if r.GetFork() {
 		logging.Log(
 			a.Logger,
-			"[%s] skipping analysis of forked repository",
+			"[#%d %s] skipping analysis of forked repository",
+			r.GetID(),
 			r.GetFullName(),
 		)
 
 		return nil
-	}
-
-	c, err := a.Connector.RepositoryClient(ctx, r.GetID())
-	if err != nil {
-		return err
 	}
 
 	branch, _, err := c.Repositories.GetBranch(
@@ -85,7 +118,8 @@ func (a *Analyzer) analyze(ctx context.Context, r *github.Repository) error {
 	if !needsSync {
 		logging.Log(
 			a.Logger,
-			"[%s] skipping analysis of %s branch (%s), commit has already been analysed",
+			"[#%d %s] skipping analysis of %s branch (%s), commit has already been analysed",
+			r.GetID(),
 			r.GetFullName(),
 			r.GetDefaultBranch(),
 			commit,
@@ -154,7 +188,8 @@ func (a *Analyzer) isGoModule(
 		if res.StatusCode == http.StatusNotFound {
 			logging.Log(
 				a.Logger,
-				"[%s] skipping analysis of %s branch (%s), go.mod file not present",
+				"[#%d %s] skipping analysis of %s branch (%s), go.mod file not present",
+				r.GetID(),
 				r.GetFullName(),
 				r.GetDefaultBranch(),
 				commit,
@@ -179,7 +214,8 @@ func (a *Analyzer) isGoModule(
 	if err != nil {
 		logging.Log(
 			a.Logger,
-			"[%s] skipping analysis of %s branch (%s), go.mod file is invalid: %s",
+			"[#%d %s] skipping analysis of %s branch (%s), go.mod file is invalid: %s",
+			r.GetID(),
 			r.GetFullName(),
 			r.GetDefaultBranch(),
 			commit,
@@ -192,7 +228,8 @@ func (a *Analyzer) isGoModule(
 	if mod.Module.Mod.Path == "github.com/dogmatiq/dogma" {
 		logging.Log(
 			a.Logger,
-			"[%s] skipping analysis of %s branch (%s), found dogma module: %s",
+			"[#%d %s] skipping analysis of %s branch (%s), found dogma module: %s",
+			r.GetID(),
 			r.GetFullName(),
 			r.GetDefaultBranch(),
 			commit,
@@ -204,7 +241,8 @@ func (a *Analyzer) isGoModule(
 
 	logging.Log(
 		a.Logger,
-		"[%s] analyzing %s branch (%s), found module %s",
+		"[#%d %s] analyzing %s branch (%s), found module %s",
+		r.GetID(),
 		r.GetFullName(),
 		r.GetDefaultBranch(),
 		commit,
@@ -302,7 +340,8 @@ func (a *Analyzer) analyzePackages(
 			for _, err := range pkg.Errors {
 				logging.Log(
 					a.Logger,
-					"[%s] unable to analyze %s: %s",
+					"[#%d %s] unable to analyze %s: %s",
+					r.GetID(),
 					r.GetFullName(),
 					pkg.PkgPath,
 					err,
@@ -314,7 +353,8 @@ func (a *Analyzer) analyzePackages(
 
 		logging.Log(
 			a.Logger,
-			"[%s] analyzing %s",
+			"[#%d %s] analyzing %s",
+			r.GetID(),
 			r.GetFullName(),
 			pkg.PkgPath,
 		)
@@ -336,7 +376,8 @@ func (a *Analyzer) analyzePackage(
 		if p := recover(); p != nil {
 			logging.Log(
 				a.Logger,
-				"[%s] recovered from panic: %s",
+				"[#%d %s] recovered from panic: %s",
+				r.GetID(),
 				r.GetFullName(),
 				p,
 			)
@@ -348,7 +389,8 @@ func (a *Analyzer) analyzePackage(
 	for _, app := range apps {
 		logging.Log(
 			a.Logger,
-			"[%s] discovered application: %s",
+			"[#%d %s] discovered application: %s",
+			r.GetID(),
 			r.GetFullName(),
 			app.Identity(),
 		)
@@ -372,7 +414,8 @@ func (a *Analyzer) analyzePackage(
 
 				logging.Log(
 					a.Logger,
-					"[%s] discovered type: %s",
+					"[#%d %s] discovered type: %s",
+					r.GetID(),
 					r.GetFullName(),
 					s.Name,
 				)
