@@ -70,20 +70,20 @@ function findMatchingRegions(name, query) {
             continue
         }
 
-        const nameChar = name[0]
-        nameIndex++
-        name = name.substr(1)
-
-        if (nameChar.match(/\s/)) {
-            continue
-        }
-
         if (!withinMatch) {
             const i = name.indexOf(query)
             if (i !== -1) {
                 indices.push([nameIndex+i, nameIndex+i + query.length - 1])
                 return indices
             }
+        }
+
+        const nameChar = name[0]
+        nameIndex++
+        name = name.substr(1)
+
+        if (nameChar.match(/\s/)) {
+            continue
         }
 
         if (nameChar === queryChar) {
