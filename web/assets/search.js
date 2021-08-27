@@ -125,8 +125,11 @@ searchForm.addEventListener("submit", (event) => {
     }
 })
 
+searchInput.addEventListener("search", doSearch)
+searchInput.addEventListener("keyup", doSearch)
+
 var prevQuery = ""
-searchInput.addEventListener("keypress", async (event) => {
+async function doSearch() {
     const query = searchInput.value
     if (query === prevQuery) {
         return
@@ -221,7 +224,7 @@ searchInput.addEventListener("keypress", async (event) => {
     }
 
     searchResults.style.display = 'block'
-});
+}
 
 searchInput.addEventListener('keydown', (event) => {
     if (searchResults.style.display !== 'block') {
