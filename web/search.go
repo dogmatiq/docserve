@@ -9,46 +9,46 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type searchTerm struct {
+type searchItem struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
 	Docs string `json:"docs,omitempty"`
 	URI  string `json:"uri"`
 }
 
-func searchTerms(version string, db *sql.DB) gin.HandlerFunc {
+func searchItems(version string, db *sql.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var terms []searchTerm
+		var items []searchItem
 
-		t, err := applicationSearchTerms(ctx, db)
+		i, err := applicationSearchItems(ctx, db)
 		if err != nil {
 			fmt.Println(err) // TODO
 			renderError(ctx, version, http.StatusInternalServerError)
 			return
 		}
-		terms = append(terms, t...)
+		items = append(items, i...)
 
-		t, err = handlerSearchTerms(ctx, db)
+		i, err = handlerSearchItems(ctx, db)
 		if err != nil {
 			fmt.Println(err) // TODO
 			renderError(ctx, version, http.StatusInternalServerError)
 			return
 		}
-		terms = append(terms, t...)
+		items = append(items, i...)
 
-		t, err = messageSearchTerms(ctx, db)
+		i, err = messageSearchItems(ctx, db)
 		if err != nil {
 			fmt.Println(err) // TODO
 			renderError(ctx, version, http.StatusInternalServerError)
 			return
 		}
-		terms = append(terms, t...)
+		items = append(items, i...)
 
-		ctx.PureJSON(http.StatusOK, terms)
+		ctx.PureJSON(http.StatusOK, items)
 	}
 }
 
-func applicationSearchTerms(ctx context.Context, db *sql.DB) ([]searchTerm, error) {
+func applicationSearchItems(ctx context.Context, db *sql.DB) ([]searchItem, error) {
 	rows, err := db.QueryContext(
 		ctx,
 		`SELECT
@@ -63,36 +63,36 @@ func applicationSearchTerms(ctx context.Context, db *sql.DB) ([]searchTerm, erro
 		return nil, fmt.Errorf("unable to query applications: %w", err)
 	}
 
-	var terms []searchTerm
+	var items []searchItem
 
 	for rows.Next() {
 		var (
-			key string
-			t   searchTerm
+			key  string
+			item searchItem
 		)
 
 		if err := rows.Scan(
 			&key,
-			&t.Name,
-			&t.Docs,
+			&item.Name,
+			&item.Docs,
 		); err != nil {
 			return nil, fmt.Errorf("unable scan application result: %w", err)
 		}
 
-		t.Type = "application"
-		t.URI = "/applications/" + key
+		item.Type = "application"
+		item.URI = "/applications/" + key
 
-		terms = append(terms, t)
+		items = append(items, item)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("unable to iterate all application rows: %w", err)
 	}
 
-	return terms, nil
+	return items, nil
 }
 
-func handlerSearchTerms(ctx context.Context, db *sql.DB) ([]searchTerm, error) {
+func handlerSearchItems(ctx context.Context, db *sql.DB) ([]searchItem, error) {
 	rows, err := db.QueryContext(
 		ctx,
 		`SELECT
@@ -110,36 +110,36 @@ func handlerSearchTerms(ctx context.Context, db *sql.DB) ([]searchTerm, error) {
 		return nil, fmt.Errorf("unable to query handlers: %w", err)
 	}
 
-	var terms []searchTerm
+	var items []searchItem
 
 	for rows.Next() {
 		var (
-			key string
-			t   searchTerm
+			key  string
+			item searchItem
 		)
 
 		if err := rows.Scan(
 			&key,
-			&t.Name,
-			&t.Type,
-			&t.Docs,
+			&item.Name,
+			&item.Type,
+			&item.Docs,
 		); err != nil {
 			return nil, fmt.Errorf("unable scan handler result: %w", err)
 		}
 
-		t.URI = "/handlers/" + key
+		item.URI = "/handlers/" + key
 
-		terms = append(terms, t)
+		items = append(items, item)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("unable to iterate all handler rows: %w", err)
 	}
 
-	return terms, nil
+	return items, nil
 }
 
-func messageSearchTerms(ctx context.Context, db *sql.DB) ([]searchTerm, error) {
+func messageSearchItems(ctx context.Context, db *sql.DB) ([]searchItem, error) {
 	rows, err := db.QueryContext(
 		ctx,
 		`SELECT
@@ -156,31 +156,31 @@ func messageSearchTerms(ctx context.Context, db *sql.DB) ([]searchTerm, error) {
 		return nil, fmt.Errorf("unable to query handlers: %w", err)
 	}
 
-	var terms []searchTerm
+	var items []searchItem
 
 	for rows.Next() {
 		var (
-			pkg string
-			t   searchTerm
+			pkg  string
+			item searchItem
 		)
 
 		if err := rows.Scan(
 			&pkg,
-			&t.Name,
-			&t.Type,
-			&t.Docs,
+			&item.Name,
+			&item.Type,
+			&item.Docs,
 		); err != nil {
 			return nil, fmt.Errorf("unable scan handler result: %w", err)
 		}
 
-		t.URI = "/messages/" + pkg + "." + t.Name
+		item.URI = "/messages/" + pkg + "." + item.Name
 
-		terms = append(terms, t)
+		items = append(items, item)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("unable to iterate all handler rows: %w", err)
 	}
 
-	return terms, nil
+	return items, nil
 }

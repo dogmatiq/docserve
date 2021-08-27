@@ -15,6 +15,7 @@ import (
 	"github.com/google/go-github/v35/github"
 )
 
+// Handler is an interface for handlers that render human-readable pages.
 type Handler interface {
 	Route() (string, string)
 	Template() string
@@ -22,6 +23,8 @@ type Handler interface {
 	View(ctx *gin.Context) (string, interface{}, error)
 }
 
+// NewRouter returns an http.Handler that routes requests to the appropriate
+// handler.
 func NewRouter(
 	version string,
 	c *githubx.Connector,
@@ -50,8 +53,8 @@ func NewRouter(
 	)
 
 	router.GET(
-		"/search/terms.json",
-		searchTerms(version, db),
+		"/search/items.json",
+		searchItems(version, db),
 	)
 
 	auth := requireOAuth(version, c, key)

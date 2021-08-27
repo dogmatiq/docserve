@@ -1,43 +1,58 @@
-const fusePromise = (async () => {
-    const options = {
-        threshold: 0.5,
-        includeMatches: true,
-        findAllMatches: true,
-        useExtendedSearch: true,
-        keys: ["name"]
-    };
-
-    const res = await window.fetch('/search/terms.json')
-    const data = await res.json()
-    return new Fuse(data, options)
+const searchInput = document.getElementById('search')
+const searchResults = document.getElementById('search_results')
+const searchItems = (async () => {
+    const res = await window.fetch('/search/items.json')
+    return res.json()
 })()
 
-const search = document.getElementById('search')
-const resultsContainer = document.getElementById('search_results')
 
-function containsCharactersInOrder(name, query) {
-    for (ch of name) {
-        if (!query) {
-            return true
-        }
+function filterItems(query, items) {
+    const matches = []
 
-        if (ch.match(/\s/)) {
-            continue
-        }
-
-        if (query[0].match(/\s/) || query[0].localeCompare(
-            ch,
-            undefined,
-            { sensitivity: 'accent' },
-        ) === 0) {
-            query = query.substr(1)
+    for (item of items) {
+        const indices = findMatchingRegions(item.name, query)
+        if (indices.length !== 0) {
+            const score = computeScore(item.name, indices)
+            matches.push({score, indices, item})
         }
     }
 
-    return !query;
+    matches.sort((a, b) => {
+        if (a.score !== b.score) {
+            return a.score - b.score
+        }
+
+        return a.item.name.localeCompare(b.item.name)
+    })
+
+    return matches
 }
 
-function computeMatchingRegions(name, query) {
+// computeScore returns a score for a item that matched a search query.
+// The lower the score, the better the match.
+function computeScore(name, indices) {
+    const lengthWeight = 1.0 
+    const distanceWeight = 1.0
+    const disjointWeight = 1.0
+
+    // Move shorter matches to the top, as this means the query string matched a
+    // greater percentage of the name.
+    let score = name.length * lengthWeight
+
+    // Move results with matches closer to the start of the string to the top,
+    // as you would _usually_ start by typing the start of the word.
+    for (const [begin, end] of indices) {
+        score += (begin / name.length) * distanceWeight
+        break
+    }
+
+    // Add a further penalty for having more disjoint matches.
+    score *= indices.length * disjointWeight
+
+    return score
+}
+
+function findMatchingRegions(name, query) {
     name = name.toLowerCase()
     query = query.toLowerCase()
 
@@ -94,34 +109,28 @@ function computeMatchingRegions(name, query) {
     return indices;
 }
 
-search.addEventListener("search", async (event) => {
-    if (search.value.length === 0) {
-        resultsContainer.style.display = 'none'
+searchInput.addEventListener("search", async (event) => {
+    if (searchInput.value.length === 0) {
+        searchResults.style.display = 'none'
         return
     }
 
-    const query = search.value
-    const fuse = await fusePromise
-    const results = fuse.search(query)
-    const card = resultsContainer.getElementsByClassName("card-body")[0]
+    const query = searchInput.value
+    const results = filterItems(query, await searchItems)
 
+    const card = searchResults.getElementsByClassName("card-body")[0]
     card.innerHTML = ''
     
     for (const r of results) {
-        const indices = computeMatchingRegions(r.item.name, query)
-
-        if (indices.length === 0) {
-            continue
-        }
-
         const container = document.createElement('p')
         container.className = 'result'
 
         const link = document.createElement('a')
         link.setAttribute("href", r.item.uri)
+        link.setAttribute("title", "score: " + JSON.stringify(r.score))
 
         let prev = 0
-        for (const [begin, end] of indices) {
+        for (const [begin, end] of r.indices) {
             if (begin > prev) {
                 const text = r.item.name.substring(prev, begin)
                 link.append(text)
@@ -132,25 +141,6 @@ search.addEventListener("search", async (event) => {
             link.appendChild(elem)
             prev = end + 1
         }
-
-        // for (const match of r.matches) {
-        //     for (const [begin, end] of match.indices) {
-        //         if (begin > prev) {
-        //             const text = r.item.name.substring(prev, begin)
-        //             link.append(text)
-        //         }
-
-        //         if (begin < prev) {
-        //             // Bug in fuse.js?
-        //             break
-        //         }
-
-        //         const elem = document.createElement('mark')
-        //         elem.innerText = r.item.name.substring(begin, end + 1)
-        //         link.appendChild(elem)
-        //         prev = end + 1
-        //     }
-        // }
 
         if (r.item.name.length > prev) {
             const text = r.item.name.substr(prev)
@@ -206,5 +196,5 @@ search.addEventListener("search", async (event) => {
         card.appendChild(message)
     }
 
-    resultsContainer.style.display = 'block'
+    searchResults.style.display = 'block'
 });
