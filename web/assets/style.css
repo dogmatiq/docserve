@@ -132,3 +132,10 @@ footer {
     margin: 2em;
     text-align: center;
 }
+
+footer mark {
+    font-family: monospace;
+    background: #dddddd;
+    border: 1px solid #aaaaaa;
+    padding: 0 0.2em;
+}

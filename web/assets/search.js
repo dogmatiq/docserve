@@ -126,7 +126,9 @@ searchForm.addEventListener("submit", (event) => {
 })
 
 var prevQuery = ""
-searchInput.addEventListener("search", async (event) => {
+searchInput.addEventListener("keypress", async (event) => {
+    console.log(event)
+
     const query = searchInput.value
     if (query === prevQuery) {
         return
@@ -274,7 +276,7 @@ document.addEventListener("keyup", (event) => {
         return
     }
 
-    if (event.key !== "/") return
+    if (event.key !== "/" && event.key !== "s") return
     if (/^(?:input|textarea|select|button)$/i.test(event.target.tagName)) return
 
     event.preventDefault();
