@@ -127,8 +127,6 @@ searchForm.addEventListener("submit", (event) => {
 
 var prevQuery = ""
 searchInput.addEventListener("keypress", async (event) => {
-    console.log(event)
-
     const query = searchInput.value
     if (query === prevQuery) {
         return
@@ -238,6 +236,13 @@ searchInput.addEventListener('keydown', (event) => {
     const active = group.getElementsByClassName('active')[0]
 
     switch (event.key) {
+        case "Escape":
+            event.preventDefault()
+            searchInput.value = '';
+            prevQuery = '';
+            searchResults.style.display = 'none';
+            break;
+
         case "ArrowUp":
             if (active) {
                 const prev = active.previousSibling
