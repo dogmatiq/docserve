@@ -108,6 +108,17 @@ func (a *Analyzer) analyze(
 		return nil
 	}
 
+	if r.GetArchived() {
+		logging.Log(
+			a.Logger,
+			"[#%d %s] skipping analysis of archived repository",
+			r.GetID(),
+			r.GetFullName(),
+		)
+
+		return nil
+	}
+
 	if r.GetFork() {
 		logging.Log(
 			a.Logger,
