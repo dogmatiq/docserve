@@ -10,7 +10,7 @@ import (
 	"github.com/dogmatiq/browser/githubx"
 	"github.com/dogmatiq/dodeca/config"
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v38/github"
 	"go.uber.org/dig"
 	"golang.org/x/sync/errgroup"
 )

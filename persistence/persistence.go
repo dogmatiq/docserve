@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/dogmatiq/configkit"
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v38/github"
 )
 
 func RepositoryNeedsSync(

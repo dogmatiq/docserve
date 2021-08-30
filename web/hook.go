@@ -7,7 +7,7 @@ import (
 
 	"github.com/dogmatiq/browser/analyzer"
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v38/github"
 )
 
 func handleGitHubHook(

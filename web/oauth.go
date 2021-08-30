@@ -9,7 +9,7 @@ import (
 
 	"github.com/dogmatiq/browser/githubx"
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v38/github"
 	"golang.org/x/oauth2"
 	jose "gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"

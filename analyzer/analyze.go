@@ -15,7 +15,7 @@ import (
 	"github.com/dogmatiq/configkit"
 	"github.com/dogmatiq/configkit/static"
 	"github.com/dogmatiq/dodeca/logging"
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v38/github"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
 )
@@ -44,6 +44,7 @@ func (a *Analyzer) Analyze(ctx context.Context, repoID int64) error {
 		return nil
 	}
 
+	// First look up the repository by ID to find its name.
 	r, res, err := c.Repositories.GetByID(ctx, repoID)
 	if res.StatusCode == http.StatusNotFound {
 		logging.Log(
@@ -54,9 +55,34 @@ func (a *Analyzer) Analyze(ctx context.Context, repoID int64) error {
 
 		return nil
 	}
-
 	if err != nil {
-		return fmt.Errorf("unable to find repository #%d", repoID)
+		return fmt.Errorf(
+			"unable to fetch repository details for #%d: %w",
+			repoID,
+			err,
+		)
+	}
+
+	// Then look it up again by name because the GetByID() operation doesn't
+	// return the complete repository information, such as whether the
+	// repository is archived or a template repository.
+	r, res, err = c.Repositories.Get(ctx, r.GetOwner().GetLogin(), r.GetName())
+	if res.StatusCode == http.StatusNotFound {
+		logging.Log(
+			a.Logger,
+			"[#%d %s] skipping analysis of non-existant repository",
+			repoID,
+			r.GetFullName(),
+		)
+
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf(
+			"unable to fetch repository details for %s: %w",
+			r.GetFullName(),
+			err,
+		)
 	}
 
 	if err := a.analyze(ctx, c, r); err != nil {
@@ -98,6 +124,7 @@ func (a *Analyzer) analyze(
 		r.GetOwner().GetLogin(),
 		r.GetName(),
 		r.GetDefaultBranch(),
+		false,
 	)
 	if err != nil {
 		return err

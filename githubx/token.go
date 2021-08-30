@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/dogmatiq/linger"
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v38/github"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/jws" // nolint // TODO https://github.com/dogmatiq/browser/issues/1
 )

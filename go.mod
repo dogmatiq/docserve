@@ -8,7 +8,7 @@ require (
 	github.com/dogmatiq/linger v0.2.1
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.7.4
-	github.com/google/go-github/v35 v35.3.0
+	github.com/google/go-github/v38 v38.1.0
 	github.com/jackc/pgx/v4 v4.13.0
 	go.uber.org/dig v1.12.0
 	golang.org/x/mod v0.5.0

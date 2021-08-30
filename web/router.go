@@ -13,7 +13,7 @@ import (
 	"github.com/dogmatiq/browser/web/pages/handlers"
 	"github.com/dogmatiq/browser/web/pages/messages"
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v38/github"
 )
 
 // Handler is an interface for handlers that render human-readable pages.

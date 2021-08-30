@@ -3,7 +3,7 @@ package githubx
 import (
 	"context"
 
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v38/github"
 )
 
 // ListInstallations calls fn for each installation of the application.
