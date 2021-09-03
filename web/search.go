@@ -54,7 +54,7 @@ func applicationSearchItems(ctx context.Context, db *sql.DB) ([]searchItem, erro
 		`SELECT
 			a.key,
 			a.name,
-			t.docs
+			COALESCE(t.docs, '')
 		FROM dogmabrowser.application AS a
 		INNER JOIN dogmabrowser.type AS t
 		ON t.id = a.type_id`,
@@ -100,7 +100,7 @@ func handlerSearchItems(ctx context.Context, db *sql.DB) ([]searchItem, error) {
 			h.key,
 			h.name,
 			h.handler_type,
-			t.docs
+			COALESCE(t.docs, '')
 		FROM dogmabrowser.handler AS h
 		INNER JOIN dogmabrowser.type AS t
 		ON t.id = h.type_id
@@ -148,7 +148,7 @@ func messageSearchItems(ctx context.Context, db *sql.DB) ([]searchItem, error) {
 			t.package,
 			t.name,
 			MODE() WITHIN GROUP (ORDER BY m.role),
-			t.docs
+			COALESCE(t.docs, '')
 		FROM dogmabrowser.handler_message AS m
 		INNER JOIN dogmabrowser.type AS t
 		ON t.id = m.type_id
