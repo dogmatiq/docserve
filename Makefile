@@ -1,4 +1,6 @@
 DOCKER_REPO = ghcr.io/dogmatiq/browser
+DOCKER_PLATFORMS += linux/amd64
+DOCKER_PLATFORMS += linux/arm64
 
 GO_EMBEDDED_FILES += persistence/schema.sql
 GO_EMBEDDED_FILES += $(shell find web -iname '*.html')
