@@ -13,7 +13,7 @@ require (
 	go.uber.org/dig v1.14.1
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
 	golang.org/x/oauth2 v0.0.0-20210817223510-7df4dd6e12ab
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/tools v0.1.11
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+	golang.org/x/tools v0.1.12
 	gopkg.in/square/go-jose.v2 v2.6.0
 )
