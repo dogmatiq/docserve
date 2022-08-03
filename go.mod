@@ -10,7 +10,7 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/google/go-github/v38 v38.1.0
 	github.com/jackc/pgx/v4 v4.16.1
-	go.uber.org/dig v1.14.1
+	go.uber.org/dig v1.15.0
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
 	golang.org/x/oauth2 v0.0.0-20210817223510-7df4dd6e12ab
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
