@@ -11,7 +11,7 @@ require (
 	github.com/google/go-github/v38 v38.1.0
 	github.com/jackc/pgx/v4 v4.17.2
 	go.uber.org/dig v1.15.0
-	golang.org/x/mod v0.6.0
+	golang.org/x/mod v0.7.0
 	golang.org/x/oauth2 v0.0.0-20210817223510-7df4dd6e12ab
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	golang.org/x/tools v0.2.0
