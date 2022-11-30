@@ -55,8 +55,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dogmatiq/configkit v0.11.1-0.20210627063455-14abe13af60d h1:z6Up+psHpBC1pO++6kD4hcpGz3xTHjOHaJrQszCdB2Q=
 github.com/dogmatiq/configkit v0.11.1-0.20210627063455-14abe13af60d/go.mod h1:dJeFSgBziEN1ln2PPQDvnY8wHx+Ua/jVcLQ4VXhrBGE=
-github.com/dogmatiq/dodeca v1.4.0 h1:b1cz1/FeCbzs3/nZZfkHv4dbo4UQMseheTRKf0yutYQ=
-github.com/dogmatiq/dodeca v1.4.0/go.mod h1:wYkgA+Ou7vuIBHflWceVG/KEVfZiluEoNY0MglFfaow=
+github.com/dogmatiq/dodeca v1.4.1 h1:vNumM6nTBZU/YDwuyRqsQD7cHQI3Q3yNZJyDj6JmDM8=
+github.com/dogmatiq/dodeca v1.4.1/go.mod h1:wYkgA+Ou7vuIBHflWceVG/KEVfZiluEoNY0MglFfaow=
 github.com/dogmatiq/dogma v0.11.1 h1:N80eSyJ6uk7Bi20pZa4TJ5W/0B83ZgMLblENLB0Pv6U=
 github.com/dogmatiq/dogma v0.11.1/go.mod h1:8TdjQ5jjV2DcCPb/jjHPgSrqU66H6092yMEIF5HGx0g=
 github.com/dogmatiq/iago v0.4.0 h1:57nZqVT34IZxtCZEW/RFif7DNUEjMXgevfr/Mmd0N8I=
