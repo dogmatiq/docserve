@@ -14,6 +14,6 @@ require (
 	golang.org/x/mod v0.7.0
 	golang.org/x/oauth2 v0.0.0-20210817223510-7df4dd6e12ab
 	golang.org/x/sync v0.1.0
-	golang.org/x/tools v0.4.0
+	golang.org/x/tools v0.5.0
 	gopkg.in/square/go-jose.v2 v2.6.0
 )
