@@ -9,7 +9,7 @@ require (
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.8.2
 	github.com/google/go-github/v38 v38.1.0
-	github.com/jackc/pgx/v4 v4.17.2
+	github.com/jackc/pgx/v4 v4.18.0
 	go.uber.org/dig v1.16.1
 	golang.org/x/mod v0.8.0
 	golang.org/x/oauth2 v0.0.0-20210817223510-7df4dd6e12ab
