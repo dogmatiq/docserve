@@ -7,7 +7,7 @@ require (
 	github.com/dogmatiq/dodeca v1.4.2
 	github.com/dogmatiq/linger v1.1.0
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
-	github.com/gin-gonic/gin v1.8.2
+	github.com/gin-gonic/gin v1.9.0
 	github.com/google/go-github/v38 v38.1.0
 	github.com/jackc/pgx/v4 v4.18.0
 	go.uber.org/dig v1.16.1
