@@ -1,4 +1,4 @@
-FROM golang:1
+FROM golang:latest
 ENV GIN_MODE=release
 
 ARG TARGETPLATFORM
