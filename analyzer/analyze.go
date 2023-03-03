@@ -46,16 +46,17 @@ func (a *Analyzer) Analyze(ctx context.Context, repoID int64) error {
 
 	// First look up the repository by ID to find its name.
 	r, res, err := c.Repositories.GetByID(ctx, repoID)
-	if res.StatusCode == http.StatusNotFound {
-		logging.Log(
-			a.Logger,
-			"[#%d] skipping analysis of non-existant repository",
-			repoID,
-		)
-
-		return nil
-	}
 	if err != nil {
+		if res != nil && res.StatusCode == http.StatusNotFound {
+			logging.Log(
+				a.Logger,
+				"[#%d] skipping analysis of non-existant repository",
+				repoID,
+			)
+
+			return nil
+		}
+
 		return fmt.Errorf(
 			"unable to fetch repository details for #%d: %w",
 			repoID,
@@ -67,17 +68,18 @@ func (a *Analyzer) Analyze(ctx context.Context, repoID int64) error {
 	// return the complete repository information, such as whether the
 	// repository is archived or a template repository.
 	r, res, err = c.Repositories.Get(ctx, r.GetOwner().GetLogin(), r.GetName())
-	if res.StatusCode == http.StatusNotFound {
-		logging.Log(
-			a.Logger,
-			"[#%d %s] skipping analysis of non-existant repository",
-			repoID,
-			r.GetFullName(),
-		)
-
-		return nil
-	}
 	if err != nil {
+		if res != nil && res.StatusCode == http.StatusNotFound {
+			logging.Log(
+				a.Logger,
+				"[#%d %s] skipping analysis of non-existant repository",
+				repoID,
+				r.GetFullName(),
+			)
+
+			return nil
+		}
+
 		return fmt.Errorf(
 			"unable to fetch repository details for %s: %w",
 			r.GetFullName(),
@@ -223,7 +225,7 @@ func (a *Analyzer) isGoModule(
 		},
 	)
 	if err != nil {
-		if res.StatusCode == http.StatusNotFound {
+		if res != nil && res.StatusCode == http.StatusNotFound {
 			logging.Log(
 				a.Logger,
 				"[#%d %s] skipping analysis of %s branch (%s), go.mod file not present",

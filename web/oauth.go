@@ -112,7 +112,7 @@ func requireOAuth(version string, c *githubx.Connector, key *rsa.PrivateKey) gin
 
 		user, res, err := client.Users.Get(ctx, "")
 		if err != nil {
-			if res.StatusCode == http.StatusUnauthorized {
+			if res != nil && res.StatusCode == http.StatusUnauthorized {
 				redirectToLogin(ctx, c.OAuthConfig)
 				return
 			}

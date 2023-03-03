@@ -111,10 +111,10 @@ func (c *Connector) InstallationClient(ctx context.Context, id int64) (*github.C
 // repository.
 func (c *Connector) RepositoryClient(ctx context.Context, id int64) (*github.Client, bool, error) {
 	i, res, err := c.AppClient.Apps.FindRepositoryInstallationByID(ctx, id)
-	if res.StatusCode == http.StatusNotFound {
-		return nil, false, nil
-	}
 	if err != nil {
+		if res.StatusCode == http.StatusNotFound {
+			return nil, false, nil
+		}
 		return nil, false, err
 	}
 
