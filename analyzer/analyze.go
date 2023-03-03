@@ -50,7 +50,7 @@ func (a *Analyzer) Analyze(ctx context.Context, repoID int64) error {
 		if res != nil && res.StatusCode == http.StatusNotFound {
 			logging.Log(
 				a.Logger,
-				"[#%d] skipping analysis of non-existant repository",
+				"[#%d] skipping analysis of non-existent repository",
 				repoID,
 			)
 
@@ -72,7 +72,7 @@ func (a *Analyzer) Analyze(ctx context.Context, repoID int64) error {
 		if res != nil && res.StatusCode == http.StatusNotFound {
 			logging.Log(
 				a.Logger,
-				"[#%d %s] skipping analysis of non-existant repository",
+				"[#%d %s] skipping analysis of non-existent repository",
 				repoID,
 				r.GetFullName(),
 			)
