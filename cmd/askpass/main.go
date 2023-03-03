@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	fmt.Println(os.Getenv("GITHUB_USER_TOKEN"))
+	fmt.Println(os.Getenv("_DOGMA_BROWSER_GITHUB_TOKEN"))
 }

@@ -2,10 +2,7 @@ package analyzer
 
 import (
 	"context"
-	"crypto/rsa"
-	"crypto/x509"
 	"database/sql"
-	"encoding/pem"
 	"fmt"
 	"go/ast"
 	"go/token"
@@ -26,10 +23,9 @@ import (
 // Analyzer performs static analysis on repositories and stores the results in
 // the database.
 type Analyzer struct {
-	DB         *sql.DB
-	Connector  *githubx.Connector
-	PrivateKey *rsa.PrivateKey
-	Logger     logging.Logger
+	DB        *sql.DB
+	Connector *githubx.Connector
+	Logger    logging.Logger
 }
 
 // Analyze analyzes the repo with the given ID.
@@ -304,11 +300,23 @@ func (a *Analyzer) loadPackages(
 	r *github.Repository,
 	commit string,
 ) ([]*packages.Package, string, error) {
-	pk, err := a.persistPrivateKey()
+	inst, _, err := a.Connector.AppClient.Apps.FindRepositoryInstallationByID(ctx, r.GetID())
 	if err != nil {
 		return nil, "", err
 	}
-	defer os.Remove(pk)
+
+	token, _, err := a.Connector.AppClient.Apps.CreateInstallationToken(
+		ctx,
+		inst.GetID(),
+		&github.InstallationTokenOptions{
+			Permissions: &github.InstallationPermissions{
+				Contents: github.String("read"),
+			},
+		},
+	)
+	if err != nil {
+		return nil, "", err
+	}
 
 	dir, err := a.downloadRepository(ctx, c, r, commit)
 	if err != nil {
@@ -330,10 +338,12 @@ func (a *Analyzer) loadPackages(
 			packages.NeedTypesInfo |
 			packages.NeedDeps,
 		Dir: dir,
-		Env: []string{
-			// See https://superuser.com/questions/232373/how-to-tell-git-which-private-key-to-use
-			"GIT_SSH_COMMAND=ssh -F /dev/null -i " + pk,
-		},
+		Env: append(
+			os.Environ(),
+			// This environment variable is read by the `askpass` binary, which
+			// is part of this project.
+			"_DOGMA_BROWSER_GITHUB_TOKEN="+token.GetToken(),
+		),
 	}
 
 	pkgs, err := packages.Load(cfg, "./...")
@@ -488,25 +498,4 @@ func (a *Analyzer) analyzePackage(
 	}
 
 	return apps, defs
-}
-
-func (a *Analyzer) persistPrivateKey() (string, error) {
-	f, err := os.CreateTemp("", "github-app-private-key")
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-	defer os.Remove(f.Name())
-
-	if err := pem.Encode(
-		f,
-		&pem.Block{
-			Type:  "RSA PRIVATE KEY",
-			Bytes: x509.MarshalPKCS1PrivateKey(a.PrivateKey),
-		},
-	); err != nil {
-		return "", err
-	}
-
-	return f.Name(), nil
 }
