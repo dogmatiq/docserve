@@ -8,8 +8,8 @@ import (
 
 	"github.com/dogmatiq/browser/analyzer"
 	"github.com/dogmatiq/browser/githubx"
-	"github.com/dogmatiq/dodeca/config"
 	"github.com/dogmatiq/dodeca/logging"
+	"github.com/dogmatiq/ferrite"
 	"github.com/google/go-github/v38/github"
 	"go.uber.org/dig"
 	"golang.org/x/sync/errgroup"
@@ -21,21 +21,18 @@ var version string
 func init() {
 	rand.Seed(time.Now().UnixNano())
 
-	// Setup a config bucket for reading environment variables.
-	provide(func() config.Bucket {
-		return config.Environment()
-	})
-
 	// Setup a system-wide logger that includes debug messages only if the DEBUG
 	// environment variable is set to "true".
-	provide(func(env config.Bucket) logging.Logger {
+	provide(func() logging.Logger {
 		return &logging.StandardLogger{
-			CaptureDebug: config.AsBoolF(env, "DEBUG"),
+			CaptureDebug: true,
 		}
 	})
 }
 
 func main() {
+	ferrite.Init()
+
 	invoke(func(
 		c *githubx.Connector,
 		o *analyzer.Orchestrator,

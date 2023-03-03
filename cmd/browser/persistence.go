@@ -6,17 +6,15 @@ import (
 	"time"
 
 	"github.com/dogmatiq/browser/persistence"
-	"github.com/dogmatiq/dodeca/config"
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 func init() {
-	provide(func(env config.Bucket) (*sql.DB, error) {
+	provide(func() (*sql.DB, error) {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 
-		dsn := config.AsString(env, "DSN")
-		db, err := sql.Open("pgx", dsn)
+		db, err := sql.Open("pgx", postgresDSN.Value())
 		if err != nil {
 			return nil, err
 		}
@@ -25,10 +23,6 @@ func init() {
 		db.SetConnMaxLifetime(5 * time.Minute)
 		db.SetMaxIdleConns(3)
 		db.SetMaxOpenConns(50)
-
-		// if err := persistence.DropSchema(ctx, db); err != nil {
-		// 	return nil, err
-		// }
 
 		if err := persistence.CreateSchema(ctx, db); err != nil {
 			return nil, err

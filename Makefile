@@ -16,3 +16,7 @@ run: $(GO_DEBUG_DIR)/browser
 
 .makefiles/%:
 	@curl -sfL https://makefiles.dev/v1 | bash /dev/stdin "$@"
+
+precommit:: ENVIRONMENT.md
+ENVIRONMENT.md: $(GO_DEBUG_DIR)/browser
+	FERRITE_MODE=usage/markdown $(GO_DEBUG_DIR)/browser 2> $@

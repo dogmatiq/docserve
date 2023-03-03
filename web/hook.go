@@ -12,11 +12,13 @@ import (
 
 func handleGitHubHook(
 	version string,
-	secret []byte,
+	secret string,
 	o *analyzer.Orchestrator,
 ) gin.HandlerFunc {
+	secretBytes := []byte(secret)
+
 	return func(ctx *gin.Context) {
-		payload, err := github.ValidatePayload(ctx.Request, secret)
+		payload, err := github.ValidatePayload(ctx.Request, secretBytes)
 		if err != nil {
 			renderError(ctx, version, http.StatusForbidden)
 			return

@@ -8,26 +8,26 @@ import (
 	"fmt"
 
 	"github.com/dogmatiq/browser/githubx"
-	"github.com/dogmatiq/dodeca/config"
 )
 
 func init() {
 	provide(func(
-		env config.Bucket,
 		pk *rsa.PrivateKey,
 	) (*githubx.Connector, error) {
+		baseURL, _ := githubURL.Value()
+
 		return githubx.NewConnector(
-			config.AsInt64(env, "GITHUB_APP_ID"),
+			int64(githubAppID.Value()),
 			pk,
-			config.AsString(env, "GITHUB_CLIENT_ID"),
-			config.AsString(env, "GITHUB_CLIENT_SECRET"),
-			config.AsURLDefault(env, "GITHUB_URL", ""),
+			githubAppClientID.Value(),
+			githubAppClientSecret.Value(),
+			baseURL,
 			nil, // use default http transport
 		)
 	})
 
-	provide(func(env config.Bucket) (*rsa.PrivateKey, error) {
-		content := config.AsBytes(env, "GITHUB_APP_PRIVATEKEY")
+	provide(func() (*rsa.PrivateKey, error) {
+		content := []byte(githubAppPrivateKey.Value())
 		block, _ := pem.Decode(content)
 		if block == nil {
 			return nil, errors.New("could not load private key: no valid PEM data found")

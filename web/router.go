@@ -31,7 +31,7 @@ func NewRouter(
 	c *githubx.Connector,
 	o *analyzer.Orchestrator,
 	key *rsa.PrivateKey,
-	hookSecret []byte,
+	hookSecret string,
 	db *sql.DB,
 ) http.Handler {
 	router := gin.Default()
