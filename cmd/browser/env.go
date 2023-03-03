@@ -8,15 +8,15 @@ var githubAppID = ferrite.
 	Required()
 
 var githubAppClientID = ferrite.
-	String("GITHUB_APP_CLIENT_ID", "the client ID of the GitHub application used to read repository content").
+	String("GITHUB_CLIENT_ID", "the client ID of the GitHub application used to read repository content").
 	Required()
 
 var githubAppClientSecret = ferrite.
-	String("GITHUB_APP_CLIENT_SECRET", "the client secret for the GitHub application used to read repository content").
+	String("GITHUB_CLIENT_SECRET", "the client secret for the GitHub application used to read repository content").
 	Required()
 
 var githubAppPrivateKey = ferrite.
-	String("GITHUB_APP_PRIVATE_KEY", "the private key for the GitHub application used to read repository content").
+	String("GITHUB_PRIVATE_KEY", "the private key for the GitHub application used to read repository content").
 	Required()
 
 var githubAppHookSecret = ferrite.
