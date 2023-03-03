@@ -63,12 +63,12 @@ export GITHUB_APP_CLIENT_SECRET=foo # (non-normative)
 
 > the ID of the GitHub application used to read repository content
 
-This variable **MUST** be set to `+1` or greater.
+This variable **MUST** be set to `1` or greater.
 If left undefined the application will print usage information to `STDERR` then
 exit with a non-zero exit code.
 
 ```bash
-export GITHUB_APP_ID=+2305843009213693952 # (non-normative)
+export GITHUB_APP_ID=4611686018427387904 # (non-normative)
 ```
 
 ### `GITHUB_APP_PRIVATE_KEY`
@@ -131,7 +131,7 @@ spec:
             - name: GITHUB_APP_CLIENT_SECRET # the client secret for the GitHub application used to read repository content
               value: foo
             - name: GITHUB_APP_ID # the ID of the GitHub application used to read repository content
-              value: "+2305843009213693952"
+              value: "4611686018427387904"
             - name: GITHUB_APP_PRIVATE_KEY # the private key for the GitHub application used to read repository content
               value: foo
             - name: GITHUB_HOOK_SECRET # the secret used to verify GitHub web-hook requests are genuine
@@ -152,7 +152,7 @@ data:
   DSN: foo # the PostgreSQL connection string
   GITHUB_APP_CLIENT_ID: foo # the client ID of the GitHub application used to read repository content
   GITHUB_APP_CLIENT_SECRET: foo # the client secret for the GitHub application used to read repository content
-  GITHUB_APP_ID: "+2305843009213693952" # the ID of the GitHub application used to read repository content
+  GITHUB_APP_ID: "4611686018427387904" # the ID of the GitHub application used to read repository content
   GITHUB_APP_PRIVATE_KEY: foo # the private key for the GitHub application used to read repository content
   GITHUB_HOOK_SECRET: foo # the secret used to verify GitHub web-hook requests are genuine
   GITHUB_URL: https://example.org/path # the base URL of the GitHub API
@@ -186,7 +186,7 @@ service:
       DSN: foo # the PostgreSQL connection string
       GITHUB_APP_CLIENT_ID: foo # the client ID of the GitHub application used to read repository content
       GITHUB_APP_CLIENT_SECRET: foo # the client secret for the GitHub application used to read repository content
-      GITHUB_APP_ID: "+2305843009213693952" # the ID of the GitHub application used to read repository content
+      GITHUB_APP_ID: "4611686018427387904" # the ID of the GitHub application used to read repository content
       GITHUB_APP_PRIVATE_KEY: foo # the private key for the GitHub application used to read repository content
       GITHUB_HOOK_SECRET: foo # the secret used to verify GitHub web-hook requests are genuine
       GITHUB_URL: https://example.org/path # the base URL of the GitHub API

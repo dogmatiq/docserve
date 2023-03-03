@@ -4,45 +4,55 @@ import (
 	"context"
 	"math/rand"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/dogmatiq/browser/analyzer"
 	"github.com/dogmatiq/browser/githubx"
 	"github.com/dogmatiq/dodeca/logging"
 	"github.com/dogmatiq/ferrite"
+	"github.com/dogmatiq/imbue"
 	"github.com/google/go-github/v38/github"
-	"go.uber.org/dig"
-	"golang.org/x/sync/errgroup"
 )
 
-// version is the current version, set automatically by the makefiles.
-var version string
+var (
+	// version is the current version, set automatically by the makefiles.
+	version string
+
+	// container is the dependency injection container.
+	container = imbue.New()
+)
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
 
-	// Setup a system-wide logger that includes debug messages only if the DEBUG
-	// environment variable is set to "true".
-	provide(func() logging.Logger {
-		return &logging.StandardLogger{
-			CaptureDebug: true,
-		}
-	})
+	imbue.With0(
+		container,
+		func(
+			ctx imbue.Context,
+		) (logging.Logger, error) {
+			return logging.DebugLogger, nil
+		},
+	)
 }
 
 func main() {
 	ferrite.Init()
 
-	invoke(func(
-		c *githubx.Connector,
-		o *analyzer.Orchestrator,
-		h http.Handler,
-		l logging.Logger,
-	) error {
-		ctx := context.Background()
-		g, ctx := errgroup.WithContext(ctx)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
 
-		g.Go(func() error {
+	g := container.WaitGroup(ctx)
+
+	imbue.Go2(
+		g,
+		func(
+			ctx context.Context,
+			o *analyzer.Orchestrator,
+			l logging.Logger,
+		) error {
 			for {
 				if err := o.Run(ctx); err != nil {
 					if err == context.Canceled {
@@ -52,9 +62,16 @@ func main() {
 					logging.LogString(l, err.Error())
 				}
 			}
-		})
+		},
+	)
 
-		g.Go(func() error {
+	imbue.Go2(
+		g,
+		func(
+			ctx context.Context,
+			c *githubx.Connector,
+			o *analyzer.Orchestrator,
+		) error {
 			return githubx.ListInstallations(
 				ctx,
 				c.AppClient,
@@ -73,9 +90,15 @@ func main() {
 					)
 				},
 			)
-		})
+		},
+	)
 
-		g.Go(func() error {
+	imbue.Go1(
+		g,
+		func(
+			ctx context.Context,
+			h http.Handler,
+		) error {
 			s := http.Server{
 				Addr:    ":8080",
 				Handler: h,
@@ -86,22 +109,10 @@ func main() {
 			}()
 
 			return s.ListenAndServe()
-		})
+		},
+	)
 
-		return g.Wait()
-	})
-}
-
-var container = dig.New()
-
-func provide(fn interface{}) {
-	if err := container.Provide(fn); err != nil {
-		panic(err)
-	}
-}
-
-func invoke(fn interface{}) {
-	if err := container.Invoke(fn); err != nil {
+	if err := g.Wait(); err != nil {
 		panic(err)
 	}
 }

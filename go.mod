@@ -6,15 +6,14 @@ require (
 	github.com/dogmatiq/configkit v0.11.1
 	github.com/dogmatiq/dodeca v1.4.2
 	github.com/dogmatiq/ferrite v0.3.3
+	github.com/dogmatiq/imbue v0.6.2
 	github.com/dogmatiq/linger v1.1.0
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.9.0
 	github.com/google/go-github/v38 v38.1.0
 	github.com/jackc/pgx/v4 v4.18.1
-	go.uber.org/dig v1.16.1
 	golang.org/x/mod v0.8.0
 	golang.org/x/oauth2 v0.5.0
-	golang.org/x/sync v0.1.0
 	golang.org/x/tools v0.6.0
 	gopkg.in/square/go-jose.v2 v2.6.0
 )
@@ -49,6 +48,7 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
+	github.com/xlab/treeprint v1.1.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
@@ -56,6 +56,7 @@ require (
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
 	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
