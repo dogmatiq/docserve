@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog], and this project adheres to
 [keep a changelog]: https://keepachangelog.com/en/1.0.0/
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 
+## [0.1.4] - 2023-03-03
+
+- Fix another misnamed environment variable, all environment variables are now
+  named as they were in v0.1.1
+
 ## [0.1.3] - 2023-03-03
 
 - Return environment variable naming to match v0.1.1, as the change in v0.1.2
@@ -34,6 +39,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [0.1.1]: https://github.com/dogmatiq/browser/releases/v0.1.1
 [0.1.2]: https://github.com/dogmatiq/browser/releases/v0.1.2
 [0.1.3]: https://github.com/dogmatiq/browser/releases/v0.1.3
+[0.1.4]: https://github.com/dogmatiq/browser/releases/v0.1.4
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

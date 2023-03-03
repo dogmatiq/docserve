@@ -16,7 +16,7 @@ var githubAppClientSecret = ferrite.
 	Required()
 
 var githubAppPrivateKey = ferrite.
-	String("GITHUB_PRIVATE_KEY", "the private key for the GitHub application used to read repository content").
+	String("GITHUB_APP_PRIVATEKEY", "the private key for the GitHub application used to read repository content").
 	Required()
 
 var githubAppHookSecret = ferrite.
