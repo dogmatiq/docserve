@@ -2,7 +2,10 @@ package analyzer
 
 import (
 	"context"
+	"crypto/rsa"
+	"crypto/x509"
 	"database/sql"
+	"encoding/pem"
 	"fmt"
 	"go/ast"
 	"go/token"
@@ -23,9 +26,10 @@ import (
 // Analyzer performs static analysis on repositories and stores the results in
 // the database.
 type Analyzer struct {
-	DB        *sql.DB
-	Connector *githubx.Connector
-	Logger    logging.Logger
+	DB         *sql.DB
+	Connector  *githubx.Connector
+	PrivateKey *rsa.PrivateKey
+	Logger     logging.Logger
 }
 
 // Analyze analyzes the repo with the given ID.
@@ -300,6 +304,12 @@ func (a *Analyzer) loadPackages(
 	r *github.Repository,
 	commit string,
 ) ([]*packages.Package, string, error) {
+	pk, err := a.persistPrivateKey()
+	if err != nil {
+		return nil, "", err
+	}
+	defer os.Remove(pk)
+
 	dir, err := a.downloadRepository(ctx, c, r, commit)
 	if err != nil {
 		return nil, dir, err
@@ -320,6 +330,10 @@ func (a *Analyzer) loadPackages(
 			packages.NeedTypesInfo |
 			packages.NeedDeps,
 		Dir: dir,
+		Env: []string{
+			// See https://superuser.com/questions/232373/how-to-tell-git-which-private-key-to-use
+			"GIT_SSH_COMMAND=ssh -F /dev/null -i " + pk,
+		},
 	}
 
 	pkgs, err := packages.Load(cfg, "./...")
@@ -474,4 +488,25 @@ func (a *Analyzer) analyzePackage(
 	}
 
 	return apps, defs
+}
+
+func (a *Analyzer) persistPrivateKey() (string, error) {
+	f, err := os.CreateTemp("", "github-app-private-key")
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	defer os.Remove(f.Name())
+
+	if err := pem.Encode(
+		f,
+		&pem.Block{
+			Type:  "RSA PRIVATE KEY",
+			Bytes: x509.MarshalPKCS1PrivateKey(a.PrivateKey),
+		},
+	); err != nil {
+		return "", err
+	}
+
+	return f.Name(), nil
 }

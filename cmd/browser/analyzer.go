@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rsa"
 	"database/sql"
 
 	"github.com/dogmatiq/browser/analyzer"
@@ -10,18 +11,20 @@ import (
 )
 
 func init() {
-	imbue.With3(
+	imbue.With4(
 		container,
 		func(
 			ctx imbue.Context,
 			db *sql.DB,
 			c *githubx.Connector,
+			pk *rsa.PrivateKey,
 			l logging.Logger,
 		) (*analyzer.Analyzer, error) {
 			return &analyzer.Analyzer{
-				DB:        db,
-				Connector: c,
-				Logger:    l,
+				DB:         db,
+				Connector:  c,
+				PrivateKey: pk,
+				Logger:     l,
 			}, nil
 		},
 	)
