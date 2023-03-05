@@ -2,14 +2,20 @@
 
 This document describes the environment variables used by `browser`.
 
-⚠️ Some of the variables have **non-normative** examples. These examples are
-syntactically correct but may not be meaningful values for this application.
+If any of the environment variable values do not meet the requirements herein,
+the application will print usage information to `STDERR` then exit with a
+non-zero exit code. Please note that **undefined** variables and **empty**
+values are considered equivalent.
+
+⚠️ This document includes **non-normative** example values. While these values
+are syntactically correct, they may not be meaningful to this application.
 
 ⚠️ The application may consume other undocumented environment variables; this
 document only shows those variables declared using [Ferrite].
 
-Please note that **undefined** variables and **empty strings** are considered
-equivalent.
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**,
+**SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** in this
+document are to be interpreted as described in [RFC 2119].
 
 ## Index
 
@@ -27,9 +33,7 @@ equivalent.
 
 > the PostgreSQL connection string
 
-This variable **MUST** be set to a non-empty string.
-If left undefined the application will print usage information to `STDERR` then
-exit with a non-zero exit code.
+The `DSN` variable **MUST NOT** be left undefined.
 
 ```bash
 export DSN=foo # (non-normative)
@@ -39,21 +43,30 @@ export DSN=foo # (non-normative)
 
 > the ID of the GitHub application used to read repository content
 
-This variable **MUST** be set to `1` or greater.
-If left undefined the application will print usage information to `STDERR` then
-exit with a non-zero exit code.
+The `GITHUB_APP_ID` variable's value **MUST** be `1` or greater.
 
 ```bash
-export GITHUB_APP_ID=4611686018427387904 # (non-normative)
+export GITHUB_APP_ID=1                    # (non-normative) the minimum accepted value
+export GITHUB_APP_ID=8301034833169298432  # (non-normative)
+export GITHUB_APP_ID=11068046444225730560 # (non-normative)
 ```
+
+<details>
+<summary>Unsigned integer syntax</summary>
+
+Unsigned integers can only be specified using decimal (base-10) notation. A
+leading sign (`+` or `-`) is not supported and **MUST NOT** be specified.
+
+Internally, the `GITHUB_APP_ID` variable is represented using an unsigned 64-bit
+integer type (`uint`); any value that overflows this data-type is invalid.
+
+</details>
 
 ### `GITHUB_APP_PRIVATEKEY`
 
 > the private key for the GitHub application used to read repository content
 
-This variable **MUST** be set to a non-empty string.
-If left undefined the application will print usage information to `STDERR` then
-exit with a non-zero exit code.
+The `GITHUB_APP_PRIVATEKEY` variable **MUST NOT** be left undefined.
 
 ```bash
 export GITHUB_APP_PRIVATEKEY=foo # (non-normative)
@@ -63,9 +76,7 @@ export GITHUB_APP_PRIVATEKEY=foo # (non-normative)
 
 > the client ID of the GitHub application used to read repository content
 
-This variable **MUST** be set to a non-empty string.
-If left undefined the application will print usage information to `STDERR` then
-exit with a non-zero exit code.
+The `GITHUB_CLIENT_ID` variable **MUST NOT** be left undefined.
 
 ```bash
 export GITHUB_CLIENT_ID=foo # (non-normative)
@@ -75,9 +86,7 @@ export GITHUB_CLIENT_ID=foo # (non-normative)
 
 > the client secret for the GitHub application used to read repository content
 
-This variable **MUST** be set to a non-empty string.
-If left undefined the application will print usage information to `STDERR` then
-exit with a non-zero exit code.
+The `GITHUB_CLIENT_SECRET` variable **MUST NOT** be left undefined.
 
 ```bash
 export GITHUB_CLIENT_SECRET=foo # (non-normative)
@@ -87,9 +96,7 @@ export GITHUB_CLIENT_SECRET=foo # (non-normative)
 
 > the secret used to verify GitHub web-hook requests are genuine
 
-This variable **MUST** be set to a non-empty string.
-If left undefined the application will print usage information to `STDERR` then
-exit with a non-zero exit code.
+The `GITHUB_HOOK_SECRET` variable **MUST NOT** be left undefined.
 
 ```bash
 export GITHUB_HOOK_SECRET=foo # (non-normative)
@@ -99,11 +106,21 @@ export GITHUB_HOOK_SECRET=foo # (non-normative)
 
 > the base URL of the GitHub API
 
-This variable **MAY** be set to a non-empty value or left undefined.
+The `GITHUB_URL` variable **MAY** be left undefined. Otherwise, the value
+**MUST** be a fully-qualified URL.
 
 ```bash
 export GITHUB_URL=https://example.org/path # (non-normative) a typical URL for a web page
 ```
+
+<details>
+<summary>URL syntax</summary>
+
+A fully-qualified URL includes both a scheme (protocol) and a hostname. URLs are
+not necessarily web addresses; `https://example.org` and
+`mailto:contact@example.org` are both examples of fully-qualified URLs.
+
+</details>
 
 ## Usage Examples
 
@@ -127,7 +144,7 @@ spec:
             - name: DSN # the PostgreSQL connection string
               value: foo
             - name: GITHUB_APP_ID # the ID of the GitHub application used to read repository content
-              value: "4611686018427387904"
+              value: "1"
             - name: GITHUB_APP_PRIVATEKEY # the private key for the GitHub application used to read repository content
               value: foo
             - name: GITHUB_CLIENT_ID # the client ID of the GitHub application used to read repository content
@@ -150,7 +167,7 @@ metadata:
   name: example-config-map
 data:
   DSN: foo # the PostgreSQL connection string
-  GITHUB_APP_ID: "4611686018427387904" # the ID of the GitHub application used to read repository content
+  GITHUB_APP_ID: "1" # the ID of the GitHub application used to read repository content
   GITHUB_APP_PRIVATEKEY: foo # the private key for the GitHub application used to read repository content
   GITHUB_CLIENT_ID: foo # the client ID of the GitHub application used to read repository content
   GITHUB_CLIENT_SECRET: foo # the client secret for the GitHub application used to read repository content
@@ -184,7 +201,7 @@ service:
   example-service:
     environment:
       DSN: foo # the PostgreSQL connection string
-      GITHUB_APP_ID: "4611686018427387904" # the ID of the GitHub application used to read repository content
+      GITHUB_APP_ID: "1" # the ID of the GitHub application used to read repository content
       GITHUB_APP_PRIVATEKEY: foo # the private key for the GitHub application used to read repository content
       GITHUB_CLIENT_ID: foo # the client ID of the GitHub application used to read repository content
       GITHUB_CLIENT_SECRET: foo # the client secret for the GitHub application used to read repository content
@@ -200,3 +217,4 @@ service:
 [ferrite]: https://github.com/dogmatiq/ferrite
 [kubernetes config map]: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables
 [kubernetes container]: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/#define-an-environment-variable-for-a-container
+[rfc 2119]: https://www.rfc-editor.org/rfc/rfc2119.html

@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/dogmatiq/configkit v0.11.1
 	github.com/dogmatiq/dodeca v1.4.2
-	github.com/dogmatiq/ferrite v0.3.3
+	github.com/dogmatiq/ferrite v0.3.4
 	github.com/dogmatiq/imbue v0.6.2
 	github.com/dogmatiq/linger v1.1.0
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
