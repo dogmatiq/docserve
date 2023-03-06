@@ -32,8 +32,8 @@ github.com/dogmatiq/dodeca v1.4.2 h1:qVQpMfFju99fvAcV3h1lA0yVaD5X38EpO1my0iKpTqs
 github.com/dogmatiq/dodeca v1.4.2/go.mod h1:kYImsyZhGxSOLiqzTK4Z1CB9ycSLpnJPBQa2yR//N5Q=
 github.com/dogmatiq/dogma v0.11.1 h1:N80eSyJ6uk7Bi20pZa4TJ5W/0B83ZgMLblENLB0Pv6U=
 github.com/dogmatiq/dogma v0.11.1/go.mod h1:8TdjQ5jjV2DcCPb/jjHPgSrqU66H6092yMEIF5HGx0g=
-github.com/dogmatiq/ferrite v0.3.4 h1:PCZynF1IpUz/+pV2O2kpAH9bKC/ZpcrkywEiPFceveY=
-github.com/dogmatiq/ferrite v0.3.4/go.mod h1:LfC9Xa5z+zYiN8U7ezJh1oOLN3RWGtmVi4RB39HAl0g=
+github.com/dogmatiq/ferrite v0.3.6 h1:i/NGo26kaWQvLK3pQf983gg0vytUS4ZzZB+14Tu1vKI=
+github.com/dogmatiq/ferrite v0.3.6/go.mod h1:JkDJakTC/XlkYQf5KRuAjkjRWRqN1W7kH6WHk43fXtM=
 github.com/dogmatiq/iago v0.4.0 h1:57nZqVT34IZxtCZEW/RFif7DNUEjMXgevfr/Mmd0N8I=
 github.com/dogmatiq/iago v0.4.0/go.mod h1:fishMWBtzYcjgis6d873VTv9kFm/wHYLOzOyO9ECBDc=
 github.com/dogmatiq/imbue v0.6.2 h1:vjeZ9st4peutl3tuyntReUjLbZOE1HjFMdOgYYc7Gzo=
