@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/dogmatiq/configkit v0.11.1
 	github.com/dogmatiq/dodeca v1.4.2
-	github.com/dogmatiq/ferrite v0.3.6
+	github.com/dogmatiq/ferrite v0.4.2
 	github.com/dogmatiq/imbue v0.6.2
 	github.com/dogmatiq/linger v1.1.0
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
@@ -45,7 +45,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
 	github.com/xlab/treeprint v1.1.0 // indirect

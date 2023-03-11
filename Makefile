@@ -19,4 +19,4 @@ run: $(GO_DEBUG_DIR)/browser
 
 precommit:: ENVIRONMENT.md
 ENVIRONMENT.md: $(GO_DEBUG_DIR)/browser
-	FERRITE_MODE=usage/markdown $(GO_DEBUG_DIR)/browser 2> $@
+	FERRITE_MODE=usage/markdown $(GO_DEBUG_DIR)/browser > $@
