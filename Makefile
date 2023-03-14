@@ -6,8 +6,11 @@ GO_EMBEDDED_FILES += persistence/schema.sql
 GO_EMBEDDED_FILES += $(shell find web -iname '*.html')
 GO_EMBEDDED_FILES += $(shell find web/assets)
 
+GO_FERRITE_BINARY = browser
+
 -include .makefiles/Makefile
 -include .makefiles/pkg/go/v1/Makefile
+-include .makefiles/pkg/go/v1/with-ferrite.mk
 -include .makefiles/pkg/docker/v1/Makefile
 
 .PHONY: run
@@ -16,7 +19,3 @@ run: $(GO_DEBUG_DIR)/browser
 
 .makefiles/%:
 	@curl -sfL https://makefiles.dev/v1 | bash /dev/stdin "$@"
-
-precommit:: ENVIRONMENT.md
-ENVIRONMENT.md: $(GO_DEBUG_DIR)/browser
-	FERRITE_MODE=usage/markdown $(GO_DEBUG_DIR)/browser > $@
