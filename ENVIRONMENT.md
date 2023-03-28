@@ -2,32 +2,31 @@
 
 This document describes the environment variables used by `browser`.
 
-If any of the environment variable values do not meet the requirements herein,
-the application will print usage information to `STDERR` then exit with a
-non-zero exit code. Please note that **undefined** variables and **empty**
-values are considered equivalent.
+| Name                      | Optionality | Description                                                                  |
+| ------------------------- | ----------- | ---------------------------------------------------------------------------- |
+| [`DSN`]                   | required    | the PostgreSQL connection string                                             |
+| [`GITHUB_APP_ID`]         | required    | the ID of the GitHub application used to read repository content             |
+| [`GITHUB_APP_PRIVATEKEY`] | required    | the private key for the GitHub application used to read repository content   |
+| [`GITHUB_CLIENT_ID`]      | required    | the client ID of the GitHub application used to read repository content      |
+| [`GITHUB_CLIENT_SECRET`]  | required    | the client secret for the GitHub application used to read repository content |
+| [`GITHUB_HOOK_SECRET`]    | required    | the secret used to verify GitHub web-hook requests are genuine               |
+| [`GITHUB_URL`]            | optional    | the base URL of the GitHub API                                               |
 
-⚠️ This document includes **non-normative** example values. While these values
-are syntactically correct, they may not be meaningful to this application.
+⚠️ `browser` may consume other undocumented environment variables. This document
+only shows variables declared using [Ferrite].
 
-⚠️ The application may consume other undocumented environment variables; this
-document only shows those variables declared using [Ferrite].
+## Specification
+
+All environment variables described below must meet the stated requirements.
+Otherwise, `browser` prints usage information to `STDERR` then exits.
+**Undefined** variables and **empty** values are equivalent.
+
+⚠️ This section includes **non-normative** example values. These examples are
+syntactically valid, but may not be meaningful to `browser`.
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**,
 **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** in this
 document are to be interpreted as described in [RFC 2119].
-
-## Index
-
-- [`DSN`] — the PostgreSQL connection string
-- [`GITHUB_APP_ID`] — the ID of the GitHub application used to read repository content
-- [`GITHUB_APP_PRIVATEKEY`] — the private key for the GitHub application used to read repository content
-- [`GITHUB_CLIENT_ID`] — the client ID of the GitHub application used to read repository content
-- [`GITHUB_CLIENT_SECRET`] — the client secret for the GitHub application used to read repository content
-- [`GITHUB_HOOK_SECRET`] — the secret used to verify GitHub web-hook requests are genuine
-- [`GITHUB_URL`] — the base URL of the GitHub API
-
-## Specification
 
 ### `DSN`
 

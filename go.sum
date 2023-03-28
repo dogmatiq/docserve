@@ -32,8 +32,8 @@ github.com/dogmatiq/dodeca v1.4.2 h1:qVQpMfFju99fvAcV3h1lA0yVaD5X38EpO1my0iKpTqs
 github.com/dogmatiq/dodeca v1.4.2/go.mod h1:kYImsyZhGxSOLiqzTK4Z1CB9ycSLpnJPBQa2yR//N5Q=
 github.com/dogmatiq/dogma v0.11.1 h1:N80eSyJ6uk7Bi20pZa4TJ5W/0B83ZgMLblENLB0Pv6U=
 github.com/dogmatiq/dogma v0.11.1/go.mod h1:8TdjQ5jjV2DcCPb/jjHPgSrqU66H6092yMEIF5HGx0g=
-github.com/dogmatiq/ferrite v1.0.0 h1:7xqjrCiV/Q9TYfhTlxgQaAQZvNNbV5237N/KSXtp+LQ=
-github.com/dogmatiq/ferrite v1.0.0/go.mod h1:H4e118gA91FXe+pmB3FHkNkwOZaM/k5+hqco5J+O4nI=
+github.com/dogmatiq/ferrite v1.0.1 h1:XNm8dzOdIbOCVP4ZaDV6HZpoYbPEvAkcgAH4TtMapfs=
+github.com/dogmatiq/ferrite v1.0.1/go.mod h1:w6/W1cS/tbeVUtbOmaYEdHEr55q4vkOvAXNnhVm/VhQ=
 github.com/dogmatiq/iago v0.4.0 h1:57nZqVT34IZxtCZEW/RFif7DNUEjMXgevfr/Mmd0N8I=
 github.com/dogmatiq/iago v0.4.0/go.mod h1:fishMWBtzYcjgis6d873VTv9kFm/wHYLOzOyO9ECBDc=
 github.com/dogmatiq/imbue v0.6.2 h1:vjeZ9st4peutl3tuyntReUjLbZOE1HjFMdOgYYc7Gzo=
@@ -69,8 +69,8 @@ github.com/go-playground/universal-translator v0.18.1/go.mod h1:xekY+UJKNuX9WP91
 github.com/go-playground/validator/v10 v10.11.2 h1:q3SHpufmypg+erIExEKUmsgmhDTyhcJ38oeKGACXohU=
 github.com/go-playground/validator/v10 v10.11.2/go.mod h1:NieE624vt4SCTJtD87arVLvdmjPAeV8BQlHtMnw9D7s=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
-github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 h1:p104kn46Q8WdvHunIJ9dAyjPVtrBPhSr3KT2yUst43I=
 github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0/go.mod h1:fyg7847qk6SyHyPtNmDHnmrv/HOrqktSC+C9fM+CJOE=
+github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 h1:tfuBGBXKqDEevZMzYi5KSi8KkcZtzBcTgAUUtapy0OI=
 github.com/goccy/go-json v0.10.0 h1:mXKd9Qw4NuzShiRlOXKews24ufknHO7gx30lsDyokKA=
 github.com/goccy/go-json v0.10.0/go.mod h1:6MelG93GURQebXPDq3khkgXZkazVtN9CRI+MGFi0w8I=
 github.com/gofrs/uuid v4.0.0+incompatible h1:1SD/1F5pU8p29ybwgQSwpQk+mwdRrXCYuPhW6m+TnJw=
@@ -202,13 +202,13 @@ github.com/onsi/ginkgo v1.12.1/go.mod h1:zj2OWP4+oCPe1qIXoGWkgMRwljMUYCdkwsT2108
 github.com/onsi/ginkgo v1.14.2/go.mod h1:iSB4RoI2tjJc9BBv4NKIKWKya62Rps+oPG/Lv9klQyY=
 github.com/onsi/ginkgo v1.16.4/go.mod h1:dX+/inL/fNMqNlz0e9LfyB9TswhZpCVdJM/Z6Vvnwo0=
 github.com/onsi/ginkgo v1.16.5 h1:8xi0RTUf59SOSfEtZMvwTvXYMzG4gV23XVHOZiXNtnE=
-github.com/onsi/ginkgo/v2 v2.9.1 h1:zie5Ly042PD3bsCvsSOPvRnFwyo3rKe64TJlD6nu0mk=
+github.com/onsi/ginkgo/v2 v2.9.2 h1:BA2GMJOtfGAfagzYtrAlufIP0lq6QERkFmHLMLPwFSU=
 github.com/onsi/gomega v1.4.3/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1CpauHY=
 github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7JYyY=
 github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1ybHNo=
 github.com/onsi/gomega v1.10.4/go.mod h1:g/HbgYopi++010VEqkFgJHKC09uJiW9UkXvMUuKHUCQ=
 github.com/onsi/gomega v1.16.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
-github.com/onsi/gomega v1.27.4 h1:Z2AnStgsdSayCMDiCU42qIz+HLqEPcgiOCXjAU/w+8E=
+github.com/onsi/gomega v1.27.5 h1:T/X6I0RNFw/kTqgfkZPcQ5KU6vCnWNBGdtrIx2dpGeQ=
 github.com/pelletier/go-toml/v2 v2.0.6 h1:nrzqCb7j9cDFj2coyLNLaZuJTLjWjlaz6nvTvIwycIU=
 github.com/pelletier/go-toml/v2 v2.0.6/go.mod h1:eumQOmlWiOPt5WriQQqoM5y18pDHwha2N+QD+EUNTek=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
