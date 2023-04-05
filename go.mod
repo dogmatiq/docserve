@@ -6,7 +6,7 @@ require (
 	github.com/dogmatiq/configkit v0.11.1
 	github.com/dogmatiq/dodeca v1.4.2
 	github.com/dogmatiq/ferrite v1.0.2
-	github.com/dogmatiq/imbue v0.6.2
+	github.com/dogmatiq/imbue v0.7.0
 	github.com/dogmatiq/linger v1.1.0
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.9.0
@@ -48,7 +48,7 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
-	github.com/xlab/treeprint v1.1.0 // indirect
+	github.com/xlab/treeprint v1.2.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
