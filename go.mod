@@ -3,7 +3,7 @@ module github.com/dogmatiq/browser
 go 1.20
 
 require (
-	github.com/dogmatiq/configkit v0.11.1
+	github.com/dogmatiq/configkit v0.12.0
 	github.com/dogmatiq/dodeca v1.4.2
 	github.com/dogmatiq/ferrite v1.0.2
 	github.com/dogmatiq/imbue v0.7.0
@@ -14,22 +14,23 @@ require (
 	github.com/jackc/pgx/v4 v4.18.1
 	golang.org/x/mod v0.10.0
 	golang.org/x/oauth2 v0.7.0
-	golang.org/x/tools v0.7.0
+	golang.org/x/tools v0.8.0
 	gopkg.in/square/go-jose.v2 v2.6.0
 )
 
 require (
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
-	github.com/dogmatiq/dogma v0.11.1 // indirect
+	github.com/dogmatiq/dogma v0.12.0 // indirect
 	github.com/dogmatiq/iago v0.4.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.11.2 // indirect
 	github.com/goccy/go-json v0.10.0 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
