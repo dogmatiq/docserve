@@ -3,7 +3,7 @@ module github.com/dogmatiq/browser
 go 1.20
 
 require (
-	github.com/dogmatiq/configkit v0.12.0
+	github.com/dogmatiq/configkit v0.12.1
 	github.com/dogmatiq/dodeca v1.4.2
 	github.com/dogmatiq/ferrite v1.0.3
 	github.com/dogmatiq/imbue v0.7.0
