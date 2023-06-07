@@ -121,98 +121,8 @@ not necessarily web addresses; `https://example.org` and
 
 </details>
 
-## Usage Examples
-
-<details>
-<summary>Kubernetes</summary>
-
-This example shows how to define the environment variables needed by `browser`
-on a [Kubernetes container] within a Kubenetes deployment manifest.
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: example-deployment
-spec:
-  template:
-    spec:
-      containers:
-        - name: example-container
-          env:
-            - name: DSN # the PostgreSQL connection string
-              value: foo
-            - name: GITHUB_APP_ID # the ID of the GitHub application used to read repository content
-              value: "1"
-            - name: GITHUB_APP_PRIVATEKEY # the private key for the GitHub application used to read repository content
-              value: foo
-            - name: GITHUB_CLIENT_ID # the client ID of the GitHub application used to read repository content
-              value: foo
-            - name: GITHUB_CLIENT_SECRET # the client secret for the GitHub application used to read repository content
-              value: foo
-            - name: GITHUB_HOOK_SECRET # the secret used to verify GitHub web-hook requests are genuine
-              value: foo
-            - name: GITHUB_URL # the base URL of the GitHub API (optional)
-              value: https://example.org/path
-```
-
-Alternatively, the environment variables can be defined within a [config map][kubernetes config map]
-then referenced from a deployment manifest using `configMapRef`.
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: example-config-map
-data:
-  DSN: foo # the PostgreSQL connection string
-  GITHUB_APP_ID: "1" # the ID of the GitHub application used to read repository content
-  GITHUB_APP_PRIVATEKEY: foo # the private key for the GitHub application used to read repository content
-  GITHUB_CLIENT_ID: foo # the client ID of the GitHub application used to read repository content
-  GITHUB_CLIENT_SECRET: foo # the client secret for the GitHub application used to read repository content
-  GITHUB_HOOK_SECRET: foo # the secret used to verify GitHub web-hook requests are genuine
-  GITHUB_URL: https://example.org/path # the base URL of the GitHub API (optional)
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: example-deployment
-spec:
-  template:
-    spec:
-      containers:
-        - name: example-container
-          envFrom:
-            - configMapRef:
-                name: example-config-map
-```
-
-</details>
-
-<details>
-<summary>Docker</summary>
-
-This example shows how to define the environment variables needed by `browser`
-when running as a [Docker service] defined in a Docker compose file.
-
-```yaml
-service:
-  example-service:
-    environment:
-      DSN: foo # the PostgreSQL connection string
-      GITHUB_APP_ID: "1" # the ID of the GitHub application used to read repository content
-      GITHUB_APP_PRIVATEKEY: foo # the private key for the GitHub application used to read repository content
-      GITHUB_CLIENT_ID: foo # the client ID of the GitHub application used to read repository content
-      GITHUB_CLIENT_SECRET: foo # the client secret for the GitHub application used to read repository content
-      GITHUB_HOOK_SECRET: foo # the secret used to verify GitHub web-hook requests are genuine
-      GITHUB_URL: https://example.org/path # the base URL of the GitHub API (optional)
-```
-
-</details>
-
 <!-- references -->
 
-[docker service]: https://docs.docker.com/compose/environment-variables/#set-environment-variables-in-containers
 [`dsn`]: #DSN
 [ferrite]: https://github.com/dogmatiq/ferrite
 [`github_app_id`]: #GITHUB_APP_ID
@@ -221,6 +131,4 @@ service:
 [`github_client_secret`]: #GITHUB_CLIENT_SECRET
 [`github_hook_secret`]: #GITHUB_HOOK_SECRET
 [`github_url`]: #GITHUB_URL
-[kubernetes config map]: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables
-[kubernetes container]: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/#define-an-environment-variable-for-a-container
 [rfc 2119]: https://www.rfc-editor.org/rfc/rfc2119.html
