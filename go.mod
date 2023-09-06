@@ -14,7 +14,7 @@ require (
 	github.com/jackc/pgx/v4 v4.18.1
 	golang.org/x/mod v0.12.0
 	golang.org/x/oauth2 v0.12.0
-	golang.org/x/tools v0.12.0
+	golang.org/x/tools v0.13.0
 	gopkg.in/square/go-jose.v2 v2.6.0
 )
 
