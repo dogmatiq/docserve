@@ -14,7 +14,7 @@ require (
 	github.com/jackc/pgx/v4 v4.18.1
 	golang.org/x/mod v0.14.0
 	golang.org/x/oauth2 v0.14.0
-	golang.org/x/tools v0.14.0
+	golang.org/x/tools v0.15.0
 	gopkg.in/square/go-jose.v2 v2.6.0
 )
 
@@ -58,7 +58,7 @@ require (
 	golang.org/x/crypto v0.15.0 // indirect
 	golang.org/x/exp v0.0.0-20230810033253-352e893a4cad // indirect
 	golang.org/x/net v0.18.0 // indirect
-	golang.org/x/sync v0.4.0 // indirect
+	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
