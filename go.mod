@@ -1,6 +1,6 @@
 module github.com/dogmatiq/browser
 
-go 1.21
+go 1.22
 
 require (
 	github.com/dogmatiq/configkit v0.12.2
