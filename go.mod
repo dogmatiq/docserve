@@ -11,7 +11,7 @@ require (
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/go-github/v38 v38.1.0
-	github.com/jackc/pgx/v4 v4.18.2
+	github.com/jackc/pgx/v4 v4.18.3
 	golang.org/x/mod v0.16.0
 	golang.org/x/oauth2 v0.18.0
 	golang.org/x/tools v0.19.0
