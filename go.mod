@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/dogmatiq/configkit v0.12.2
 	github.com/dogmatiq/dodeca v1.4.2
-	github.com/dogmatiq/ferrite v1.2.1
+	github.com/dogmatiq/ferrite v1.3.0
 	github.com/dogmatiq/imbue v0.7.1
 	github.com/dogmatiq/linger v1.1.0
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
@@ -47,7 +47,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
-	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
