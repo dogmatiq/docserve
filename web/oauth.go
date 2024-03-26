@@ -29,6 +29,7 @@ func handleOAuthCallback(version string, c *oauth2.Config, key *rsa.PublicKey) g
 			fmt.Println("unable to marshal oauth token:", err) // TODO
 			renderError(ctx, version, http.StatusInternalServerError)
 			ctx.Abort()
+			return
 		}
 
 		opts := &jose.EncrypterOptions{}
@@ -47,6 +48,7 @@ func handleOAuthCallback(version string, c *oauth2.Config, key *rsa.PublicKey) g
 			fmt.Println("unable to create token encrypter:", err) // TODO
 			renderError(ctx, version, http.StatusInternalServerError)
 			ctx.Abort()
+			return
 		}
 
 		claims := jwt.Claims{
@@ -58,6 +60,7 @@ func handleOAuthCallback(version string, c *oauth2.Config, key *rsa.PublicKey) g
 			fmt.Println("unable to encrypt token:", err) // TODO
 			renderError(ctx, version, http.StatusInternalServerError)
 			ctx.Abort()
+			return
 		}
 
 		ctx.SetCookie(

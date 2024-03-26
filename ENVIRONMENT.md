@@ -67,9 +67,7 @@ integer type (`uint`); any value that overflows this data-type is invalid.
 
 The `GITHUB_APP_PRIVATEKEY` variable **MUST NOT** be left undefined.
 
-```bash
-export GITHUB_APP_PRIVATEKEY=foo # (non-normative)
-```
+⚠️ This variable is **sensitive**; its value may contain private information.
 
 ### `GITHUB_CLIENT_ID`
 
@@ -87,9 +85,7 @@ export GITHUB_CLIENT_ID=foo # (non-normative)
 
 The `GITHUB_CLIENT_SECRET` variable **MUST NOT** be left undefined.
 
-```bash
-export GITHUB_CLIENT_SECRET=foo # (non-normative)
-```
+⚠️ This variable is **sensitive**; its value may contain private information.
 
 ### `GITHUB_HOOK_SECRET`
 
@@ -97,9 +93,7 @@ export GITHUB_CLIENT_SECRET=foo # (non-normative)
 
 The `GITHUB_HOOK_SECRET` variable **MUST NOT** be left undefined.
 
-```bash
-export GITHUB_HOOK_SECRET=foo # (non-normative)
-```
+⚠️ This variable is **sensitive**; its value may contain private information.
 
 ### `GITHUB_URL`
 
