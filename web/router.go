@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/dogmatiq/browser/analyzer"
 	"github.com/dogmatiq/browser/githubx"
@@ -34,10 +35,23 @@ func NewRouter(
 	hookSecret string,
 	db *sql.DB,
 ) http.Handler {
-	router := gin.Default()
-	router.HTMLRender = pageTemplates
+	engine := gin.New()
 
-	router.Use(gin.Recovery())
+	engine.Use(gin.Recovery())
+	engine.Use(gin.LoggerWithConfig(
+		gin.LoggerConfig{
+			Skip: func(ctx *gin.Context) bool {
+				return ctx.Request.URL.Path == "/health" ||
+					strings.HasPrefix(ctx.Request.URL.Path, "/assets/")
+			},
+		},
+	))
+
+	engine.HTMLRender = pageTemplates
+
+	engine.GET("/health", func(ctx *gin.Context) {
+		ctx.String(http.StatusOK, "OK")
+	})
 
 	assets := http.FileServer(
 		http.FS(assetsFS),
@@ -47,20 +61,20 @@ func NewRouter(
 		assets.ServeHTTP(ctx.Writer, ctx.Request)
 	}
 
-	router.GET("/assets/*path", assetsHandler)
-	router.HEAD("/assets/*path", assetsHandler)
+	engine.GET("/assets/*path", assetsHandler)
+	engine.HEAD("/assets/*path", assetsHandler)
 
-	router.GET(
+	engine.GET(
 		"/github/auth",
 		handleOAuthCallback(version, c.OAuthConfig, &key.PublicKey),
 	)
 
-	router.POST(
+	engine.POST(
 		"/github/hook",
 		handleGitHubHook(version, hookSecret, o),
 	)
 
-	router.GET(
+	engine.GET(
 		"/search/items.json",
 		searchItems(version, db),
 	)
@@ -80,7 +94,7 @@ func NewRouter(
 	for _, h := range handlers {
 		method, path := h.Route()
 
-		router.Handle(
+		engine.Handle(
 			method,
 			path,
 			auth,
@@ -88,13 +102,13 @@ func NewRouter(
 		)
 	}
 
-	router.NoRoute(
+	engine.NoRoute(
 		func(ctx *gin.Context) {
 			renderError(ctx, version, http.StatusNotFound)
 		},
 	)
 
-	return router
+	return engine
 }
 
 type templateContext struct {

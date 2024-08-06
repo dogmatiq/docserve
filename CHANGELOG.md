@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Added `/health` endpoint.
+
+### Changed
+
+- Do not log HTTP requests for `/assets` and `/health` endpoints.
+
 ### Fixed
 
 - Fixed panic when response from GitHub API is `nil`.
