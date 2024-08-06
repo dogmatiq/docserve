@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [keep a changelog]: https://keepachangelog.com/en/1.0.0/
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 
-## [Unreleased]
+## [0.1.10] - 2024-08-06
 
 ### Added
 
@@ -88,6 +88,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [0.1.7]: https://github.com/dogmatiq/browser/releases/v0.1.7
 [0.1.8]: https://github.com/dogmatiq/browser/releases/v0.1.8
 [0.1.9]: https://github.com/dogmatiq/browser/releases/v0.1.9
+[0.1.10]: https://github.com/dogmatiq/browser/releases/v0.1.10
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD
