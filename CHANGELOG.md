@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ## [0.1.11] - 2024-08-12
 
-- Updated `dogmatiq/configkit` to v0.12.3.
+- Updated `dogmatiq/configkit` to v0.13.2.
 
 ## [0.1.10] - 2024-08-06
 
