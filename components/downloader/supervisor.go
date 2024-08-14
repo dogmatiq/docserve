@@ -54,7 +54,7 @@ func (s *Supervisor) download(
 	defer func() {
 		if err == nil {
 			if cached {
-				logger.InfoContext(
+				logger.DebugContext(
 					ctx,
 					"module already downloaded",
 					slog.Duration("elapsed", time.Since(start)),
