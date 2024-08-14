@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/dogmatiq/browser/components/internal/worker"
-	"github.com/dogmatiq/browser/messages"
+	"github.com/dogmatiq/browser/messages/gomod"
 	"github.com/dogmatiq/configkit/static"
 	"golang.org/x/tools/go/packages"
 )
@@ -32,7 +32,7 @@ func (s *Supervisor) Run(ctx context.Context) error {
 func (s *Supervisor) analyze(
 	ctx context.Context,
 	workerID int,
-	m messages.ModuleDownloaded,
+	m gomod.ModuleDownloaded,
 ) (err error) {
 	logger := s.Logger.With(
 		slog.Group(

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/dogmatiq/browser/components/internal/worker"
-	"github.com/dogmatiq/browser/messages"
+	"github.com/dogmatiq/browser/messages/gomod"
 	"github.com/dogmatiq/minibus"
 )
 
@@ -34,7 +34,7 @@ func (s *Supervisor) Run(ctx context.Context) error {
 func (s *Supervisor) download(
 	ctx context.Context,
 	workerID int,
-	m messages.ModuleDiscovered,
+	m gomod.ModuleDiscovered,
 ) (err error) {
 	logger := s.Logger.With(
 		slog.Group(
@@ -106,7 +106,7 @@ func (s *Supervisor) download(
 
 	return minibus.Send(
 		ctx,
-		messages.ModuleDownloaded{
+		gomod.ModuleDownloaded{
 			RepoSource:    m.RepoSource,
 			RepoID:        m.RepoID,
 			ModulePath:    m.ModulePath,

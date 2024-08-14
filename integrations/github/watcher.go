@@ -9,6 +9,7 @@ import (
 
 	"github.com/dogmatiq/browser/integrations/github/internal/githubapi"
 	"github.com/dogmatiq/browser/messages"
+	"github.com/dogmatiq/browser/messages/gomod"
 	"github.com/dogmatiq/minibus"
 	"github.com/google/go-github/v63/github"
 	"golang.org/x/mod/modfile"
@@ -248,7 +249,7 @@ func (w *RepositoryWatcher) foundRepo(
 
 		if err := minibus.Send(
 			ctx,
-			messages.ModuleDiscovered{
+			gomod.ModuleDiscovered{
 				RepoSource:    repoSource(w.Client),
 				RepoID:        marshalRepoID(repo.GetID()),
 				ModulePath:    mod.Module.Mod.Path,
