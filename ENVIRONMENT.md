@@ -4,9 +4,9 @@ This document describes the environment variables used by `browser`.
 
 | Name                       | Optionality         | Description                                                                |
 | -------------------------- | ------------------- | -------------------------------------------------------------------------- |
-| [`CONCURRENT_ANALYZERS`]   | defaults to `+8`    | the maximum number of Go modules to analyze concurrently                   |
-| [`CONCURRENT_DOWNLOADS`]   | defaults to `+80`   | the maximum number of Go modules to download concurrently                  |
+| [`ANALYZER_WORKERS`]       | defaults to `+8`    | the maximum number of Go modules to analyze concurrently                   |
 | [`DEBUG`]                  | defaults to `false` | enable debug logging                                                       |
+| [`DOWNLOADER_WORKERS`]     | defaults to `+32`   | the maximum number of Go modules to download concurrently                  |
 | [`GITHUB_APP_CLIENT_ID`]   | required            | the client ID of the GitHub application used to read repository content    |
 | [`GITHUB_APP_HOOK_SECRET`] | required            | the secret used to verify GitHub web-hook requests are genuine             |
 | [`GITHUB_APP_PRIVATE_KEY`] | required            | the private key for the GitHub application used to read repository content |
@@ -29,16 +29,16 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**,
 **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** in this
 document are to be interpreted as described in [RFC 2119].
 
-### `CONCURRENT_ANALYZERS`
+### `ANALYZER_WORKERS`
 
 > the maximum number of Go modules to analyze concurrently
 
-The `CONCURRENT_ANALYZERS` variable **MAY** be left undefined, in which case the
+The `ANALYZER_WORKERS` variable **MAY** be left undefined, in which case the
 default value of `+8` is used. Otherwise, the value **MUST** be `+1` or greater.
 
 ```bash
-export CONCURRENT_ANALYZERS=+8 # (default)
-export CONCURRENT_ANALYZERS=+1 # (non-normative) the minimum accepted value
+export ANALYZER_WORKERS=+8 # (default)
+export ANALYZER_WORKERS=+1 # (non-normative) the minimum accepted value
 ```
 
 <details>
@@ -48,33 +48,8 @@ Signed integers can only be specified using decimal notation. A leading positive
 sign (`+`) is **OPTIONAL**. A leading negative sign (`-`) is **REQUIRED** in
 order to specify a negative value.
 
-Internally, the `CONCURRENT_ANALYZERS` variable is represented using a signed
-64-bit integer type (`int`); any value that overflows this data-type is invalid.
-
-</details>
-
-### `CONCURRENT_DOWNLOADS`
-
-> the maximum number of Go modules to download concurrently
-
-The `CONCURRENT_DOWNLOADS` variable **MAY** be left undefined, in which case the
-default value of `+80` is used. Otherwise, the value **MUST** be `+1` or
-greater.
-
-```bash
-export CONCURRENT_DOWNLOADS=+80 # (default)
-export CONCURRENT_DOWNLOADS=+1  # (non-normative) the minimum accepted value
-```
-
-<details>
-<summary>Signed integer syntax</summary>
-
-Signed integers can only be specified using decimal notation. A leading positive
-sign (`+`) is **OPTIONAL**. A leading negative sign (`-`) is **REQUIRED** in
-order to specify a negative value.
-
-Internally, the `CONCURRENT_DOWNLOADS` variable is represented using a signed
-64-bit integer type (`int`); any value that overflows this data-type is invalid.
+Internally, the `ANALYZER_WORKERS` variable is represented using a signed 64-bit
+integer type (`int`); any value that overflows this data-type is invalid.
 
 </details>
 
@@ -89,6 +64,31 @@ of `false` is used. Otherwise, the value **MUST** be either `true` or `false`.
 export DEBUG=true
 export DEBUG=false # (default)
 ```
+
+### `DOWNLOADER_WORKERS`
+
+> the maximum number of Go modules to download concurrently
+
+The `DOWNLOADER_WORKERS` variable **MAY** be left undefined, in which case the
+default value of `+32` is used. Otherwise, the value **MUST** be `+1` or
+greater.
+
+```bash
+export DOWNLOADER_WORKERS=+32 # (default)
+export DOWNLOADER_WORKERS=+1  # (non-normative) the minimum accepted value
+```
+
+<details>
+<summary>Signed integer syntax</summary>
+
+Signed integers can only be specified using decimal notation. A leading positive
+sign (`+`) is **OPTIONAL**. A leading negative sign (`-`) is **REQUIRED** in
+order to specify a negative value.
+
+Internally, the `DOWNLOADER_WORKERS` variable is represented using a signed 64-
+bit integer type (`int`); any value that overflows this data-type is invalid.
+
+</details>
 
 ### `GITHUB_APP_CLIENT_ID`
 
@@ -162,9 +162,9 @@ UNIX-like systems. Standard service names are published by IANA.
 
 <!-- references -->
 
-[`concurrent_analyzers`]: #CONCURRENT_ANALYZERS
-[`concurrent_downloads`]: #CONCURRENT_DOWNLOADS
+[`analyzer_workers`]: #ANALYZER_WORKERS
 [`debug`]: #DEBUG
+[`downloader_workers`]: #DOWNLOADER_WORKERS
 [ferrite]: https://github.com/dogmatiq/ferrite
 [`github_app_client_id`]: #GITHUB_APP_CLIENT_ID
 [`github_app_hook_secret`]: #GITHUB_APP_HOOK_SECRET

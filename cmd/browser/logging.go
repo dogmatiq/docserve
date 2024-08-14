@@ -44,16 +44,14 @@ func init() {
 		container,
 		func(
 			ctx imbue.Context,
-			options []minibus.Option,
+			funcs []minibus.Func,
 			logger *slog.Logger,
-		) ([]minibus.Option, error) {
+		) ([]minibus.Func, error) {
 			return append(
-				options,
-				minibus.WithFunc(
-					func(ctx context.Context) error {
-						return messagelogger.Run(ctx, logger)
-					},
-				),
+				funcs,
+				func(ctx context.Context) error {
+					return messagelogger.Run(ctx, logger)
+				},
 			), nil
 		},
 	)

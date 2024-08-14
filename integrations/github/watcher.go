@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log/slog"
 	"path/filepath"
-	"strconv"
+	"sync/atomic"
 
-	"github.com/dogmatiq/browser/internal/githubapi"
+	"github.com/dogmatiq/browser/integrations/github/internal/githubapi"
 	"github.com/dogmatiq/browser/messages"
 	"github.com/dogmatiq/minibus"
 	"github.com/google/go-github/v63/github"
@@ -68,7 +68,7 @@ func (w *RepositoryWatcher) handleInstallationEvent(
 ) error {
 	switch m.GetAction() {
 	case "created":
-		return w.foundRepos(ctx, m.GetInstallation(), m.Repositories...)
+		w.addInstallation(ctx, m.GetInstallation())
 	case "deleted":
 		return w.lostRepos(ctx, m.Repositories...)
 	}
@@ -80,7 +80,9 @@ func (w *RepositoryWatcher) handleInstallationRepositoriesEvent(
 	ctx context.Context,
 	m *github.InstallationRepositoriesEvent,
 ) error {
-	if err := w.foundRepos(ctx, m.GetInstallation(), m.RepositoriesAdded...); err != nil {
+	c := w.Client.InstallationClient(m.GetInstallation().GetID())
+
+	if _, err := w.foundRepos(ctx, c, m.RepositoriesAdded...); err != nil {
 		return err
 	}
 
@@ -97,7 +99,9 @@ func (w *RepositoryWatcher) handleRepositoryEvent(
 ) error {
 	switch m.GetAction() {
 	case "unarchived":
-		return w.foundRepos(ctx, m.GetInstallation(), m.Repo)
+		c := w.Client.InstallationClient(m.GetInstallation().GetID())
+		_, err := w.foundRepos(ctx, c, m.Repo)
+		return err
 	case "archived":
 		return w.lostRepos(ctx, m.Repo)
 	default:
@@ -106,15 +110,10 @@ func (w *RepositoryWatcher) handleRepositoryEvent(
 }
 
 func (w *RepositoryWatcher) addInstallation(ctx context.Context, in *github.Installation) error {
-	c := w.Client.InstallationClient(
-		in.GetID(),
-		&github.InstallationTokenOptions{
-			Permissions: &github.InstallationPermissions{
-				Metadata: github.String("read"),
-			},
-		},
-	)
-	defer c.Close()
+	c := w.Client.InstallationClient(in.GetID())
+
+	repoCount := 0
+	moduleCount := 0
 
 	if err := githubapi.RangePages(
 		ctx,
@@ -126,58 +125,70 @@ func (w *RepositoryWatcher) addInstallation(ctx context.Context, in *github.Inst
 			return repos.Repositories, res, nil
 		},
 		func(ctx context.Context, repos []*github.Repository) error {
-			return w.foundRepos(ctx, in, repos...)
+			repoCount += len(repos)
+			mc, err := w.foundRepos(ctx, c, repos...)
+			moduleCount += mc
+			return err
 		},
 	); err != nil {
 		return fmt.Errorf("unable to add %q installation: %w", in.GetAccount().GetLogin(), err)
 	}
+
+	w.Logger.InfoContext(
+		ctx,
+		"finished discovery",
+		slog.Group(
+			"installation",
+			slog.Int64("id", in.GetID()),
+			slog.String("account", in.GetAccount().GetLogin()),
+			slog.Int("repo_count", repoCount),
+			slog.Int("module_count", moduleCount),
+		),
+	)
 
 	return nil
 }
 
 func (w *RepositoryWatcher) foundRepos(
 	ctx context.Context,
-	in *github.Installation,
+	c *githubapi.InstallationClient,
 	repos ...*github.Repository,
-) error {
+) (int, error) {
+	var moduleCount atomic.Int64
+
 	g, ctx := errgroup.WithContext(ctx)
 
 	for _, repo := range repos {
 		if !isIgnored(repo) {
 			g.Go(func() error {
-				return w.foundRepo(ctx, in, repo)
+				mc, err := w.foundRepo(ctx, c, repo)
+				moduleCount.Add(int64(mc))
+				return err
 			})
 		}
 	}
 
-	return g.Wait()
+	if err := g.Wait(); err != nil {
+		return 0, err
+	}
+
+	return int(moduleCount.Load()), nil
 }
 
 func (w *RepositoryWatcher) foundRepo(
 	ctx context.Context,
-	in *github.Installation,
+	c *githubapi.InstallationClient,
 	repo *github.Repository,
-) error {
-	c := w.Client.InstallationClient(
-		in.GetID(),
-		&github.InstallationTokenOptions{
-			RepositoryIDs: []int64{repo.GetID()},
-			Permissions: &github.InstallationPermissions{
-				Contents: github.String("read"),
-			},
-		},
-	)
-	defer c.Close()
-
+) (int, error) {
 	if err := minibus.Send(
 		ctx,
 		messages.RepoFound{
-			Source: w.repoSource(),
-			ID:     w.repoID(repo),
-			Name:   repo.GetFullName(),
+			RepoSource: repoSource(w.Client),
+			RepoID:     marshalRepoID(repo.GetID()),
+			RepoName:   repo.GetFullName(),
 		},
 	); err != nil {
-		return err
+		return 0, err
 	}
 
 	tree, _, err := c.REST().Git.GetTree(
@@ -188,17 +199,24 @@ func (w *RepositoryWatcher) foundRepo(
 		true,
 	)
 	if err != nil {
-		return err
+		return 0, fmt.Errorf("unable to read git tree: %w", err)
 	}
 
 	if tree.GetTruncated() {
 		w.Logger.WarnContext(
 			ctx,
 			"truncated git tree results, some modules may go undetected",
-			slog.String("repo.name", repo.GetFullName()),
-			slog.String("repo.sha", tree.GetSHA()),
+			slog.Group(
+				"repo",
+				slog.String("source", repoSource(w.Client)),
+				slog.String("id", marshalRepoID(repo.GetID())),
+				slog.String("name", repo.GetFullName()),
+				slog.String("sha", tree.GetSHA()),
+			),
 		)
 	}
+
+	moduleCount := 0
 
 	for _, entry := range tree.Entries {
 		if entry.GetType() != "blob" {
@@ -209,6 +227,8 @@ func (w *RepositoryWatcher) foundRepo(
 			continue
 		}
 
+		moduleCount++
+
 		data, _, err := c.REST().Git.GetBlobRaw(
 			ctx,
 			repo.GetOwner().GetLogin(),
@@ -216,7 +236,7 @@ func (w *RepositoryWatcher) foundRepo(
 			entry.GetSHA(),
 		)
 		if err != nil {
-			return fmt.Errorf("unable to get go.mod content: %w", err)
+			return 0, fmt.Errorf("unable to read git blob: %w", err)
 		}
 
 		mod, err := modfile.ParseLax(
@@ -225,23 +245,23 @@ func (w *RepositoryWatcher) foundRepo(
 			nil, /* version fixer*/
 		)
 		if err != nil {
-			return fmt.Errorf("unable to parse go.mod: %w", err)
+			return 0, fmt.Errorf("unable to parse go.mod: %w", err)
 		}
 
 		if err := minibus.Send(
 			ctx,
-			messages.GoModuleFound{
-				RepoSource:    w.repoSource(),
-				RepoID:        w.repoID(repo),
+			messages.GoModuleDiscovered{
+				RepoSource:    repoSource(w.Client),
+				RepoID:        marshalRepoID(repo.GetID()),
 				ModulePath:    mod.Module.Mod.Path,
 				ModuleVersion: tree.GetSHA(),
 			},
 		); err != nil {
-			return err
+			return 0, err
 		}
 	}
 
-	return nil
+	return moduleCount, nil
 }
 
 func (w *RepositoryWatcher) lostRepos(
@@ -252,8 +272,8 @@ func (w *RepositoryWatcher) lostRepos(
 		if err := minibus.Send(
 			ctx,
 			messages.RepoLost{
-				Source: w.repoSource(),
-				ID:     w.repoID(repo),
+				RepoSource: repoSource(w.Client),
+				RepoID:     marshalRepoID(repo.GetID()),
 			},
 		); err != nil {
 			return err
@@ -261,15 +281,4 @@ func (w *RepositoryWatcher) lostRepos(
 	}
 
 	return nil
-}
-
-func (w *RepositoryWatcher) repoSource() string {
-	if w.Client.BaseURL == nil {
-		return "github"
-	}
-	return fmt.Sprintf("github@%s", w.Client.BaseURL.Host)
-}
-
-func (w *RepositoryWatcher) repoID(repo *github.Repository) string {
-	return strconv.FormatInt(repo.GetID(), 10)
 }

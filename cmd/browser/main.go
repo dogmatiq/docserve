@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/dogmatiq/browser/integrations/github"
 	"github.com/dogmatiq/ferrite"
 	"github.com/dogmatiq/imbue"
 )
@@ -16,11 +17,15 @@ var (
 	version string
 
 	// container is the dependency injection container.
-	container = imbue.New()
+	container = imbue.New(
+		imbue.WithCatalog(github.DependencyCatalog),
+	)
 )
 
 func main() {
-	ferrite.Init()
+	ferrite.Init(
+		ferrite.WithRegistry(github.EnvironmentRegistry),
+	)
 
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -41,11 +46,9 @@ func run() error {
 		return fmt.Errorf("unable to determine executable path: %w", err)
 	}
 
-	socket := bin + ".sock"
-
 	if os.Getenv("GIT_ASKPASS") == bin {
-		return runAskpass(ctx, socket)
+		return runAskpass(ctx)
 	}
 
-	return runServer(ctx, socket)
+	return runServer(ctx)
 }

@@ -3,11 +3,12 @@ package askpass
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
 	"sync"
-	"sync/atomic"
+	"time"
 
 	"github.com/dogmatiq/minibus"
 )
@@ -18,8 +19,7 @@ type Handler struct {
 	outbox chan<- any
 	ready  chan struct{}
 
-	correlationID atomic.Uint64
-	pending       sync.Map // correlation ID -> response channel
+	pending sync.Map // request ID -> response channel
 }
 
 // Run pipes events received by the webhook handler to the message bus.
@@ -36,7 +36,7 @@ func (h *Handler) Run(ctx context.Context) (err error) {
 
 	for m := range minibus.Inbox(ctx) {
 		res := m.(Response)
-		if reply, ok := h.pending.Load(res.CorrelationID); ok {
+		if reply, ok := h.pending.Load(res.RequestID); ok {
 			reply.(chan Response) <- res
 		}
 	}
@@ -45,24 +45,26 @@ func (h *Handler) Run(ctx context.Context) (err error) {
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
 	req, ok := h.parseRequest(w, r)
 	if !ok {
 		return
 	}
 
 	response := make(chan Response, 1)
-	h.pending.Store(req.CorrelationID, response)
-	defer h.pending.Delete(req.CorrelationID)
+	h.pending.Store(req.RequestID, response)
+	defer h.pending.Delete(req.RequestID)
 
 	// wait for the outbox to become available
-	ctx := r.Context()
 	h.init.Do(func() {
 		h.ready = make(chan struct{})
 	})
 
 	select {
 	case <-ctx.Done():
-		h.writeContextError(ctx, w)
+		h.writeContextError(ctx, w, "waiting for message bus initialization")
 		return
 	case <-h.ready:
 	}
@@ -70,7 +72,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// publish the request to the outbox
 	select {
 	case <-ctx.Done():
-		h.writeContextError(ctx, w)
+		h.writeContextError(ctx, w, "waiting to publish askpass request")
 		return
 	case h.outbox <- req:
 	}
@@ -78,7 +80,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// wait for the response
 	select {
 	case <-ctx.Done():
-		h.writeContextError(ctx, w)
+		h.writeContextError(ctx, w, "waiting for askpass response")
 	case res := <-response:
 		h.writeResponse(w, res)
 	}
@@ -96,7 +98,7 @@ func (h *Handler) parseRequest(w http.ResponseWriter, r *http.Request) (Request,
 		return Request{}, false
 	}
 
-	repoURL, err := url.Parse(req.RepoURL)
+	repoURL, err := url.Parse(req.URL)
 	if err != nil {
 		http.Error(
 			w,
@@ -107,16 +109,16 @@ func (h *Handler) parseRequest(w http.ResponseWriter, r *http.Request) (Request,
 	}
 
 	return Request{
-		CorrelationID: h.correlationID.Add(1),
-		RepoURL:       repoURL,
+		RequestID: req.ID,
+		RepoURL:   repoURL,
+		Field:     req.Field,
 	}, true
 }
 
 func (h *Handler) writeResponse(w http.ResponseWriter, res Response) {
 	data, err := json.Marshal(
 		response{
-			Username: res.Username,
-			Password: res.Password,
+			Value: res.Value,
 		},
 	)
 
@@ -135,15 +137,25 @@ func (h *Handler) writeResponse(w http.ResponseWriter, res Response) {
 	w.Write(data)
 }
 
-func (h *Handler) writeContextError(ctx context.Context, w http.ResponseWriter) {
+func (h *Handler) writeContextError(ctx context.Context, w http.ResponseWriter, message string) {
 	code := http.StatusInternalServerError
 	if ctx.Err() == context.DeadlineExceeded {
 		code = http.StatusRequestTimeout
 	}
 
+	fmt.Printf(
+		"%s: %s\n",
+		message,
+		ctx.Err(),
+	)
+
 	http.Error(
 		w,
-		ctx.Err().Error(),
+		fmt.Sprintf(
+			"%s: %s",
+			message,
+			ctx.Err(),
+		),
 		code,
 	)
 }

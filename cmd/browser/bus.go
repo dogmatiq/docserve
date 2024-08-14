@@ -8,10 +8,8 @@ import (
 func init() {
 	imbue.With0(
 		container,
-		func(ctx imbue.Context) ([]minibus.Option, error) {
-			return []minibus.Option{
-				minibus.WithInboxSize(10000),
-			}, nil
+		func(ctx imbue.Context) ([]minibus.Func, error) {
+			return []minibus.Func{}, nil
 		},
 	)
 }
