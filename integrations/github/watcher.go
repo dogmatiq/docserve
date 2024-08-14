@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 
 	"github.com/dogmatiq/browser/integrations/github/internal/githubapi"
-	"github.com/dogmatiq/browser/messages"
 	"github.com/dogmatiq/browser/messages/gomod"
+	"github.com/dogmatiq/browser/messages/repo"
 	"github.com/dogmatiq/minibus"
 	"github.com/google/go-github/v63/github"
 	"golang.org/x/mod/modfile"
@@ -177,14 +177,14 @@ func (w *RepositoryWatcher) foundRepos(
 func (w *RepositoryWatcher) foundRepo(
 	ctx context.Context,
 	c *githubapi.InstallationClient,
-	repo *github.Repository,
+	r *github.Repository,
 ) (int, error) {
 	if err := minibus.Send(
 		ctx,
-		messages.RepoFound{
+		repo.Found{
 			RepoSource: repoSource(w.Client),
-			RepoID:     marshalRepoID(repo.GetID()),
-			RepoName:   repo.GetFullName(),
+			RepoID:     marshalRepoID(r.GetID()),
+			RepoName:   r.GetFullName(),
 		},
 	); err != nil {
 		return 0, err
@@ -192,8 +192,8 @@ func (w *RepositoryWatcher) foundRepo(
 
 	tree, _, err := c.REST().Git.GetTree(
 		ctx,
-		repo.GetOwner().GetLogin(),
-		repo.GetName(),
+		r.GetOwner().GetLogin(),
+		r.GetName(),
 		"HEAD",
 		true,
 	)
@@ -208,8 +208,8 @@ func (w *RepositoryWatcher) foundRepo(
 			slog.Group(
 				"repo",
 				slog.String("source", repoSource(w.Client)),
-				slog.String("id", marshalRepoID(repo.GetID())),
-				slog.String("name", repo.GetFullName()),
+				slog.String("id", marshalRepoID(r.GetID())),
+				slog.String("name", r.GetFullName()),
 				slog.String("sha", tree.GetSHA()),
 			),
 		)
@@ -230,8 +230,8 @@ func (w *RepositoryWatcher) foundRepo(
 
 		data, _, err := c.REST().Git.GetBlobRaw(
 			ctx,
-			repo.GetOwner().GetLogin(),
-			repo.GetName(),
+			r.GetOwner().GetLogin(),
+			r.GetName(),
 			entry.GetSHA(),
 		)
 		if err != nil {
@@ -251,7 +251,7 @@ func (w *RepositoryWatcher) foundRepo(
 			ctx,
 			gomod.ModuleDiscovered{
 				RepoSource:    repoSource(w.Client),
-				RepoID:        marshalRepoID(repo.GetID()),
+				RepoID:        marshalRepoID(r.GetID()),
 				ModulePath:    mod.Module.Mod.Path,
 				ModuleVersion: tree.GetSHA(),
 			},
@@ -267,12 +267,12 @@ func (w *RepositoryWatcher) lostRepos(
 	ctx context.Context,
 	repos ...*github.Repository,
 ) error {
-	for _, repo := range repos {
+	for _, r := range repos {
 		if err := minibus.Send(
 			ctx,
-			messages.RepoLost{
+			repo.Lost{
 				RepoSource: repoSource(w.Client),
-				RepoID:     marshalRepoID(repo.GetID()),
+				RepoID:     marshalRepoID(r.GetID()),
 			},
 		); err != nil {
 			return err

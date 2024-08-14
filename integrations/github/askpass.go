@@ -7,8 +7,8 @@ import (
 	"regexp"
 
 	"github.com/dogmatiq/browser/integrations/github/internal/githubapi"
-	"github.com/dogmatiq/browser/messages"
 	"github.com/dogmatiq/browser/messages/askpass"
+	"github.com/dogmatiq/browser/messages/repo"
 	"github.com/dogmatiq/minibus"
 	"golang.org/x/oauth2"
 )
@@ -29,8 +29,8 @@ type askpassRepo struct {
 
 // Run starts the server.
 func (s *AskpassServer) Run(ctx context.Context) error {
-	minibus.Subscribe[messages.RepoFound](ctx)
-	minibus.Subscribe[messages.RepoLost](ctx)
+	minibus.Subscribe[repo.Found](ctx)
+	minibus.Subscribe[repo.Lost](ctx)
 	minibus.Subscribe[askpass.CredentialRequest](ctx)
 	minibus.Ready(ctx)
 
@@ -51,9 +51,9 @@ func (s *AskpassServer) handleMessage(
 	m any,
 ) error {
 	switch m := m.(type) {
-	case messages.RepoFound:
+	case repo.Found:
 		return s.handleRepoFound(ctx, m)
-	case messages.RepoLost:
+	case repo.Lost:
 		return s.handleRepoLost(ctx, m)
 	case askpass.CredentialRequest:
 		return s.handleAskpassRequest(ctx, m)
@@ -64,7 +64,7 @@ func (s *AskpassServer) handleMessage(
 
 func (s *AskpassServer) handleRepoFound(
 	ctx context.Context,
-	m messages.RepoFound,
+	m repo.Found,
 ) error {
 	if m.RepoSource != repoSource(s.Client) {
 		return nil
@@ -94,7 +94,7 @@ func (s *AskpassServer) handleRepoFound(
 
 func (s *AskpassServer) handleRepoLost(
 	_ context.Context,
-	m messages.RepoLost,
+	m repo.Lost,
 ) error {
 	if m.RepoSource != repoSource(s.Client) {
 		return nil
