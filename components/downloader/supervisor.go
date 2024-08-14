@@ -10,8 +10,8 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/dogmatiq/browser/components/internal/worker"
 	"github.com/dogmatiq/browser/messages/gomod"
+	"github.com/dogmatiq/browser/worker"
 	"github.com/dogmatiq/minibus"
 )
 

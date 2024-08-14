@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/dogmatiq/browser/components/internal/worker"
 	"github.com/dogmatiq/browser/messages/gomod"
+	"github.com/dogmatiq/browser/worker"
 	"github.com/dogmatiq/configkit/static"
 	"golang.org/x/tools/go/packages"
 )
