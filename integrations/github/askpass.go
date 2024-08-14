@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"regexp"
 
-	"github.com/dogmatiq/browser/components/askpass"
 	"github.com/dogmatiq/browser/integrations/github/internal/githubapi"
 	"github.com/dogmatiq/browser/messages"
+	"github.com/dogmatiq/browser/messages/askpass"
 	"github.com/dogmatiq/minibus"
 	"golang.org/x/oauth2"
 )
@@ -31,7 +31,7 @@ type askpassRepo struct {
 func (s *AskpassServer) Run(ctx context.Context) error {
 	minibus.Subscribe[messages.RepoFound](ctx)
 	minibus.Subscribe[messages.RepoLost](ctx)
-	minibus.Subscribe[askpass.Request](ctx)
+	minibus.Subscribe[askpass.CredentialRequest](ctx)
 	minibus.Ready(ctx)
 
 	s.reposByID = map[string]*askpassRepo{}
@@ -55,7 +55,7 @@ func (s *AskpassServer) handleMessage(
 		return s.handleRepoFound(ctx, m)
 	case messages.RepoLost:
 		return s.handleRepoLost(ctx, m)
-	case askpass.Request:
+	case askpass.CredentialRequest:
 		return s.handleAskpassRequest(ctx, m)
 	default:
 		panic("unexpected message type")
@@ -109,7 +109,7 @@ func (s *AskpassServer) handleRepoLost(
 
 func (s *AskpassServer) handleAskpassRequest(
 	ctx context.Context,
-	m askpass.Request,
+	m askpass.CredentialRequest,
 ) (err error) {
 	repoName, ok := s.parseRepoURL(m.RepoURL)
 	if !ok {
@@ -121,23 +121,28 @@ func (s *AskpassServer) handleAskpassRequest(
 		return nil
 	}
 
-	value := "x-access-token"
-	if m.Field == askpass.Password {
+	var value string
+	switch m.Credential {
+	case askpass.Username:
+		value = "x-access-token"
+	case askpass.Password:
 		token, err := repo.TokenSource.Token()
 		if err != nil {
 			return err
 		}
 		value = token.AccessToken
+	default:
+		return fmt.Errorf("unsupported credential type: %s", m.Credential)
 	}
 
 	return minibus.Send(
 		ctx,
-		askpass.Response{
+		askpass.CredentialResponse{
 			RequestID:  m.RequestID,
 			RepoSource: repoSource(s.Client),
 			RepoID:     marshalRepoID(repo.ID),
 			RepoURL:    m.RepoURL,
-			Field:      m.Field,
+			Credential: m.Credential,
 			Value:      value,
 		},
 	)

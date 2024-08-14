@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dogmatiq/browser/messages/askpass"
 	"github.com/google/uuid"
 )
 
@@ -18,12 +19,12 @@ func Ask(
 	addr string,
 	requestID uuid.UUID,
 	repoURL string,
-	field Field,
+	cred askpass.Credential,
 ) (string, error) {
-	req := request{
-		ID:    requestID,
-		URL:   repoURL,
-		Field: field,
+	req := apiRequest{
+		ID:         requestID,
+		URL:        repoURL,
+		Credential: cred,
 	}
 
 	body, err := json.Marshal(req)
@@ -64,7 +65,7 @@ func Ask(
 		)
 	}
 
-	var res response
+	var res apiResponse
 	if err := json.Unmarshal(body, &res); err != nil {
 		return "", fmt.Errorf("unable to unmarshal askpass response: %w", err)
 	}
@@ -72,14 +73,14 @@ func Ask(
 	return res.Value, nil
 }
 
-// request is a request for credentials sent over the HTTP API.
-type request struct {
-	ID    uuid.UUID `json:"id"`
-	URL   string    `json:"url"`
-	Field Field     `json:"field"`
+// apiRequest is a apiRequest for credentials sent over the HTTP API.
+type apiRequest struct {
+	ID         uuid.UUID          `json:"id"`
+	URL        string             `json:"url"`
+	Credential askpass.Credential `json:"credential"`
 }
 
-// response is the response to an [request].
-type response struct {
+// apiResponse is the apiResponse to an [apiRequest].
+type apiResponse struct {
 	Value string `json:"value"`
 }

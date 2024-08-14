@@ -5,9 +5,9 @@ import (
 	"log/slog"
 )
 
-// GoModuleDiscovered is a message that indicates a Go module was found at a specific
+// ModuleDiscovered is a message that indicates a Go module was found at a specific
 // version.
-type GoModuleDiscovered struct {
+type ModuleDiscovered struct {
 	RepoSource    string
 	RepoID        string
 	ModulePath    string
@@ -15,10 +15,10 @@ type GoModuleDiscovered struct {
 }
 
 // LogTo logs the message to the given logger.
-func (m GoModuleDiscovered) LogTo(ctx context.Context, logger *slog.Logger) {
+func (m ModuleDiscovered) LogTo(ctx context.Context, logger *slog.Logger) {
 	logger.DebugContext(
 		ctx,
-		"go module found",
+		"module found",
 		slog.Group(
 			"repo",
 			slog.String("source", m.RepoSource),
@@ -32,9 +32,9 @@ func (m GoModuleDiscovered) LogTo(ctx context.Context, logger *slog.Logger) {
 	)
 }
 
-// GoModuleDownloaded is a message that indicates a Go module was downloaded
+// ModuleDownloaded is a message that indicates a Go module was downloaded
 // into the module cache.
-type GoModuleDownloaded struct {
+type ModuleDownloaded struct {
 	RepoSource    string
 	RepoID        string
 	ModulePath    string
@@ -43,10 +43,10 @@ type GoModuleDownloaded struct {
 }
 
 // LogTo logs the message to the given logger.
-func (m GoModuleDownloaded) LogTo(ctx context.Context, logger *slog.Logger) {
+func (m ModuleDownloaded) LogTo(ctx context.Context, logger *slog.Logger) {
 	logger.DebugContext(
 		ctx,
-		"go module downloaded",
+		"module downloaded",
 		slog.Group(
 			"repo",
 			slog.String("source", m.RepoSource),

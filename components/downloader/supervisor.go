@@ -34,7 +34,7 @@ func (s *Supervisor) Run(ctx context.Context) error {
 func (s *Supervisor) download(
 	ctx context.Context,
 	workerID int,
-	m messages.GoModuleDiscovered,
+	m messages.ModuleDiscovered,
 ) (err error) {
 	logger := s.Logger.With(
 		slog.Group(
@@ -49,22 +49,27 @@ func (s *Supervisor) download(
 	)
 
 	start := time.Now()
-	logger.DebugContext(ctx, "downloading go module")
-
 	cached := false
 
 	defer func() {
 		if err == nil {
-			logger.InfoContext(
-				ctx,
-				"downloaded go module",
-				slog.Duration("elapsed", time.Since(start)),
-				slog.Bool("cached", cached),
-			)
+			if cached {
+				logger.InfoContext(
+					ctx,
+					"module already downloaded",
+					slog.Duration("elapsed", time.Since(start)),
+				)
+			} else {
+				logger.InfoContext(
+					ctx,
+					"module downloaded",
+					slog.Duration("elapsed", time.Since(start)),
+				)
+			}
 		} else if ctx.Err() == nil {
 			logger.ErrorContext(
 				ctx,
-				"unable to download go module",
+				"module download failed",
 				slog.Duration("elapsed", time.Since(start)),
 				slog.Any("error", err),
 			)
@@ -101,7 +106,7 @@ func (s *Supervisor) download(
 
 	return minibus.Send(
 		ctx,
-		messages.GoModuleDownloaded{
+		messages.ModuleDownloaded{
 			RepoSource:    m.RepoSource,
 			RepoID:        m.RepoID,
 			ModulePath:    m.ModulePath,
@@ -120,9 +125,9 @@ func (s *Supervisor) exec(
 	cmd.Env = s.Environment
 	cmd.Dir = os.TempDir()
 
-	var stdout bytes.Buffer
+	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
-	cmd.Stderr = os.Stderr // TODO
+	cmd.Stderr = &stderr
 
 	runErr := cmd.Run()
 
@@ -145,7 +150,7 @@ func (s *Supervisor) exec(
 
 	if runErr != nil {
 		return "", "", fmt.Errorf(
-			"unable to download module: %w",
+			"unable to download module: %w\n"+stderr.String(),
 			runErr,
 		)
 	}

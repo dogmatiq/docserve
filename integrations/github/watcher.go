@@ -112,6 +112,16 @@ func (w *RepositoryWatcher) handleRepositoryEvent(
 func (w *RepositoryWatcher) addInstallation(ctx context.Context, in *github.Installation) error {
 	c := w.Client.InstallationClient(in.GetID())
 
+	w.Logger.InfoContext(
+		ctx,
+		"github app installation discovered",
+		slog.Group(
+			"installation",
+			slog.Int64("id", in.GetID()),
+			slog.String("account", in.GetAccount().GetLogin()),
+		),
+	)
+
 	repoCount := 0
 	moduleCount := 0
 
@@ -133,18 +143,6 @@ func (w *RepositoryWatcher) addInstallation(ctx context.Context, in *github.Inst
 	); err != nil {
 		return fmt.Errorf("unable to add %q installation: %w", in.GetAccount().GetLogin(), err)
 	}
-
-	w.Logger.InfoContext(
-		ctx,
-		"finished discovery",
-		slog.Group(
-			"installation",
-			slog.Int64("id", in.GetID()),
-			slog.String("account", in.GetAccount().GetLogin()),
-			slog.Int("repo_count", repoCount),
-			slog.Int("module_count", moduleCount),
-		),
-	)
 
 	return nil
 }
@@ -250,7 +248,7 @@ func (w *RepositoryWatcher) foundRepo(
 
 		if err := minibus.Send(
 			ctx,
-			messages.GoModuleDiscovered{
+			messages.ModuleDiscovered{
 				RepoSource:    repoSource(w.Client),
 				RepoID:        marshalRepoID(repo.GetID()),
 				ModulePath:    mod.Module.Mod.Path,

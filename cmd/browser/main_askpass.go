@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/dogmatiq/browser/components/askpass"
+	messages "github.com/dogmatiq/browser/messages/askpass"
 	"github.com/go-git/go-git/v5"
 	"github.com/google/uuid"
 )
@@ -19,14 +20,18 @@ func runAskpass(ctx context.Context) error {
 		return fmt.Errorf("[request %d] expected at least one argument", id)
 	}
 
-	var field askpass.Field
-	switch {
-	case strings.HasPrefix(os.Args[1], "Username "):
-		field = askpass.Username
-	case strings.HasPrefix(os.Args[1], "Password "):
-		field = askpass.Password
-	default:
-		return fmt.Errorf("[request %s] unexpected prompt: %s", id, os.Args[1])
+	prompt := os.Args[1]
+	fields := strings.Fields(prompt)
+	if len(fields) == 0 {
+		return fmt.Errorf("[request %d] invalid prompt: %q", id, prompt)
+	}
+
+	cred := messages.Credential(
+		strings.ToLower(fields[0]),
+	)
+
+	if err := cred.Validate(); err != nil {
+		return fmt.Errorf("[request %d] %w", id, err)
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
@@ -47,7 +52,7 @@ func runAskpass(ctx context.Context) error {
 		os.Getenv("ASKPASS_ADDR"),
 		id,
 		remote.Config().URLs[0],
-		field,
+		cred,
 	)
 	if err != nil {
 		return fmt.Errorf("[request %s] %w", id, err)

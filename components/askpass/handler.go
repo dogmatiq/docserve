@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dogmatiq/browser/messages/askpass"
 	"github.com/dogmatiq/minibus"
 )
 
@@ -19,7 +20,7 @@ type Handler struct {
 	outbox chan<- any
 	ready  chan struct{}
 
-	pending sync.Map // request ID -> response channel
+	pending sync.Map // map[uuid.UUID]chan<- messages.CredentialResponse
 }
 
 // Run pipes events received by the webhook handler to the message bus.
@@ -27,17 +28,18 @@ func (h *Handler) Run(ctx context.Context) (err error) {
 	h.init.Do(func() {
 		h.ready = make(chan struct{})
 	})
-
-	minibus.Subscribe[Response](ctx)
-	minibus.Ready(ctx)
-
 	h.outbox = minibus.Outbox(ctx)
+
+	minibus.Subscribe[askpass.CredentialResponse](ctx)
+	minibus.Ready(ctx)
 	close(h.ready)
 
 	for m := range minibus.Inbox(ctx) {
-		res := m.(Response)
-		if reply, ok := h.pending.Load(res.RequestID); ok {
-			reply.(chan Response) <- res
+		switch m := m.(type) {
+		case askpass.CredentialResponse:
+			if reply, ok := h.pending.Load(m.RequestID); ok {
+				reply.(chan askpass.CredentialResponse) <- m
+			}
 		}
 	}
 
@@ -53,21 +55,21 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := make(chan Response, 1)
-	h.pending.Store(req.RequestID, response)
-	defer h.pending.Delete(req.RequestID)
-
-	// wait for the outbox to become available
 	h.init.Do(func() {
 		h.ready = make(chan struct{})
 	})
 
+	// wait for the outbox to become available
 	select {
 	case <-ctx.Done():
 		h.writeContextError(ctx, w, "waiting for message bus initialization")
 		return
 	case <-h.ready:
 	}
+
+	response := make(chan askpass.CredentialResponse, 1)
+	h.pending.Store(req.RequestID, response)
+	defer h.pending.Delete(req.RequestID)
 
 	// publish the request to the outbox
 	select {
@@ -81,13 +83,17 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	select {
 	case <-ctx.Done():
 		h.writeContextError(ctx, w, "waiting for askpass response")
+		return
 	case res := <-response:
 		h.writeResponse(w, res)
 	}
 }
 
-func (h *Handler) parseRequest(w http.ResponseWriter, r *http.Request) (Request, bool) {
-	var req request
+func (h *Handler) parseRequest(
+	w http.ResponseWriter,
+	r *http.Request,
+) (askpass.CredentialRequest, bool) {
+	var req apiRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(
@@ -95,7 +101,7 @@ func (h *Handler) parseRequest(w http.ResponseWriter, r *http.Request) (Request,
 			err.Error(),
 			http.StatusBadRequest,
 		)
-		return Request{}, false
+		return askpass.CredentialRequest{}, false
 	}
 
 	repoURL, err := url.Parse(req.URL)
@@ -105,19 +111,22 @@ func (h *Handler) parseRequest(w http.ResponseWriter, r *http.Request) (Request,
 			err.Error(),
 			http.StatusBadRequest,
 		)
-		return Request{}, false
+		return askpass.CredentialRequest{}, false
 	}
 
-	return Request{
-		RequestID: req.ID,
-		RepoURL:   repoURL,
-		Field:     req.Field,
+	return askpass.CredentialRequest{
+		RequestID:  req.ID,
+		RepoURL:    repoURL,
+		Credential: req.Credential,
 	}, true
 }
 
-func (h *Handler) writeResponse(w http.ResponseWriter, res Response) {
+func (h *Handler) writeResponse(
+	w http.ResponseWriter,
+	res askpass.CredentialResponse,
+) {
 	data, err := json.Marshal(
-		response{
+		apiResponse{
 			Value: res.Value,
 		},
 	)

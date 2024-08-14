@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"runtime/debug"
 	"time"
 
 	"github.com/dogmatiq/browser/components/internal/worker"
@@ -33,7 +32,7 @@ func (s *Supervisor) Run(ctx context.Context) error {
 func (s *Supervisor) analyze(
 	ctx context.Context,
 	workerID int,
-	m messages.GoModuleDownloaded,
+	m messages.ModuleDownloaded,
 ) (err error) {
 	logger := s.Logger.With(
 		slog.Group(
@@ -48,19 +47,18 @@ func (s *Supervisor) analyze(
 	)
 
 	start := time.Now()
-	logger.DebugContext(ctx, "analyzing go module")
 
 	defer func() {
 		if err == nil {
 			logger.InfoContext(
 				ctx,
-				"analyzed go module",
+				"module analyzed",
 				slog.Duration("elapsed", time.Since(start)),
 			)
 		} else if ctx.Err() == nil {
 			logger.ErrorContext(
 				ctx,
-				"unable to analyze go module",
+				"module analysis failed",
 				slog.Duration("elapsed", time.Since(start)),
 				slog.Any("error", err),
 			)
@@ -73,11 +71,32 @@ func (s *Supervisor) analyze(
 	}
 
 	for _, p := range pkgs {
-		s.analyzePackage(ctx, p, logger)
-
-		if ctx.Err() != nil {
-			return ctx.Err()
+		for _, err := range p.Errors {
+			logger.WarnContext(
+				ctx,
+				"package could not be loaded",
+				slog.Group(
+					"package",
+					slog.String("path", p.PkgPath),
+				),
+				slog.String("error", err.Error()),
+			)
 		}
+	}
+
+	apps := static.FromPackages(pkgs)
+
+	for _, app := range apps {
+		logger.InfoContext(
+			ctx,
+			"dogma application discovered",
+			slog.Group(
+				"app",
+				slog.String("key", app.Identity().Key),
+				slog.String("name", app.Identity().Name),
+				slog.String("type", app.TypeName()),
+			),
+		)
 	}
 
 	return nil
@@ -107,63 +126,4 @@ func (s *Supervisor) loadPackages(
 	}
 
 	return pkgs, nil
-}
-
-func (s *Supervisor) analyzePackage(
-	ctx context.Context,
-	p *packages.Package,
-	logger *slog.Logger,
-) {
-	logger = logger.With(
-		slog.Group(
-			"package",
-			slog.String("path", p.PkgPath),
-		),
-	)
-
-	start := time.Now()
-	logger.DebugContext(
-		ctx,
-		"analyzing go package",
-	)
-	defer func() {
-		logger.InfoContext(
-			ctx,
-			"analyzed go package",
-			slog.Duration("elapsed", time.Since(start)),
-		)
-	}()
-
-	for _, err := range p.Errors {
-		logger.WarnContext(
-			ctx,
-			"error while loading package",
-			slog.String("error", err.Error()),
-		)
-	}
-
-	defer func() {
-		if p := recover(); p != nil {
-			logger.WarnContext(
-				ctx,
-				"error while analyzing package",
-				slog.String("error", fmt.Sprint(p)),
-				slog.String("trace", string(debug.Stack())),
-			)
-		}
-	}()
-
-	apps := static.FromPackages([]*packages.Package{p})
-
-	for _, app := range apps {
-		logger.InfoContext(
-			ctx,
-			"discovered dogma application",
-			slog.Group(
-				"app",
-				slog.String("key", app.Identity().Key),
-				slog.String("name", app.Identity().Name),
-			),
-		)
-	}
 }
