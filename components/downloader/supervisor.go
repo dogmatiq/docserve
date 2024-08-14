@@ -107,8 +107,7 @@ func (s *Supervisor) download(
 	return minibus.Send(
 		ctx,
 		gomod.ModuleDownloaded{
-			RepoSource:    m.RepoSource,
-			RepoID:        m.RepoID,
+			Repo:          m.Repo,
 			ModulePath:    m.ModulePath,
 			ModuleVersion: version,
 			ModuleDir:     dir,

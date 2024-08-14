@@ -1,31 +1,70 @@
 package github
 
 import (
+	"context"
 	"fmt"
+	"log/slog"
+	"net/url"
 	"strconv"
 
-	"github.com/dogmatiq/browser/integrations/github/internal/githubapi"
+	"github.com/dogmatiq/browser/messages/repo"
 	"github.com/google/go-github/v63/github"
 )
 
-func repoSource(c *githubapi.AppClient) string {
-	if c.BaseURL == nil {
-		return "github"
-	}
-	return fmt.Sprintf("github@%s", c.BaseURL.Host)
+type repoFound struct {
+	Repo repo.Repo
+
+	AppClientID    string
+	InstallationID int64
+	GitHubRepo     *github.Repository
 }
 
-func marshalRepoID(id int64) string {
-	return strconv.FormatInt(id, 10)
+func (m repoFound) FoundRepo() repo.Repo {
+	return m.Repo
 }
 
-func unmarshalRepoID(s string) (int64, error) {
-	return strconv.ParseInt(s, 10, 64)
+func (m repoFound) LogTo(ctx context.Context, logger *slog.Logger) {
+	repo.LogFound(ctx, m, logger)
 }
 
-// isIgnored returns true if the repository should be ignored.
-func isIgnored(r *github.Repository) bool {
+type repoLost struct {
+	Repo repo.Repo
+
+	AppClientID    string
+	InstallationID int64
+	GitHubRepo     *github.Repository
+}
+
+func (m repoLost) LostRepo() repo.Repo {
+	return m.Repo
+}
+
+func (m repoLost) LogTo(ctx context.Context, logger *slog.Logger) {
+	repo.LogLost(ctx, m, logger)
+}
+
+// repoIgnored returns true if the repository should be ignored.
+func repoIgnored(r *github.Repository) bool {
 	return r.GetIsTemplate() ||
 		r.GetArchived() ||
 		r.GetFork()
+}
+
+// marshalRepo produces the generic representation of a GitHub repository.
+func marshalRepo(r *github.Repository) repo.Repo {
+	u, err := url.Parse(*r.HTMLURL)
+	if err != nil {
+		panic(err)
+	}
+
+	source := "github"
+	if u.Host != "github.com" {
+		source = fmt.Sprintf("github-enterprise-server@%s", u.Host)
+	}
+
+	return repo.Repo{
+		Source: source,
+		ID:     strconv.FormatInt(r.GetID(), 10),
+		Name:   r.GetFullName(),
+	}
 }

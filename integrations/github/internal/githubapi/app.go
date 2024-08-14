@@ -3,7 +3,6 @@ package githubapi
 import (
 	"context"
 	"crypto/rsa"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"sync"
@@ -16,10 +15,14 @@ import (
 // AppClient is a client that accesses the GitHub APIs on behalf of a GitHub
 // application.
 type AppClient struct {
-	ClientID   string
-	PrivateKey *rsa.PrivateKey
-	BaseURL    *url.URL
-	Logger     *slog.Logger
+	// ID is the GitHub application's client ID (not the app ID).
+	ID string
+
+	// Key is the GitHub application's private key.
+	Key *rsa.PrivateKey
+
+	// BaseURL is the base URL of the GitHub API.
+	BaseURL *url.URL
 
 	initOnce sync.Once
 	rest     *githubrest.Client
@@ -91,8 +94,8 @@ func (c *AppClient) init() {
 		http := oauth2.NewClient(
 			context.Background(),
 			&appTokenSource{
-				ClientID:   c.ClientID,
-				PrivateKey: c.PrivateKey,
+				ClientID:   c.ID,
+				PrivateKey: c.Key,
 			},
 		)
 		c.rest = newRESTClient(c.BaseURL, http)

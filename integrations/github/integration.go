@@ -141,10 +141,9 @@ func init() {
 			baseURL, _ := githubURL.Value()
 
 			c := &githubapi.AppClient{
-				ClientID:   githubAppClientID.Value(),
-				PrivateKey: key,
-				BaseURL:    baseURL,
-				Logger:     logger,
+				ID:      githubAppClientID.Value(),
+				Key:     key,
+				BaseURL: baseURL,
 			}
 
 			return c, nil

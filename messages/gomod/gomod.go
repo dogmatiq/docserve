@@ -3,13 +3,14 @@ package gomod
 import (
 	"context"
 	"log/slog"
+
+	"github.com/dogmatiq/browser/messages/repo"
 )
 
 // ModuleDiscovered is a message that indicates a Go module was found at a specific
 // version.
 type ModuleDiscovered struct {
-	RepoSource    string
-	RepoID        string
+	Repo          repo.Repo
 	ModulePath    string
 	ModuleVersion string
 }
@@ -21,8 +22,9 @@ func (m ModuleDiscovered) LogTo(ctx context.Context, logger *slog.Logger) {
 		"module found",
 		slog.Group(
 			"repo",
-			slog.String("source", m.RepoSource),
-			slog.String("id", m.RepoID),
+			slog.String("source", m.Repo.Source),
+			slog.String("id", m.Repo.ID),
+			slog.String("name", m.Repo.Name),
 		),
 		slog.Group(
 			"module",
@@ -35,8 +37,7 @@ func (m ModuleDiscovered) LogTo(ctx context.Context, logger *slog.Logger) {
 // ModuleDownloaded is a message that indicates a Go module was downloaded
 // into the module cache.
 type ModuleDownloaded struct {
-	RepoSource    string
-	RepoID        string
+	Repo          repo.Repo
 	ModulePath    string
 	ModuleVersion string
 	ModuleDir     string
@@ -49,8 +50,9 @@ func (m ModuleDownloaded) LogTo(ctx context.Context, logger *slog.Logger) {
 		"module downloaded",
 		slog.Group(
 			"repo",
-			slog.String("source", m.RepoSource),
-			slog.String("id", m.RepoID),
+			slog.String("source", m.Repo.Source),
+			slog.String("id", m.Repo.ID),
+			slog.String("name", m.Repo.Name),
 		),
 		slog.Group(
 			"module",

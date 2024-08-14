@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/url"
 
+	"github.com/dogmatiq/browser/messages/repo"
 	"github.com/google/uuid"
 )
 
@@ -64,9 +65,8 @@ func (m CredentialRequest) LogTo(ctx context.Context, logger *slog.Logger) {
 type CredentialResponse struct {
 	RequestID uuid.UUID
 
-	RepoSource string
-	RepoID     string
-	RepoURL    *url.URL
+	Repo    repo.Repo
+	RepoURL *url.URL
 
 	Credential Credential
 	Value      string
@@ -87,8 +87,9 @@ func (m CredentialResponse) LogTo(ctx context.Context, logger *slog.Logger) {
 		attrs,
 		slog.Group(
 			"repo",
-			slog.String("source", m.RepoSource),
-			slog.String("id", m.RepoID),
+			slog.String("source", m.Repo.Source),
+			slog.String("id", m.Repo.ID),
+			slog.String("name", m.Repo.Name),
 			slog.String("url", m.RepoURL.String()),
 		),
 	)

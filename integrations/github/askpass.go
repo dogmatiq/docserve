@@ -10,6 +10,7 @@ import (
 	"github.com/dogmatiq/browser/messages/askpass"
 	"github.com/dogmatiq/browser/messages/repo"
 	"github.com/dogmatiq/minibus"
+	"github.com/google/go-github/v63/github"
 	"golang.org/x/oauth2"
 )
 
@@ -17,13 +18,12 @@ import (
 type AskpassServer struct {
 	Client *githubapi.AppClient
 
-	reposByID   map[string]*askpassRepo
-	reposByName map[string]*askpassRepo
+	entriesByRepoID   map[string]*askpassEntry
+	entriesByRepoName map[string]*askpassEntry
 }
 
-type askpassRepo struct {
-	ID          int64
-	Name        string
+type askpassEntry struct {
+	Repo        *github.Repository
 	TokenSource oauth2.TokenSource
 }
 
@@ -34,8 +34,8 @@ func (s *AskpassServer) Run(ctx context.Context) error {
 	minibus.Subscribe[askpass.CredentialRequest](ctx)
 	minibus.Ready(ctx)
 
-	s.reposByID = map[string]*askpassRepo{}
-	s.reposByName = map[string]*askpassRepo{}
+	s.entriesByRepoID = map[string]*askpassEntry{}
+	s.entriesByRepoName = map[string]*askpassEntry{}
 
 	for m := range minibus.Inbox(ctx) {
 		if err := s.handleMessage(ctx, m); err != nil {
@@ -51,72 +51,52 @@ func (s *AskpassServer) handleMessage(
 	m any,
 ) error {
 	switch m := m.(type) {
-	case repo.Found:
-		return s.handleRepoFound(ctx, m)
-	case repo.Lost:
-		return s.handleRepoLost(ctx, m)
+	case repoFound:
+		s.handleRepoFound(m)
+	case repoLost:
+		s.handleRepoLost(m)
 	case askpass.CredentialRequest:
 		return s.handleAskpassRequest(ctx, m)
 	default:
 		panic("unexpected message type")
 	}
-}
-
-func (s *AskpassServer) handleRepoFound(
-	ctx context.Context,
-	m repo.Found,
-) error {
-	if m.RepoSource != repoSource(s.Client) {
-		return nil
-	}
-
-	repoID, err := unmarshalRepoID(m.RepoID)
-	if err != nil {
-		return err
-	}
-
-	in, _, err := s.Client.REST().Apps.FindRepositoryInstallationByID(ctx, repoID)
-	if err != nil {
-		return fmt.Errorf("unable to find installation for repository %d: %w", repoID, err)
-	}
-
-	r := &askpassRepo{
-		ID:          repoID,
-		Name:        m.RepoName,
-		TokenSource: s.Client.InstallationTokenSource(in.GetID()),
-	}
-
-	s.reposByID[m.RepoID] = r
-	s.reposByName[m.RepoName] = r
 
 	return nil
 }
 
-func (s *AskpassServer) handleRepoLost(
-	_ context.Context,
-	m repo.Lost,
-) error {
-	if m.RepoSource != repoSource(s.Client) {
-		return nil
+func (s *AskpassServer) handleRepoFound(m repoFound) {
+	if m.AppClientID != s.Client.ID {
+		return
 	}
 
-	repo := s.reposByID[m.RepoID]
-	delete(s.reposByID, m.RepoID)
-	delete(s.reposByName, repo.Name)
+	entry := &askpassEntry{
+		Repo:        m.GitHubRepo,
+		TokenSource: s.Client.InstallationTokenSource(m.InstallationID),
+	}
 
-	return nil
+	s.entriesByRepoID[m.Repo.ID] = entry
+	s.entriesByRepoName[m.Repo.Name] = entry
+}
+
+func (s *AskpassServer) handleRepoLost(m repoLost) {
+	if m.AppClientID != s.Client.ID {
+		return
+	}
+
+	delete(s.entriesByRepoID, m.Repo.ID)
+	delete(s.entriesByRepoName, m.Repo.Name)
 }
 
 func (s *AskpassServer) handleAskpassRequest(
 	ctx context.Context,
 	m askpass.CredentialRequest,
-) (err error) {
+) error {
 	repoName, ok := s.parseRepoURL(m.RepoURL)
 	if !ok {
 		return nil
 	}
 
-	repo, ok := s.reposByName[repoName]
+	entry, ok := s.entriesByRepoName[repoName]
 	if !ok {
 		return nil
 	}
@@ -126,7 +106,7 @@ func (s *AskpassServer) handleAskpassRequest(
 	case askpass.Username:
 		value = "x-access-token"
 	case askpass.Password:
-		token, err := repo.TokenSource.Token()
+		token, err := entry.TokenSource.Token()
 		if err != nil {
 			return err
 		}
@@ -139,8 +119,7 @@ func (s *AskpassServer) handleAskpassRequest(
 		ctx,
 		askpass.CredentialResponse{
 			RequestID:  m.RequestID,
-			RepoSource: repoSource(s.Client),
-			RepoID:     marshalRepoID(repo.ID),
+			Repo:       marshalRepo(entry.Repo),
 			RepoURL:    m.RepoURL,
 			Credential: m.Credential,
 			Value:      value,
