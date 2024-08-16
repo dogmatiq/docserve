@@ -3,7 +3,7 @@ module github.com/dogmatiq/browser
 go 1.22
 
 require (
-	github.com/dogmatiq/configkit v0.13.2
+	github.com/dogmatiq/configkit v0.13.4
 	github.com/dogmatiq/dodeca v1.4.2
 	github.com/dogmatiq/ferrite v1.3.0
 	github.com/dogmatiq/imbue v0.7.1
@@ -25,6 +25,7 @@ require (
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/dogmatiq/dogma v0.13.1 // indirect
 	github.com/dogmatiq/iago v0.4.0 // indirect
+	github.com/dogmatiq/interopspec v0.5.4 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -62,6 +63,8 @@ require (
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.23.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
+	google.golang.org/grpc v1.65.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
