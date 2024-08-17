@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/dogmatiq/browser/messages/gomod"
+	"github.com/dogmatiq/browser/model"
 	"github.com/dogmatiq/browser/worker"
 	"github.com/dogmatiq/configkit/static"
 	"golang.org/x/tools/go/packages"
@@ -33,21 +33,17 @@ func (s *Supervisor) Run(ctx context.Context) error {
 func (s *Supervisor) analyze(
 	ctx context.Context,
 	workerID int,
-	m gomod.ModuleAvailableOnDisk,
+	m model.ModuleAvailableOnDisk,
 ) (err error) {
 	logger := s.Logger.With(
 		slog.Group(
 			"worker",
 			slog.Int("id", workerID),
 		),
-		slog.Group(
-			"module",
-			slog.String("path", m.ModulePath),
-			slog.String("version", m.ModuleVersion),
-		),
+		m.Module.AsLogAttr(),
 	)
 
-	entry, ok, err := s.Cache.Load(ctx, m.ModulePath, m.ModuleVersion)
+	entry, ok, err := s.Cache.Load(ctx, m.Module.Path, m.Module.Version)
 
 	if err != nil {
 		logger.WarnContext(
@@ -69,7 +65,7 @@ func (s *Supervisor) analyze(
 			"analyzing module",
 		)
 
-		pkgs, err := s.loadPackages(ctx, m.ModuleDir)
+		pkgs, err := s.loadPackages(ctx, m.Dir)
 		if err != nil {
 			return err
 		}
@@ -98,7 +94,7 @@ func (s *Supervisor) analyze(
 			slog.Duration("elapsed", time.Since(start)),
 		)
 
-		if err := s.Cache.Save(ctx, m.ModulePath, m.ModuleVersion, entry); err != nil {
+		if err := s.Cache.Save(ctx, m.Module.Path, m.Module.Version, entry); err != nil {
 			logger.WarnContext(
 				ctx,
 				"unable to save analyzer cache entry",

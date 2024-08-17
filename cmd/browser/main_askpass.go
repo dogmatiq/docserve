@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/dogmatiq/browser/components/askpass"
-	messages "github.com/dogmatiq/browser/messages/askpass"
+	"github.com/dogmatiq/browser/model"
 	"github.com/go-git/go-git/v5"
 	"github.com/google/uuid"
 )
@@ -26,7 +26,7 @@ func runAskpass(ctx context.Context) error {
 		return fmt.Errorf("[request %d] invalid prompt: %q", id, prompt)
 	}
 
-	cred := messages.Credential(
+	cred := model.CredentialType(
 		strings.ToLower(fields[0]),
 	)
 

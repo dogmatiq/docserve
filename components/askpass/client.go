@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/dogmatiq/browser/messages/askpass"
+	"github.com/dogmatiq/browser/model"
 	"github.com/google/uuid"
 )
 
@@ -19,7 +19,7 @@ func Ask(
 	addr string,
 	requestID uuid.UUID,
 	repoURL string,
-	cred askpass.Credential,
+	cred model.CredentialType,
 ) (string, error) {
 	req := apiRequest{
 		ID:         requestID,
@@ -75,9 +75,9 @@ func Ask(
 
 // apiRequest is a apiRequest for credentials sent over the HTTP API.
 type apiRequest struct {
-	ID         uuid.UUID          `json:"id"`
-	URL        string             `json:"url"`
-	Credential askpass.Credential `json:"credential"`
+	ID         uuid.UUID            `json:"id"`
+	URL        string               `json:"url"`
+	Credential model.CredentialType `json:"credential"`
 }
 
 // apiResponse is the apiResponse to an [apiRequest].

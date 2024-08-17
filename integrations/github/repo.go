@@ -7,40 +7,40 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/dogmatiq/browser/messages/repo"
+	"github.com/dogmatiq/browser/model"
 	"github.com/google/go-github/v63/github"
 )
 
 type repoFound struct {
-	Repo repo.Repo
+	Repo model.Repo
 
 	AppClientID    string
 	InstallationID int64
 	GitHubRepo     *github.Repository
 }
 
-func (m repoFound) FoundRepo() repo.Repo {
+func (m repoFound) FoundRepo() model.Repo {
 	return m.Repo
 }
 
 func (m repoFound) LogTo(ctx context.Context, logger *slog.Logger) {
-	repo.LogFound(ctx, m, logger)
+	model.LogRepoFound(ctx, m, logger)
 }
 
 type repoLost struct {
-	Repo repo.Repo
+	Repo model.Repo
 
 	AppClientID    string
 	InstallationID int64
 	GitHubRepo     *github.Repository
 }
 
-func (m repoLost) LostRepo() repo.Repo {
+func (m repoLost) LostRepo() model.Repo {
 	return m.Repo
 }
 
 func (m repoLost) LogTo(ctx context.Context, logger *slog.Logger) {
-	repo.LogLost(ctx, m, logger)
+	model.LogRepoLost(ctx, m, logger)
 }
 
 // repoIgnored returns true if the repository should be ignored.
@@ -51,7 +51,7 @@ func repoIgnored(r *github.Repository) bool {
 }
 
 // marshalRepo produces the generic representation of a GitHub repository.
-func marshalRepo(r *github.Repository) repo.Repo {
+func marshalRepo(r *github.Repository) model.Repo {
 	u, err := url.Parse(*r.HTMLURL)
 	if err != nil {
 		panic(err)
@@ -62,7 +62,7 @@ func marshalRepo(r *github.Repository) repo.Repo {
 		source = fmt.Sprintf("github-enterprise-server@%s", u.Host)
 	}
 
-	return repo.Repo{
+	return model.Repo{
 		Source: source,
 		ID:     strconv.FormatInt(r.GetID(), 10),
 		Name:   r.GetFullName(),

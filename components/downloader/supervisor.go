@@ -10,7 +10,7 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/dogmatiq/browser/messages/gomod"
+	"github.com/dogmatiq/browser/model"
 	"github.com/dogmatiq/browser/worker"
 	"github.com/dogmatiq/minibus"
 )
@@ -34,18 +34,14 @@ func (s *Supervisor) Run(ctx context.Context) error {
 func (s *Supervisor) download(
 	ctx context.Context,
 	workerID int,
-	m gomod.ModuleDiscovered,
+	m model.ModuleDiscovered,
 ) (err error) {
 	logger := s.Logger.With(
 		slog.Group(
 			"worker",
 			slog.Int("id", workerID),
 		),
-		slog.Group(
-			"module",
-			slog.String("path", m.ModulePath),
-			slog.String("version", m.ModuleVersion),
-		),
+		m.Module.AsLogAttr(),
 	)
 
 	dir, version, err := s.exec(
@@ -54,11 +50,13 @@ func (s *Supervisor) download(
 		"list",
 		"-m",
 		"-json",
-		fmt.Sprintf("%s@%s", m.ModulePath, m.ModuleVersion),
+		fmt.Sprintf("%s@%s", m.Module.Path, m.Module.Version),
 	)
 	if err != nil {
 		return err
 	}
+
+	m.Module.Version = version // prefer the canonical version
 
 	if dir != "" {
 		logger.DebugContext(
@@ -78,7 +76,7 @@ func (s *Supervisor) download(
 			"mod",
 			"download",
 			"-json",
-			fmt.Sprintf("%s@%s", m.ModulePath, m.ModuleVersion),
+			fmt.Sprintf("%s@%s", m.Module.Path, m.Module.Version),
 		)
 		if err != nil {
 			return err
@@ -93,11 +91,10 @@ func (s *Supervisor) download(
 
 	return minibus.Send(
 		ctx,
-		gomod.ModuleAvailableOnDisk{
-			Repo:          m.Repo,
-			ModulePath:    m.ModulePath,
-			ModuleVersion: version,
-			ModuleDir:     dir,
+		model.ModuleAvailableOnDisk{
+			Repo:   m.Repo,
+			Module: m.Module,
+			Dir:    dir,
 		},
 	)
 }

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/dogmatiq/browser/integrations/github/internal/githubapi"
-	"github.com/dogmatiq/browser/messages/gomod"
+	"github.com/dogmatiq/browser/model"
 	"github.com/dogmatiq/minibus"
 	"github.com/google/go-github/v63/github"
 	"golang.org/x/mod/modfile"
@@ -204,13 +204,8 @@ func (w *RepositoryWatcher) addRepo(
 		w.Logger.WarnContext(
 			ctx,
 			"truncated git tree results, some modules may go undetected",
-			slog.Group(
-				"repo",
-				slog.String("source", g.Source),
-				slog.String("id", g.ID),
-				slog.String("name", g.Name),
-				slog.String("sha", tree.GetSHA()),
-			),
+			g.AsLogAttr(),
+			slog.String("sha", tree.GetSHA()),
 		)
 	}
 
@@ -244,10 +239,12 @@ func (w *RepositoryWatcher) addRepo(
 
 		if err := minibus.Send(
 			ctx,
-			gomod.ModuleDiscovered{
-				Repo:          g,
-				ModulePath:    mod.Module.Mod.Path,
-				ModuleVersion: tree.GetSHA(),
+			model.ModuleDiscovered{
+				Repo: g,
+				Module: model.Module{
+					Path:    mod.Module.Mod.Path,
+					Version: tree.GetSHA(),
+				},
 			},
 		); err != nil {
 			return err

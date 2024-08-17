@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dogmatiq/browser/messages/askpass"
+	"github.com/dogmatiq/browser/model"
 	"github.com/dogmatiq/minibus"
 )
 
@@ -30,15 +30,15 @@ func (h *Handler) Run(ctx context.Context) (err error) {
 	})
 	h.outbox = minibus.Outbox(ctx)
 
-	minibus.Subscribe[askpass.CredentialResponse](ctx)
+	minibus.Subscribe[model.CredentialResponse](ctx)
 	minibus.Ready(ctx)
 	close(h.ready)
 
 	for m := range minibus.Inbox(ctx) {
 		switch m := m.(type) {
-		case askpass.CredentialResponse:
+		case model.CredentialResponse:
 			if reply, ok := h.pending.Load(m.RequestID); ok {
-				reply.(chan askpass.CredentialResponse) <- m
+				reply.(chan model.CredentialResponse) <- m
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case <-h.ready:
 	}
 
-	response := make(chan askpass.CredentialResponse, 1)
+	response := make(chan model.CredentialResponse, 1)
 	h.pending.Store(req.RequestID, response)
 	defer h.pending.Delete(req.RequestID)
 
@@ -92,7 +92,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) parseRequest(
 	w http.ResponseWriter,
 	r *http.Request,
-) (askpass.CredentialRequest, bool) {
+) (model.CredentialRequest, bool) {
 	var req apiRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -101,7 +101,7 @@ func (h *Handler) parseRequest(
 			err.Error(),
 			http.StatusBadRequest,
 		)
-		return askpass.CredentialRequest{}, false
+		return model.CredentialRequest{}, false
 	}
 
 	repoURL, err := url.Parse(req.URL)
@@ -111,19 +111,19 @@ func (h *Handler) parseRequest(
 			err.Error(),
 			http.StatusBadRequest,
 		)
-		return askpass.CredentialRequest{}, false
+		return model.CredentialRequest{}, false
 	}
 
-	return askpass.CredentialRequest{
-		RequestID:  req.ID,
-		RepoURL:    repoURL,
-		Credential: req.Credential,
+	return model.CredentialRequest{
+		RequestID:      req.ID,
+		URL:            repoURL,
+		CredentialType: req.Credential,
 	}, true
 }
 
 func (h *Handler) writeResponse(
 	w http.ResponseWriter,
-	res askpass.CredentialResponse,
+	res model.CredentialResponse,
 ) {
 	data, err := json.Marshal(
 		apiResponse{

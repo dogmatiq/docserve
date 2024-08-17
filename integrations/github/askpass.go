@@ -7,8 +7,7 @@ import (
 	"regexp"
 
 	"github.com/dogmatiq/browser/integrations/github/internal/githubapi"
-	"github.com/dogmatiq/browser/messages/askpass"
-	"github.com/dogmatiq/browser/messages/repo"
+	"github.com/dogmatiq/browser/model"
 	"github.com/dogmatiq/minibus"
 	"github.com/google/go-github/v63/github"
 	"golang.org/x/oauth2"
@@ -29,9 +28,9 @@ type askpassEntry struct {
 
 // Run starts the server.
 func (s *AskpassServer) Run(ctx context.Context) error {
-	minibus.Subscribe[repo.Found](ctx)
-	minibus.Subscribe[repo.Lost](ctx)
-	minibus.Subscribe[askpass.CredentialRequest](ctx)
+	minibus.Subscribe[model.RepoFound](ctx)
+	minibus.Subscribe[model.RepoLost](ctx)
+	minibus.Subscribe[model.CredentialRequest](ctx)
 	minibus.Ready(ctx)
 
 	s.entriesByRepoID = map[string]*askpassEntry{}
@@ -55,7 +54,7 @@ func (s *AskpassServer) handleMessage(
 		s.handleRepoFound(m)
 	case repoLost:
 		s.handleRepoLost(m)
-	case askpass.CredentialRequest:
+	case model.CredentialRequest:
 		return s.handleAskpassRequest(ctx, m)
 	default:
 		panic("unexpected message type")
@@ -89,9 +88,9 @@ func (s *AskpassServer) handleRepoLost(m repoLost) {
 
 func (s *AskpassServer) handleAskpassRequest(
 	ctx context.Context,
-	m askpass.CredentialRequest,
+	m model.CredentialRequest,
 ) error {
-	repoName, ok := s.parseRepoURL(m.RepoURL)
+	repoName, ok := s.parseRepoURL(m.URL)
 	if !ok {
 		return nil
 	}
@@ -102,27 +101,26 @@ func (s *AskpassServer) handleAskpassRequest(
 	}
 
 	var value string
-	switch m.Credential {
-	case askpass.Username:
+	switch m.CredentialType {
+	case model.UsernameCredentialType:
 		value = "x-access-token"
-	case askpass.Password:
+	case model.PasswordCredentialType:
 		token, err := entry.TokenSource.Token()
 		if err != nil {
 			return err
 		}
 		value = token.AccessToken
 	default:
-		return fmt.Errorf("unsupported credential type: %s", m.Credential)
+		return fmt.Errorf("unsupported credential type: %s", m.CredentialType)
 	}
 
 	return minibus.Send(
 		ctx,
-		askpass.CredentialResponse{
-			RequestID:  m.RequestID,
-			Repo:       marshalRepo(entry.Repo),
-			RepoURL:    m.RepoURL,
-			Credential: m.Credential,
-			Value:      value,
+		model.CredentialResponse{
+			RequestID:      m.RequestID,
+			Repo:           marshalRepo(entry.Repo),
+			CredentialType: m.CredentialType,
+			Value:          value,
 		},
 	)
 }

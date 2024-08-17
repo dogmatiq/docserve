@@ -1,4 +1,4 @@
-package askpass
+package model
 
 import (
 	"context"
@@ -6,33 +6,32 @@ import (
 	"log/slog"
 	"net/url"
 
-	"github.com/dogmatiq/browser/messages/repo"
 	"github.com/google/uuid"
 )
 
-// Credential is an enumeration of the types of credentials that can be
+// CredentialType is an enumeration of the types of credentials that can be
 // requested.
-type Credential string
+type CredentialType string
 
 const (
-	// Username indicates that relevant credential is the username used to
+	// UsernameCredentialType indicates that relevant credential is the username used to
 	// authenticate with the repository.
-	Username Credential = "username"
-	// Password indicates that relevant credential is the password used to
+	UsernameCredentialType CredentialType = "username"
+	// PasswordCredentialType indicates that relevant credential is the password used to
 	// authenticate with the repository.
-	Password Credential = "password"
+	PasswordCredentialType CredentialType = "password"
 )
 
 // IsSensitive returns true if the credential is sensitive and should therefore
 // not be displayed in plain-text.
-func (c Credential) IsSensitive() bool {
-	return c != Username
+func (c CredentialType) IsSensitive() bool {
+	return c != UsernameCredentialType
 }
 
 // Validate returns an error if the credential is not valid.
-func (c Credential) Validate() error {
+func (c CredentialType) Validate() error {
 	switch c {
-	case Username, Password:
+	case UsernameCredentialType, PasswordCredentialType:
 		return nil
 	default:
 		return fmt.Errorf("invalid credential: %q", c)
@@ -42,9 +41,9 @@ func (c Credential) Validate() error {
 // CredentialRequest is a message that requests a credential for the repository
 // located at the given URL.
 type CredentialRequest struct {
-	RequestID  uuid.UUID
-	RepoURL    *url.URL
-	Credential Credential
+	RequestID      uuid.UUID
+	URL            *url.URL
+	CredentialType CredentialType
 }
 
 // LogTo logs the message to the given logger.
@@ -53,11 +52,8 @@ func (m CredentialRequest) LogTo(ctx context.Context, logger *slog.Logger) {
 		ctx,
 		"repo credential requested",
 		slog.String("request_id", m.RequestID.String()),
-		slog.String("credential", string(m.Credential)),
-		slog.Group(
-			"repo",
-			slog.String("url", m.RepoURL.String()),
-		),
+		slog.String("credential", string(m.CredentialType)),
+		slog.String("url", m.URL.String()),
 	)
 }
 
@@ -65,33 +61,25 @@ func (m CredentialRequest) LogTo(ctx context.Context, logger *slog.Logger) {
 type CredentialResponse struct {
 	RequestID uuid.UUID
 
-	Repo    repo.Repo
-	RepoURL *url.URL
-
-	Credential Credential
-	Value      string
+	Repo           Repo
+	CredentialType CredentialType
+	Value          string
 }
 
 // LogTo logs the message to the given logger.
 func (m CredentialResponse) LogTo(ctx context.Context, logger *slog.Logger) {
 	attrs := []any{
 		slog.String("request_id", m.RequestID.String()),
-		slog.String("credential", string(m.Credential)),
+		slog.String("credential", string(m.CredentialType)),
 	}
 
-	if !m.Credential.IsSensitive() {
+	if !m.CredentialType.IsSensitive() {
 		attrs = append(attrs, slog.String("value", m.Value))
 	}
 
 	attrs = append(
 		attrs,
-		slog.Group(
-			"repo",
-			slog.String("source", m.Repo.Source),
-			slog.String("id", m.Repo.ID),
-			slog.String("name", m.Repo.Name),
-			slog.String("url", m.RepoURL.String()),
-		),
+		m.Repo.AsLogAttr(),
 	)
 
 	logger.DebugContext(
