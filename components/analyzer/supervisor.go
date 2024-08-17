@@ -9,6 +9,7 @@ import (
 	"github.com/dogmatiq/browser/model"
 	"github.com/dogmatiq/browser/worker"
 	"github.com/dogmatiq/configkit/static"
+	"github.com/dogmatiq/minibus"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -114,6 +115,17 @@ func (s *Supervisor) analyze(
 				slog.String("type", app.TypeName()),
 			),
 		)
+
+		if err := minibus.Send(
+			ctx,
+			model.AppDiscovered{
+				Repo:   m.Repo,
+				Module: m.Module,
+				App:    app,
+			},
+		); err != nil {
+			return err
+		}
 	}
 
 	return nil
