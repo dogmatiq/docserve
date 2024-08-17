@@ -20,10 +20,10 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 h1:rpfIENRNNilwHwZeG5+P150SMrnNEcHYvcCuK6dPZSg=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0/go.mod h1:v57UDF4pDQJcEfFUCRop3lJL149eHGSe9Jvczhzjo/0=
-github.com/dogmatiq/configkit v0.13.5 h1:8EJPY+ssWuQalM2MPM+iHV9y5ZeVCbE8wfS0Ne+pc8Q=
-github.com/dogmatiq/configkit v0.13.5/go.mod h1:lwCG/to/1ZEJJXGyxCxqQvg7HIb8dDrQv4Xc40K32Dw=
-github.com/dogmatiq/dogma v0.13.1 h1:b1nsqYNmICEG2egvZ43K8w04Jma+MWYL6yF5Ad12y9o=
-github.com/dogmatiq/dogma v0.13.1/go.mod h1:9lyVA+6V2+E/exV0IrBOrkUiyFwIATEhv+b0vnB2umQ=
+github.com/dogmatiq/configkit v0.13.6 h1:tgMl55VC9ra1NjMfZJIyHTInTi/mTh8AScTpasIJKDs=
+github.com/dogmatiq/configkit v0.13.6/go.mod h1:wjuets0+wsD/7pYFE9bX2YvZ6LlrEx330yBG1nXoDSw=
+github.com/dogmatiq/dogma v0.14.0 h1:hY4iMX4QskZpP+ksJbw+WLwz0JAUyWgz2Aoof6qjz44=
+github.com/dogmatiq/dogma v0.14.0/go.mod h1:9lyVA+6V2+E/exV0IrBOrkUiyFwIATEhv+b0vnB2umQ=
 github.com/dogmatiq/ferrite v1.3.0 h1:T8JnwO2x/Bu9TFDZxYDRH9UwrAf586+i/n2bQp3fXsI=
 github.com/dogmatiq/ferrite v1.3.0/go.mod h1:DfZDa1NcEgRklZ62WU5cuWdlketCxYcXQGY60cTkwJ0=
 github.com/dogmatiq/iago v0.4.0 h1:57nZqVT34IZxtCZEW/RFif7DNUEjMXgevfr/Mmd0N8I=

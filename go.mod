@@ -5,7 +5,7 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/dogmatiq/configkit v0.13.5
+	github.com/dogmatiq/configkit v0.13.6
 	github.com/dogmatiq/ferrite v1.3.0
 	github.com/dogmatiq/imbue v0.7.1
 	github.com/dogmatiq/interopspec v0.5.4
@@ -29,7 +29,7 @@ require (
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
-	github.com/dogmatiq/dogma v0.13.1 // indirect
+	github.com/dogmatiq/dogma v0.14.0 // indirect
 	github.com/dogmatiq/iago v0.4.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
