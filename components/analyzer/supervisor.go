@@ -33,7 +33,7 @@ func (s *Supervisor) Run(ctx context.Context) error {
 func (s *Supervisor) analyze(
 	ctx context.Context,
 	workerID int,
-	m gomod.ModuleDownloaded,
+	m gomod.ModuleAvailableOnDisk,
 ) (err error) {
 	logger := s.Logger.With(
 		slog.Group(
@@ -47,34 +47,6 @@ func (s *Supervisor) analyze(
 		),
 	)
 
-	start := time.Now()
-	cached := false
-
-	defer func() {
-		if err == nil {
-			if cached {
-				logger.DebugContext(
-					ctx,
-					"module already analyzed",
-					slog.Duration("elapsed", time.Since(start)),
-				)
-			} else {
-				logger.InfoContext(
-					ctx,
-					"module analyzed",
-					slog.Duration("elapsed", time.Since(start)),
-				)
-			}
-		} else if ctx.Err() == nil {
-			logger.ErrorContext(
-				ctx,
-				"module analysis failed",
-				slog.Duration("elapsed", time.Since(start)),
-				slog.Any("error", err),
-			)
-		}
-	}()
-
 	entry, ok, err := s.Cache.Load(ctx, m.ModulePath, m.ModuleVersion)
 
 	if err != nil {
@@ -86,8 +58,17 @@ func (s *Supervisor) analyze(
 	}
 
 	if ok {
-		cached = true
+		logger.DebugContext(
+			ctx,
+			"module already analyzed",
+		)
 	} else {
+		start := time.Now()
+		logger.InfoContext(
+			ctx,
+			"analyzing module",
+		)
+
 		pkgs, err := s.loadPackages(ctx, m.ModuleDir)
 		if err != nil {
 			return err
@@ -97,7 +78,7 @@ func (s *Supervisor) analyze(
 			for _, err := range p.Errors {
 				logger.WarnContext(
 					ctx,
-					"package could not be loaded",
+					"package could not be loaded for analysis",
 					slog.Group(
 						"package",
 						slog.String("path", p.PkgPath),
@@ -110,6 +91,12 @@ func (s *Supervisor) analyze(
 		entry = CacheEntry{
 			Apps: static.FromPackages(pkgs),
 		}
+
+		logger.InfoContext(
+			ctx,
+			"module analyzed",
+			slog.Duration("elapsed", time.Since(start)),
+		)
 
 		if err := s.Cache.Save(ctx, m.ModulePath, m.ModuleVersion, entry); err != nil {
 			logger.WarnContext(
@@ -142,16 +129,9 @@ func (s *Supervisor) loadPackages(
 ) ([]*packages.Package, error) {
 	cfg := &packages.Config{
 		Context: ctx,
-		Mode: packages.NeedName |
-			packages.NeedFiles |
-			packages.NeedCompiledGoFiles |
-			packages.NeedImports |
-			packages.NeedTypes |
-			packages.NeedSyntax |
-			packages.NeedTypesInfo |
-			packages.NeedDeps,
-		Dir: dir,
-		Env: s.Environment,
+		Mode:    static.PackagesLoadMode,
+		Dir:     dir,
+		Env:     s.Environment,
 	}
 
 	pkgs, err := packages.Load(cfg, "./...")

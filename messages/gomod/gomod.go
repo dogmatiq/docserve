@@ -34,9 +34,9 @@ func (m ModuleDiscovered) LogTo(ctx context.Context, logger *slog.Logger) {
 	)
 }
 
-// ModuleDownloaded is a message that indicates a Go module was downloaded
+// ModuleAvailableOnDisk is a message that indicates a Go module was downloaded
 // into the module cache.
-type ModuleDownloaded struct {
+type ModuleAvailableOnDisk struct {
 	Repo          repo.Repo
 	ModulePath    string
 	ModuleVersion string
@@ -44,10 +44,10 @@ type ModuleDownloaded struct {
 }
 
 // LogTo logs the message to the given logger.
-func (m ModuleDownloaded) LogTo(ctx context.Context, logger *slog.Logger) {
+func (m ModuleAvailableOnDisk) LogTo(ctx context.Context, logger *slog.Logger) {
 	logger.DebugContext(
 		ctx,
-		"module downloaded",
+		"module available on disk",
 		slog.Group(
 			"repo",
 			slog.String("source", m.Repo.Source),

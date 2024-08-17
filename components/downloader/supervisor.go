@@ -48,34 +48,6 @@ func (s *Supervisor) download(
 		),
 	)
 
-	start := time.Now()
-	cached := false
-
-	defer func() {
-		if err == nil {
-			if cached {
-				logger.DebugContext(
-					ctx,
-					"module already downloaded",
-					slog.Duration("elapsed", time.Since(start)),
-				)
-			} else {
-				logger.InfoContext(
-					ctx,
-					"module downloaded",
-					slog.Duration("elapsed", time.Since(start)),
-				)
-			}
-		} else if ctx.Err() == nil {
-			logger.ErrorContext(
-				ctx,
-				"module download failed",
-				slog.Duration("elapsed", time.Since(start)),
-				slog.Any("error", err),
-			)
-		}
-	}()
-
 	dir, version, err := s.exec(
 		ctx,
 		"go",
@@ -88,7 +60,18 @@ func (s *Supervisor) download(
 		return err
 	}
 
-	if dir == "" {
+	if dir != "" {
+		logger.DebugContext(
+			ctx,
+			"module already downloaded",
+		)
+	} else {
+		logger.InfoContext(
+			ctx,
+			"downloading module",
+		)
+
+		start := time.Now()
 		dir, version, err = s.exec(
 			ctx,
 			"go",
@@ -100,13 +83,17 @@ func (s *Supervisor) download(
 		if err != nil {
 			return err
 		}
-	} else {
-		cached = true
+
+		logger.InfoContext(
+			ctx,
+			"module downloaded",
+			slog.Duration("elapsed", time.Since(start)),
+		)
 	}
 
 	return minibus.Send(
 		ctx,
-		gomod.ModuleDownloaded{
+		gomod.ModuleAvailableOnDisk{
 			Repo:          m.Repo,
 			ModulePath:    m.ModulePath,
 			ModuleVersion: version,
