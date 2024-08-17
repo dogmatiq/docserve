@@ -2,16 +2,17 @@
 
 This document describes the environment variables used by `browser`.
 
-| Name                       | Optionality         | Description                                                                |
-| -------------------------- | ------------------- | -------------------------------------------------------------------------- |
-| [`ANALYZER_WORKERS`]       | defaults to `+8`    | the maximum number of Go modules to analyze concurrently                   |
-| [`DEBUG`]                  | defaults to `false` | enable debug logging                                                       |
-| [`DOWNLOADER_WORKERS`]     | defaults to `+32`   | the maximum number of Go modules to download concurrently                  |
-| [`GITHUB_APP_CLIENT_ID`]   | required            | the client ID of the GitHub application used to read repository content    |
-| [`GITHUB_APP_HOOK_SECRET`] | required            | the secret used to verify GitHub web-hook requests are genuine             |
-| [`GITHUB_APP_PRIVATE_KEY`] | required            | the private key for the GitHub application used to read repository content |
-| [`GITHUB_URL`]             | optional            | the base URL of the GitHub API                                             |
-| [`HTTP_LISTEN_PORT`]       | defaults to `8080`  | the port to listen on for HTTP requests                                    |
+| Name                       | Optionality         | Description                                                                | Imported From      |
+| -------------------------- | ------------------- | -------------------------------------------------------------------------- | ------------------ |
+| [`ANALYZER_CACHE_DIR`]     | required            | the directory in which to store analysis results                           |                    |
+| [`ANALYZER_WORKERS`]       | defaults to `+4`    | the maximum number of Go modules to analyze concurrently                   |                    |
+| [`DEBUG`]                  | defaults to `false` | enable debug logging                                                       |                    |
+| [`DOWNLOADER_WORKERS`]     | defaults to `+8`    | the maximum number of Go modules to download concurrently                  |                    |
+| [`GITHUB_APP_CLIENT_ID`]   | required            | the client ID of the GitHub application used to read repository content    | GitHub Integration |
+| [`GITHUB_APP_HOOK_SECRET`] | required            | the secret used to verify GitHub web-hook requests are genuine             | GitHub Integration |
+| [`GITHUB_APP_PRIVATE_KEY`] | required            | the private key for the GitHub application used to read repository content | GitHub Integration |
+| [`GITHUB_URL`]             | optional            | the base URL of the GitHub API                                             | GitHub Integration |
+| [`HTTP_LISTEN_PORT`]       | defaults to `8080`  | the port to listen on for HTTP requests                                    |                    |
 
 ⚠️ `browser` may consume other undocumented environment variables. This document
 only shows variables declared using [Ferrite].
@@ -29,15 +30,25 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**,
 **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** in this
 document are to be interpreted as described in [RFC 2119].
 
+### `ANALYZER_CACHE_DIR`
+
+> the directory in which to store analysis results
+
+The `ANALYZER_CACHE_DIR` variable **MUST NOT** be left undefined.
+
+```bash
+export ANALYZER_CACHE_DIR=foo # (non-normative)
+```
+
 ### `ANALYZER_WORKERS`
 
 > the maximum number of Go modules to analyze concurrently
 
 The `ANALYZER_WORKERS` variable **MAY** be left undefined, in which case the
-default value of `+8` is used. Otherwise, the value **MUST** be `+1` or greater.
+default value of `+4` is used. Otherwise, the value **MUST** be `+1` or greater.
 
 ```bash
-export ANALYZER_WORKERS=+8 # (default)
+export ANALYZER_WORKERS=+4 # (default)
 export ANALYZER_WORKERS=+1 # (non-normative) the minimum accepted value
 ```
 
@@ -70,12 +81,11 @@ export DEBUG=false # (default)
 > the maximum number of Go modules to download concurrently
 
 The `DOWNLOADER_WORKERS` variable **MAY** be left undefined, in which case the
-default value of `+32` is used. Otherwise, the value **MUST** be `+1` or
-greater.
+default value of `+8` is used. Otherwise, the value **MUST** be `+1` or greater.
 
 ```bash
-export DOWNLOADER_WORKERS=+32 # (default)
-export DOWNLOADER_WORKERS=+1  # (non-normative) the minimum accepted value
+export DOWNLOADER_WORKERS=+8 # (default)
+export DOWNLOADER_WORKERS=+1 # (non-normative) the minimum accepted value
 ```
 
 <details>
@@ -100,6 +110,8 @@ The `GITHUB_APP_CLIENT_ID` variable **MUST NOT** be left undefined.
 export GITHUB_APP_CLIENT_ID=foo # (non-normative)
 ```
 
+This variable is imported from GitHub Integration.
+
 ### `GITHUB_APP_HOOK_SECRET`
 
 > the secret used to verify GitHub web-hook requests are genuine
@@ -108,6 +120,8 @@ The `GITHUB_APP_HOOK_SECRET` variable **MUST NOT** be left undefined.
 
 ⚠️ This variable is **sensitive**; its value may contain private information.
 
+This variable is imported from GitHub Integration.
+
 ### `GITHUB_APP_PRIVATE_KEY`
 
 > the private key for the GitHub application used to read repository content
@@ -115,6 +129,8 @@ The `GITHUB_APP_HOOK_SECRET` variable **MUST NOT** be left undefined.
 The `GITHUB_APP_PRIVATE_KEY` variable **MUST NOT** be left undefined.
 
 ⚠️ This variable is **sensitive**; its value may contain private information.
+
+This variable is imported from GitHub Integration.
 
 ### `GITHUB_URL`
 
@@ -126,6 +142,8 @@ The `GITHUB_URL` variable **MAY** be left undefined. Otherwise, the value
 ```bash
 export GITHUB_URL=https://example.org/path # (non-normative) a typical URL for a web page
 ```
+
+This variable is imported from GitHub Integration.
 
 <details>
 <summary>URL syntax</summary>
@@ -162,6 +180,7 @@ UNIX-like systems. Standard service names are published by IANA.
 
 <!-- references -->
 
+[`analyzer_cache_dir`]: #ANALYZER_CACHE_DIR
 [`analyzer_workers`]: #ANALYZER_WORKERS
 [`debug`]: #DEBUG
 [`downloader_workers`]: #DOWNLOADER_WORKERS

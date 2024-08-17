@@ -16,6 +16,7 @@ import (
 // modules.
 type Supervisor struct {
 	Environment []string
+	Cache       Cache
 	Workers     int
 	Logger      *slog.Logger
 }
@@ -47,14 +48,23 @@ func (s *Supervisor) analyze(
 	)
 
 	start := time.Now()
+	cached := false
 
 	defer func() {
 		if err == nil {
-			logger.InfoContext(
-				ctx,
-				"module analyzed",
-				slog.Duration("elapsed", time.Since(start)),
-			)
+			if cached {
+				logger.DebugContext(
+					ctx,
+					"module already analyzed",
+					slog.Duration("elapsed", time.Since(start)),
+				)
+			} else {
+				logger.InfoContext(
+					ctx,
+					"module analyzed",
+					slog.Duration("elapsed", time.Since(start)),
+				)
+			}
 		} else if ctx.Err() == nil {
 			logger.ErrorContext(
 				ctx,
@@ -65,28 +75,52 @@ func (s *Supervisor) analyze(
 		}
 	}()
 
-	pkgs, err := s.loadPackages(ctx, m.ModuleDir)
+	entry, ok, err := s.Cache.Load(ctx, m.ModulePath, m.ModuleVersion)
+
 	if err != nil {
-		return err
+		logger.WarnContext(
+			ctx,
+			"unable to load analyzer cache entry",
+			slog.Any("error", err),
+		)
 	}
 
-	for _, p := range pkgs {
-		for _, err := range p.Errors {
+	if ok {
+		cached = true
+	} else {
+		pkgs, err := s.loadPackages(ctx, m.ModuleDir)
+		if err != nil {
+			return err
+		}
+
+		for _, p := range pkgs {
+			for _, err := range p.Errors {
+				logger.WarnContext(
+					ctx,
+					"package could not be loaded",
+					slog.Group(
+						"package",
+						slog.String("path", p.PkgPath),
+					),
+					slog.String("error", err.Error()),
+				)
+			}
+		}
+
+		entry = CacheEntry{
+			Apps: static.FromPackages(pkgs),
+		}
+
+		if err := s.Cache.Save(ctx, m.ModulePath, m.ModuleVersion, entry); err != nil {
 			logger.WarnContext(
 				ctx,
-				"package could not be loaded",
-				slog.Group(
-					"package",
-					slog.String("path", p.PkgPath),
-				),
-				slog.String("error", err.Error()),
+				"unable to save analyzer cache entry",
+				slog.Any("error", err),
 			)
 		}
 	}
 
-	apps := static.FromPackages(pkgs)
-
-	for _, app := range apps {
+	for _, app := range entry.Apps {
 		logger.InfoContext(
 			ctx,
 			"dogma application discovered",

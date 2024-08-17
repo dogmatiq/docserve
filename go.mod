@@ -1,11 +1,14 @@
 module github.com/dogmatiq/browser
 
-go 1.22
+go 1.23
+
+toolchain go1.23.0
 
 require (
-	github.com/dogmatiq/configkit v0.13.2
+	github.com/dogmatiq/configkit v0.13.5
 	github.com/dogmatiq/ferrite v1.3.0
 	github.com/dogmatiq/imbue v0.7.1
+	github.com/dogmatiq/interopspec v0.5.4
 	github.com/dogmatiq/minibus v0.3.0
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/google/go-github/v63 v63.0.0
@@ -16,6 +19,7 @@ require (
 	golang.org/x/oauth2 v0.21.0
 	golang.org/x/sync v0.8.0
 	golang.org/x/tools v0.24.0
+	google.golang.org/protobuf v1.34.2
 )
 
 require (
@@ -54,6 +58,9 @@ require (
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/text v0.17.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
+	google.golang.org/grpc v1.65.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

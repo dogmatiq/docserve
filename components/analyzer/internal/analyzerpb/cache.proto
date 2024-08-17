@@ -1,0 +1,10 @@
+syntax = "proto3";
+package dogma.browser.v2.analyzer;
+
+option go_package = "github.com/dogmatiq/browser/components/analyzer/internal/analyzerpb";
+
+import "github.com/dogmatiq/interopspec/configspec/configapi.proto";
+
+message CacheEntry {
+  repeated dogma.interop.v1.config.Application applications = 1;
+}

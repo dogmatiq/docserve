@@ -12,10 +12,14 @@ import (
 
 var (
 	analyzerWorkers = ferrite.
-		Signed[int]("ANALYZER_WORKERS", "the maximum number of Go modules to analyze concurrently").
-		WithMinimum(1).
-		WithDefault(max(1, runtime.NumCPU()/2)).
-		Required()
+			Signed[int]("ANALYZER_WORKERS", "the maximum number of Go modules to analyze concurrently").
+			WithMinimum(1).
+			WithDefault(max(1, runtime.NumCPU()/2)).
+			Required()
+
+	analyzerCacheDir = ferrite.
+				String("ANALYZER_CACHE_DIR", "the directory in which to store analysis results").
+				Required()
 )
 
 func init() {
@@ -27,6 +31,9 @@ func init() {
 			logger *slog.Logger,
 		) (*analyzer.Supervisor, error) {
 			return &analyzer.Supervisor{
+				Cache: &analyzer.DiskCache{
+					Dir: analyzerCacheDir.Value(),
+				},
 				Environment: env.Value(),
 				Workers:     analyzerWorkers.Value(),
 				Logger: logger.With(
