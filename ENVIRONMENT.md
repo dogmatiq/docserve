@@ -2,33 +2,21 @@
 
 This document describes the environment variables used by `browser`.
 
-| Name                      | Optionality | Description                                                                  |
-| ------------------------- | ----------- | ---------------------------------------------------------------------------- |
-| [`DSN`]                   | required    | the PostgreSQL connection string                                             |
-| [`GITHUB_APP_ID`]         | required    | the ID of the GitHub application used to read repository content             |
-| [`GITHUB_APP_PRIVATEKEY`] | required    | the private key for the GitHub application used to read repository content   |
-| [`GITHUB_CLIENT_ID`]      | required    | the client ID of the GitHub application used to read repository content      |
-| [`GITHUB_CLIENT_SECRET`]  | required    | the client secret for the GitHub application used to read repository content |
-| [`GITHUB_HOOK_SECRET`]    | required    | the secret used to verify GitHub web-hook requests are genuine               |
-| [`GITHUB_URL`]            | optional    | the base URL of the GitHub API                                               |
+| Name                      | Usage    | Description                                                                  |
+| ------------------------- | -------- | ---------------------------------------------------------------------------- |
+| [`DSN`]                   | required | the PostgreSQL connection string                                             |
+| [`GITHUB_APP_ID`]         | required | the ID of the GitHub application used to read repository content             |
+| [`GITHUB_APP_PRIVATEKEY`] | required | the private key for the GitHub application used to read repository content   |
+| [`GITHUB_CLIENT_ID`]      | required | the client ID of the GitHub application used to read repository content      |
+| [`GITHUB_CLIENT_SECRET`]  | required | the client secret for the GitHub application used to read repository content |
+| [`GITHUB_HOOK_SECRET`]    | required | the secret used to verify GitHub web-hook requests are genuine               |
+| [`GITHUB_URL`]            | optional | the base URL of the GitHub API                                               |
 
-⚠️ `browser` may consume other undocumented environment variables. This document
-only shows variables declared using [Ferrite].
+> [!TIP]
+> If an environment variable is set to an empty value, `browser` behaves as if
+> that variable is left undefined.
 
-## Specification
-
-All environment variables described below must meet the stated requirements.
-Otherwise, `browser` prints usage information to `STDERR` then exits.
-**Undefined** variables and **empty** values are equivalent.
-
-⚠️ This section includes **non-normative** example values. These examples are
-syntactically valid, but may not be meaningful to `browser`.
-
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**,
-**SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** in this
-document are to be interpreted as described in [RFC 2119].
-
-### `DSN`
+## `DSN`
 
 > the PostgreSQL connection string
 
@@ -38,7 +26,7 @@ The `DSN` variable **MUST NOT** be left undefined.
 export DSN=foo # (non-normative)
 ```
 
-### `GITHUB_APP_ID`
+## `GITHUB_APP_ID`
 
 > the ID of the GitHub application used to read repository content
 
@@ -61,7 +49,7 @@ integer type (`uint`); any value that overflows this data-type is invalid.
 
 </details>
 
-### `GITHUB_APP_PRIVATEKEY`
+## `GITHUB_APP_PRIVATEKEY`
 
 > the private key for the GitHub application used to read repository content
 
@@ -69,7 +57,7 @@ The `GITHUB_APP_PRIVATEKEY` variable **MUST NOT** be left undefined.
 
 ⚠️ This variable is **sensitive**; its value may contain private information.
 
-### `GITHUB_CLIENT_ID`
+## `GITHUB_CLIENT_ID`
 
 > the client ID of the GitHub application used to read repository content
 
@@ -79,7 +67,7 @@ The `GITHUB_CLIENT_ID` variable **MUST NOT** be left undefined.
 export GITHUB_CLIENT_ID=foo # (non-normative)
 ```
 
-### `GITHUB_CLIENT_SECRET`
+## `GITHUB_CLIENT_SECRET`
 
 > the client secret for the GitHub application used to read repository content
 
@@ -87,7 +75,7 @@ The `GITHUB_CLIENT_SECRET` variable **MUST NOT** be left undefined.
 
 ⚠️ This variable is **sensitive**; its value may contain private information.
 
-### `GITHUB_HOOK_SECRET`
+## `GITHUB_HOOK_SECRET`
 
 > the secret used to verify GitHub web-hook requests are genuine
 
@@ -95,7 +83,7 @@ The `GITHUB_HOOK_SECRET` variable **MUST NOT** be left undefined.
 
 ⚠️ This variable is **sensitive**; its value may contain private information.
 
-### `GITHUB_URL`
+## `GITHUB_URL`
 
 > the base URL of the GitHub API
 
@@ -115,6 +103,17 @@ not necessarily web addresses; `https://example.org` and
 
 </details>
 
+---
+
+> [!NOTE]
+> This document only describes environment variables declared using [Ferrite].
+> `browser` may consume other undocumented environment variables.
+
+> [!IMPORTANT]
+> Some of the example values given in this document are **non-normative**.
+> Although these values are syntactically valid, they may not be meaningful to
+> `browser`.
+
 <!-- references -->
 
 [`dsn`]: #DSN
@@ -125,4 +124,3 @@ not necessarily web addresses; `https://example.org` and
 [`github_client_secret`]: #GITHUB_CLIENT_SECRET
 [`github_hook_secret`]: #GITHUB_HOOK_SECRET
 [`github_url`]: #GITHUB_URL
-[rfc 2119]: https://www.rfc-editor.org/rfc/rfc2119.html
