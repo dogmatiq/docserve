@@ -3,7 +3,7 @@ module github.com/dogmatiq/browser
 go 1.22
 
 require (
-	github.com/dogmatiq/configkit v0.13.6
+	github.com/dogmatiq/configkit v0.13.8
 	github.com/dogmatiq/dodeca v1.4.2
 	github.com/dogmatiq/ferrite v1.4.0
 	github.com/dogmatiq/imbue v0.7.1
@@ -23,7 +23,7 @@ require (
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
-	github.com/dogmatiq/dogma v0.14.0 // indirect
+	github.com/dogmatiq/dogma v0.14.2 // indirect
 	github.com/dogmatiq/iago v0.4.0 // indirect
 	github.com/dogmatiq/interopspec v0.5.4 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
