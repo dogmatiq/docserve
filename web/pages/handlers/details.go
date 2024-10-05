@@ -20,9 +20,9 @@ type detailsView struct {
 	AppName string
 
 	ConsumedMessages    []messageSummary
-	ConsumedMessageRole message.Role
+	ConsumedMessageKind message.Kind
 	ProducedMessages    []messageSummary
-	ProducedMessageRole message.Role
+	ProducedMessageKind message.Kind
 	TimeoutMessages     []components.Type
 }
 
@@ -63,13 +63,13 @@ func (h *DetailsHandler) View(ctx *gin.Context) (string, interface{}, error) {
 
 	switch view.Type {
 	case configkit.AggregateHandlerType, configkit.IntegrationHandlerType:
-		view.ConsumedMessageRole = message.CommandRole
-		view.ProducedMessageRole = message.EventRole
+		view.ConsumedMessageKind = message.CommandKind
+		view.ProducedMessageKind = message.EventKind
 	case configkit.ProcessHandlerType:
-		view.ConsumedMessageRole = message.EventRole
-		view.ProducedMessageRole = message.CommandRole
+		view.ConsumedMessageKind = message.EventKind
+		view.ProducedMessageKind = message.CommandKind
 	case configkit.ProjectionHandlerType:
-		view.ConsumedMessageRole = message.EventRole
+		view.ConsumedMessageKind = message.EventKind
 	}
 
 	if err := h.loadMessages(ctx, &view, handlerKey); err != nil {
@@ -141,7 +141,7 @@ func (h *DetailsHandler) loadMessages(
 				AND xm.is_produced != m.is_produced
 				AND xm.is_consumed != m.is_consumed
 				) AS handler_count,
-			m.role,
+			m.kind,
 			m.is_produced,
 			m.is_consumed
 		FROM dogmabrowser.handler_message AS m
@@ -160,7 +160,7 @@ func (h *DetailsHandler) loadMessages(
 		var s messageSummary
 
 		var (
-			role                   message.Role
+			kind                   message.Kind
 			isProduced, isConsumed bool
 		)
 
@@ -171,14 +171,14 @@ func (h *DetailsHandler) loadMessages(
 			&s.Impl.URL,
 			&s.Impl.Docs,
 			&s.HandlerCount,
-			&role,
+			&kind,
 			&isProduced,
 			&isConsumed,
 		); err != nil {
 			return err
 		}
 
-		if role == message.TimeoutRole {
+		if kind == message.TimeoutKind {
 			view.TimeoutMessages = append(view.TimeoutMessages, s.Impl)
 		} else if isProduced {
 			view.ProducedMessages = append(view.ProducedMessages, s)

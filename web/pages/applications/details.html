@@ -1,270 +1,342 @@
 {{ define "content" }}
-<h1>Application Details &mdash; {{ .Name }} </h1>
+<h1>Application Details &mdash; {{ .Name }}</h1>
 
 <div class="card my-3">
-    <div class="card-body">
-        <dl>
-            <dt><span
-                title="The human-readable name given to the application."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Name
-            </span></dt>
-            <dd>{{ .Name }}</dd>
-            <dt><span
-                title="The immutable key that serves as a globally unique identifier for the application."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Key
-            </span></dt>
-            <dd>{{ .Key }}</dd>
-            <dt><span
-                title="The name of the Go type that implements the application interface."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Implementation
-            </span></dt>
-            <dd>{{ type .Impl }}</dd>
+  <div class="card-body">
+    <dl>
+      <dt>
+        <span
+          title="The human-readable name given to the application."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Name
+        </span>
+      </dt>
+      <dd>{{ .Name }}</dd>
+      <dt>
+        <span
+          title="The immutable key that serves as a globally unique identifier for the application."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Key
+        </span>
+      </dt>
+      <dd>{{ .Key }}</dd>
+      <dt>
+        <span
+          title="The name of the Go type that implements the application interface."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Implementation
+        </span>
+      </dt>
+      <dd>{{ type .Impl }}</dd>
 
-            {{ if .Impl.Docs }}
-                <dt><span
-                    title="The documentation comments from the source code."
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                >
-                    Documentation
-                </span></dt>
-                <dd>{{ .Impl.Docs }}</dd>
-            {{ end }}
-        </dl>
-    </div>
+      {{ if .Impl.Docs }}
+      <dt>
+        <span
+          title="The documentation comments from the source code."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Documentation
+        </span>
+      </dt>
+      <dd>{{ .Impl.Docs }}</dd>
+      {{ end }}
+    </dl>
+  </div>
 </div>
 
 <section class="mt-5">
-    <h2 id="relationships"><a href="#relationships"><i class="bi bi-link"></i></a> Application Relationships</h2>
+  <h2 id="relationships">
+    <a href="#relationships"><i class="bi bi-link"></i></a> Application
+    Relationships
+  </h2>
 
-    {{ if .Relationships }}
-        <p class="my-3">
-            Analysis discovered <strong>{{ len .Relationships }}</strong> other
-            application(s) that communicate with the <strong>{{ .Name }}</strong>
-            application.
-        </p>
+  {{ if .Relationships }}
+  <p class="my-3">
+    Analysis discovered <strong>{{ len .Relationships }}</strong> other
+    application(s) that communicate with the <strong>{{ .Name }}</strong>
+    application.
+  </p>
 
-        <table class="table table-striped table-hover">
-            <thead>
-                <th colspan="2"><span
-                    title="The direction of communication between the related application and the <strong>{{ .Name }}</strong> application."
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    data-bs-html="true"
-                >
-                    Dir.
-                </span></th>
-                <th><span
-                    title="The name of the application that is related to the <strong>{{ .Name }}</strong> application."
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    data-bs-html="true"
-                >
-                    Application
-                </span></th>
-                <th><span
-                    title="The name of the Go type that implements the application interface."
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                >
-                    Implementation
-                </span></th>
-                <th class="numeric"><span
-                    title="The number of messages produced by the related application that are consumed by the <strong>{{ .Name }}</strong> application."
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    data-bs-html="true"
-                >
-                    Upstream
-                </span></th>
-                <th class="numeric"><span
-                    title="The number of messages produced by the <strong>{{ .Name }}</strong> application that are consumed by the related application."
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    data-bs-html="true"
-                >
-                    Downstream
-                </span></th>
-            </thead>
-            <tbody>
-                {{ range $r := .Relationships }}
-                    <tr>
-                        <td style="width: 1px; text-align: right;">{{ $.Name }}</td>
-                        <td style="width: 1px; text-align: center;">
-                            <a href="/relationships/{{ $.Key }}...{{ $r.Key }}">
-                            {{ if and $r.UpstreamMessageCount $r.DownstreamMessageCount }}
-                                <i
-                                    title="The <strong>{{ $.Name }}</strong> and {{ $r.Name }} applications communicate bidirectionally using <strong>{{ $r.TotalMessageCount }}</strong> message(s)."
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="top"
-                                    data-bs-html="true"
-                                    class="bi bi-arrow-left-right"></i>
-                            {{ else }}
-                                {{ if $r.UpstreamMessageCount }}
-                                <i
-                                    title="The <strong>{{ $.Name }}</strong> application consumes <strong>{{ $r.UpstreamMessageCount }}</strong> message(s) from the <strong>{{ $r.Name }}</strong> application."
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="top"
-                                    data-bs-html="true"
-                                    class="bi bi-arrow-left"></i>
-                                {{ end }}
-                                {{ if $r.DownstreamMessageCount }}
-                                <i
-                                    title="The <strong>{{ $r.Name }}</strong> application consumes <strong>{{ $r.DownstreamMessageCount }}</strong> message(s) from the <strong>{{ $.Name }}</strong> application."
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="top"
-                                    data-bs-html="true"
-                                    class="bi bi-arrow-right"></i>
-                                {{ end }}
-                            {{ end }}
-                            </a>
-                        </td>
-                        <td><a href="/applications/{{ $r.Key }}">{{ $r.Name }}</a></td>
-                        <td>{{ type $r.Impl }}</td>
-                        <td class="numeric"><a href="/relationships/{{ $.Key }}...{{ $r.Key }}#upstream">{{ numeric $r.UpstreamMessageCount }}</a></td>
-                        <td class="numeric"><a href="/relationships/{{ $.Key }}...{{ $r.Key }}#downstream">{{ numeric $r.DownstreamMessageCount }}</a></td>
-                    </tr>
-                {{ end }}
-            </tbody>
-        </table>
-    {{ else }}
-        <p class="my-3">
-            Analysis did not discover any other applications that communicate
-            with the <strong>{{ .Name }}</strong> application.
-        </p>
-    {{ end }}
-
+  <table class="table table-striped table-hover">
+    <thead>
+      <th colspan="2">
+        <span
+          title="The direction of communication between the related application and the <strong>{{ .Name }}</strong> application."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          data-bs-html="true"
+        >
+          Dir.
+        </span>
+      </th>
+      <th>
+        <span
+          title="The name of the application that is related to the <strong>{{ .Name }}</strong> application."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          data-bs-html="true"
+        >
+          Application
+        </span>
+      </th>
+      <th>
+        <span
+          title="The name of the Go type that implements the application interface."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Implementation
+        </span>
+      </th>
+      <th class="numeric">
+        <span
+          title="The number of messages produced by the related application that are consumed by the <strong>{{ .Name }}</strong> application."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          data-bs-html="true"
+        >
+          Upstream
+        </span>
+      </th>
+      <th class="numeric">
+        <span
+          title="The number of messages produced by the <strong>{{ .Name }}</strong> application that are consumed by the related application."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          data-bs-html="true"
+        >
+          Downstream
+        </span>
+      </th>
+    </thead>
+    <tbody>
+      {{ range $r := .Relationships }}
+      <tr>
+        <td style="width: 1px; text-align: right">{{ $.Name }}</td>
+        <td style="width: 1px; text-align: center">
+          <a href="/relationships/{{ $.Key }}...{{ $r.Key }}">
+            {{ if and $r.UpstreamMessageCount $r.DownstreamMessageCount }}
+            <i
+              title="The <strong>{{ $.Name }}</strong> and {{ $r.Name }} applications communicate bidirectionally using <strong>{{ $r.TotalMessageCount }}</strong> message(s)."
+              data-bs-toggle="tooltip"
+              data-bs-placement="top"
+              data-bs-html="true"
+              class="bi bi-arrow-left-right"
+            ></i>
+            {{ else }} {{ if $r.UpstreamMessageCount }}
+            <i
+              title="The <strong>{{ $.Name }}</strong> application consumes <strong>{{ $r.UpstreamMessageCount }}</strong> message(s) from the <strong>{{ $r.Name }}</strong> application."
+              data-bs-toggle="tooltip"
+              data-bs-placement="top"
+              data-bs-html="true"
+              class="bi bi-arrow-left"
+            ></i>
+            {{ end }} {{ if $r.DownstreamMessageCount }}
+            <i
+              title="The <strong>{{ $r.Name }}</strong> application consumes <strong>{{ $r.DownstreamMessageCount }}</strong> message(s) from the <strong>{{ $.Name }}</strong> application."
+              data-bs-toggle="tooltip"
+              data-bs-placement="top"
+              data-bs-html="true"
+              class="bi bi-arrow-right"
+            ></i>
+            {{ end }} {{ end }}
+          </a>
+        </td>
+        <td><a href="/applications/{{ $r.Key }}">{{ $r.Name }}</a></td>
+        <td>{{ type $r.Impl }}</td>
+        <td class="numeric">
+          <a href="/relationships/{{ $.Key }}...{{ $r.Key }}#upstream"
+            >{{ numeric $r.UpstreamMessageCount }}</a
+          >
+        </td>
+        <td class="numeric">
+          <a href="/relationships/{{ $.Key }}...{{ $r.Key }}#downstream"
+            >{{ numeric $r.DownstreamMessageCount }}</a
+          >
+        </td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+  {{ else }}
+  <p class="my-3">
+    Analysis did not discover any other applications that communicate with the
+    <strong>{{ .Name }}</strong> application.
+  </p>
+  {{ end }}
 </section>
 
 <section class="mt-5">
-    <h2 id="handlers"><a href="#handlers"><i class="bi bi-link"></i></a> Handlers</h2>
+  <h2 id="handlers">
+    <a href="#handlers"><i class="bi bi-link"></i></a> Handlers
+  </h2>
 
-    <p class="my-3">
-        Analysis of the <strong>{{ .Name }}</strong> application discovered
-        <strong>{{ len .Handlers }}</strong> message handler(s).
-    </p>
+  <p class="my-3">
+    Analysis of the <strong>{{ .Name }}</strong> application discovered
+    <strong>{{ len .Handlers }}</strong> message handler(s).
+  </p>
 
-    <table class="table table-striped table-hover">
-        <thead>
-            <th><span
-                title="The human-readable name given to the handler."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Name
-            </span></th>
-            <th><span
-                title="The type of handler interface implemented by the handler."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Type
-            </span></th>
-            <th><span
-                title="The name of the Go type that implements the handler interface."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Implementation
-            </span></th>
-            <th class="numeric"><span
-                title="The number of messages consumed by the handler."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Consumed
-            </span></th>
-            <th class="numeric"><span
-                title="The number of messages produced by the handler."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Produced
-            </span></th>
-        </thead>
-        <tbody>
-            {{ range $h := .Handlers }}
-                <tr>
-                    <td><a href="/handlers/{{ $h.Key }}">{{ $h.Name }}</a></td>
-                    <td>{{ handlertype $h.Type }}</td>
-                    <td>{{ type $h.Impl }}</td>
-                    <td class="numeric"><a href="/handlers/{{ $h.Key }}#consumed">{{ numeric $h.ConsumedMessageCount }}</a></td>
-                    <td class="numeric"><a href="/handlers/{{ $h.Key }}#produced">{{ numeric $h.ProducedMessageCount }}</a></td>
-                </tr>
-            {{ end }}
-        </tbody>
-    </table>
+  <table class="table table-striped table-hover">
+    <thead>
+      <th>
+        <span
+          title="The human-readable name given to the handler."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Name
+        </span>
+      </th>
+      <th>
+        <span
+          title="The type of handler interface implemented by the handler."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Type
+        </span>
+      </th>
+      <th>
+        <span
+          title="The name of the Go type that implements the handler interface."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Implementation
+        </span>
+      </th>
+      <th class="numeric">
+        <span
+          title="The number of messages consumed by the handler."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Consumed
+        </span>
+      </th>
+      <th class="numeric">
+        <span
+          title="The number of messages produced by the handler."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Produced
+        </span>
+      </th>
+    </thead>
+    <tbody>
+      {{ range $h := .Handlers }}
+      <tr>
+        <td><a href="/handlers/{{ $h.Key }}">{{ $h.Name }}</a></td>
+        <td>{{ handlertype $h.Type }}</td>
+        <td>{{ type $h.Impl }}</td>
+        <td class="numeric">
+          <a href="/handlers/{{ $h.Key }}#consumed"
+            >{{ numeric $h.ConsumedMessageCount }}</a
+          >
+        </td>
+        <td class="numeric">
+          <a href="/handlers/{{ $h.Key }}#produced"
+            >{{ numeric $h.ProducedMessageCount }}</a
+          >
+        </td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
 </section>
 
 <section class="mt-5">
-    <h2 id="messages"><a href="#messages"><i class="bi bi-link"></i></a> Messages</h2>
+  <h2 id="messages">
+    <a href="#messages"><i class="bi bi-link"></i></a> Messages
+  </h2>
 
-    <p class="my-3">
-        Analysis of <strong>{{ len .Handlers }}</strong> handlers within the
-        <strong>{{ .Name }}</strong> application discovered
-        <strong>{{ len .Messages }}</strong> different message type(s).
-    </p>
+  <p class="my-3">
+    Analysis of <strong>{{ len .Handlers }}</strong> handlers within the
+    <strong>{{ .Name }}</strong> application discovered
+    <strong>{{ len .Messages }}</strong> different message type(s).
+  </p>
 
-    <table class="table table-striped table-hover">
-        <thead>
-            <th><span
-                title="The short name of the message."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Name
-            </span></th>
-            <th><span
-                title="The role that the message plays within the <strong>{{ .Name }}</strong> application."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-                data-bs-html="true"
-            >
-                Role
-            </span></th>
-            <th><span
-                title="The name of the Go type that defines the message."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Implementation
-            </span></th>
-            <th class="numeric"><span
-                title="The number of handlers that produce the message."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Producers
-            </span></th>
-            <th class="numeric"><span
-                title="The number of handlers that consume the message."
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-            >
-                Consumers
-            </span></th>
-        </thead>
-        <tbody>
-            {{ range $m := .Messages }}
-                <tr>
-                    <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
-                    <td>{{ role $m.Role }}</td>
-                    <td>{{ type $m.Impl }}</td>
-                    <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers">{{ numeric $m.ProducerCount }}</a></td>
-                    <td class="numeric"><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers">{{ numeric $m.ConsumerCount }}</a></td>
-                </tr>
-            {{ end }}
-        </tbody>
-    </table>
+  <table class="table table-striped table-hover">
+    <thead>
+      <th>
+        <span
+          title="The short name of the message."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Name
+        </span>
+      </th>
+      <th>
+        <span
+          title="The kind of message (command, event or timeout)."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          data-bs-html="true"
+        >
+          Kind
+        </span>
+      </th>
+      <th>
+        <span
+          title="The name of the Go type that defines the message."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Implementation
+        </span>
+      </th>
+      <th class="numeric">
+        <span
+          title="The number of handlers that produce the message."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Producers
+        </span>
+      </th>
+      <th class="numeric">
+        <span
+          title="The number of handlers that consume the message."
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+        >
+          Consumers
+        </span>
+      </th>
+    </thead>
+    <tbody>
+      {{ range $m := .Messages }}
+      <tr>
+        <td>
+          <a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}"
+            >{{ $m.Impl.Name }}</a
+          >
+        </td>
+        <td>{{ kind $m.Kind }}</td>
+        <td>{{ type $m.Impl }}</td>
+        <td class="numeric">
+          <a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#producers"
+            >{{ numeric $m.ProducerCount }}</a
+          >
+        </td>
+        <td class="numeric">
+          <a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#consumers"
+            >{{ numeric $m.ConsumerCount }}</a
+          >
+        </td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
 </section>
 
 {{ end }}

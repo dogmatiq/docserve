@@ -147,7 +147,7 @@ func messageSearchItems(ctx context.Context, db *sql.DB) ([]searchItem, error) {
 		`SELECT
 			t.package,
 			t.name,
-			MODE() WITHIN GROUP (ORDER BY m.role),
+			MODE() WITHIN GROUP (ORDER BY m.kind),
 			COALESCE(t.docs, '')
 		FROM dogmabrowser.handler_message AS m
 		INNER JOIN dogmabrowser.type AS t

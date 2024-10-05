@@ -29,7 +29,7 @@ type relationship struct {
 	Name                   string
 	Impl                   components.Type
 	HasPointerMismatch     bool
-	HasRoleMismatch        bool
+	HasKindMismatch        bool
 	UpstreamMessageCount   int
 	DownstreamMessageCount int
 	TotalMessageCount      int
@@ -50,7 +50,7 @@ type handlerSummary struct {
 // application, for display within a detailsView.
 type messageSummary struct {
 	Impl          components.Type
-	Role          message.Role
+	Kind          message.Kind
 	ProducerCount int
 	ConsumerCount int
 }
@@ -151,7 +151,7 @@ func (h *DetailsHandler) loadRelationships(
 			COALESCE(t.url, ''),
 			COALESCE(t.docs, ''),
 			BOOL_OR(m.is_pointer != xm.is_pointer) AS has_pointer_mismatch,
-			BOOL_OR(m.role != xm.role) AS has_role_mismatch,
+			BOOL_OR(m.kind != xm.kind) AS has_kind_mismatch,
 			COUNT(DISTINCT m.type_id) FILTER (WHERE m.is_produced AND xm.is_consumed) AS upstream_count,
 			COUNT(DISTINCT m.type_id) FILTER (WHERE m.is_consumed AND xm.is_produced) AS downstream_count,
 			COUNT(DISTINCT m.type_id)
@@ -162,11 +162,11 @@ func (h *DetailsHandler) loadRelationships(
 		ON h.application_key = a.key
 		INNER JOIN dogmabrowser.handler_message AS m
 		ON m.handler_key = h.key
-		AND m.role != 'timeout'
+		AND m.kind != 'timeout'
 		INNER JOIN dogmabrowser.handler_message AS xm
 		ON xm.type_id = m.type_id
 		AND xm.handler_key != m.handler_key
-		AND xm.role != 'timeout'
+		AND xm.kind != 'timeout'
 		INNER JOIN dogmabrowser.handler AS xh
 		ON xh.key = xm.handler_key
 		AND xh.application_key != h.application_key
@@ -196,7 +196,7 @@ func (h *DetailsHandler) loadRelationships(
 			&r.Impl.URL,
 			&r.Impl.Docs,
 			&r.HasPointerMismatch,
-			&r.HasRoleMismatch,
+			&r.HasKindMismatch,
 			&r.UpstreamMessageCount,
 			&r.DownstreamMessageCount,
 			&r.TotalMessageCount,
@@ -287,7 +287,7 @@ func (h *DetailsHandler) loadMessages(
 			m.is_pointer,
 			COALESCE(t.url, ''),
 			COALESCE(t.docs, ''),
-			m.role,
+			m.kind,
 			(
 				SELECT COUNT(DISTINCT pm.handler_key)
 				FROM dogmabrowser.handler_message AS pm
@@ -323,7 +323,7 @@ func (h *DetailsHandler) loadMessages(
 			&s.Impl.IsPointer,
 			&s.Impl.URL,
 			&s.Impl.Docs,
-			&s.Role,
+			&s.Kind,
 			&s.ProducerCount,
 			&s.ConsumerCount,
 		); err != nil {
