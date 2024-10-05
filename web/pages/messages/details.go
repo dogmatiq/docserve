@@ -13,8 +13,8 @@ import (
 
 type detailsView struct {
 	Impl               components.Type
-	Role               string
-	HasRoleMismatch    bool
+	Kind               string
+	HasKindMismatch    bool
 	HasPointerMismatch bool
 
 	Applications []applicationSummary
@@ -96,8 +96,8 @@ func (h *DetailsHandler) loadDetails(
 			t.name,
 			COALESCE(t.url, ''),
 			COALESCE(t.docs, ''),
-			MODE() WITHIN GROUP (ORDER BY m.role) AS role,
-			COUNT(DISTINCT m.role) > 1 AS has_role_mismatch,
+			MODE() WITHIN GROUP (ORDER BY m.kind) AS kind,
+			COUNT(DISTINCT m.kind) > 1 AS has_kind_mismatch,
 			COUNT(DISTINCT m.is_pointer) > 1 AS has_pointer_mismatch
 		FROM dogmabrowser.handler_message AS m
 		INNER JOIN dogmabrowser.type AS t
@@ -114,8 +114,8 @@ func (h *DetailsHandler) loadDetails(
 		&view.Impl.Name,
 		&view.Impl.URL,
 		&view.Impl.Docs,
-		&view.Role,
-		&view.HasRoleMismatch,
+		&view.Kind,
+		&view.HasKindMismatch,
 		&view.HasPointerMismatch,
 	)
 }

@@ -179,7 +179,7 @@ func syncMessages(
 		return fmt.Errorf("unable to mark messages for removal: %w", err)
 	}
 
-	for n, r := range h.MessageNames().Produced {
+	for n, em := range h.MessageNames() {
 		typeID, isPointer, err := syncTypeRef(ctx, tx, n.String())
 		if err != nil {
 			return err
@@ -191,47 +191,22 @@ func syncMessages(
 				handler_key,
 				type_id,
 				is_pointer,
-				role,
-				is_produced
-			) VALUES (
-				$1, $2, $3, $4, TRUE
-			) ON CONFLICT (handler_key, type_id, is_pointer) DO UPDATE SET
-				role = excluded.role,
-				is_produced = excluded.is_produced,
-				needs_removal = FALSE`,
-			h.Identity().Key,
-			typeID,
-			isPointer,
-			r,
-		); err != nil {
-			return fmt.Errorf("unable to sync message: %w", err)
-		}
-	}
-
-	for n, r := range h.MessageNames().Consumed {
-		typeID, isPointer, err := syncTypeRef(ctx, tx, n.String())
-		if err != nil {
-			return err
-		}
-
-		if _, err := tx.ExecContext(
-			ctx,
-			`INSERT INTO dogmabrowser.handler_message (
-				handler_key,
-				type_id,
-				is_pointer,
-				role,
+				kind,
+				is_produced,
 				is_consumed
 			) VALUES (
-				$1, $2, $3, $4, TRUE
+				$1, $2, $3, $4, $5, $6
 			) ON CONFLICT (handler_key, type_id, is_pointer) DO UPDATE SET
-				role = excluded.role,
+				kind = excluded.kind,
+				is_produced = excluded.is_produced,
 				is_consumed = excluded.is_consumed,
 				needs_removal = FALSE`,
 			h.Identity().Key,
 			typeID,
 			isPointer,
-			r,
+			em.Kind,
+			em.IsProduced,
+			em.IsConsumed,
 		); err != nil {
 			return fmt.Errorf("unable to sync message: %w", err)
 		}

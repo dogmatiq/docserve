@@ -27,8 +27,8 @@ type relatedApp struct {
 
 type relatedMessage struct {
 	Impl               components.Type
-	Role               message.Role
-	HasRoleMismatch    bool
+	Kind               message.Kind
+	HasKindMismatch    bool
 	HasPointerMismatch bool
 	ProducerCount      int
 	ConsumerCount      int
@@ -149,8 +149,8 @@ func (h *RelationshipHandler) loadMessages(
 			MODE() WITHIN GROUP (ORDER BY pm.is_pointer),
 			COALESCE(t.url, ''),
 			COALESCE(t.docs, ''),
-			MODE() WITHIN GROUP (ORDER BY pm.role),
-			BOOL_OR(pm.role != cm.role) AS has_role_mismatch,
+			MODE() WITHIN GROUP (ORDER BY pm.kind),
+			BOOL_OR(pm.kind != cm.kind) AS has_kind_mismatch,
 			BOOL_OR(pm.is_pointer != cm.is_pointer) AS has_pointer_mismatch,
 			COUNT(DISTINCT pm.handler_key) AS producer_count,
 			COUNT(DISTINCT cm.handler_key) AS consumer_count
@@ -165,10 +165,10 @@ func (h *RelationshipHandler) loadMessages(
 		ON ch.key = cm.handler_key
 		WHERE ph.application_key = $1
 		AND pm.is_produced
-		AND pm.role != 'timeout'
+		AND pm.kind != 'timeout'
 		AND ch.application_key = $2
 		AND cm.is_consumed
-		AND cm.role != 'timeout'
+		AND cm.kind != 'timeout'
 		GROUP BY t.id
 		ORDER BY t.name, t.package`,
 		producerAppKey,
@@ -188,8 +188,8 @@ func (h *RelationshipHandler) loadMessages(
 			&r.Impl.IsPointer,
 			&r.Impl.URL,
 			&r.Impl.Docs,
-			&r.Role,
-			&r.HasRoleMismatch,
+			&r.Kind,
+			&r.HasKindMismatch,
 			&r.HasPointerMismatch,
 			&r.ProducerCount,
 			&r.ConsumerCount,

@@ -1,0 +1,27 @@
+<span class="kind-component">
+  {{ if eq . "command" }}
+  <span
+    title="A command message represents a request for the application to perform some action."
+    data-bs-toggle="tooltip"
+    data-bs-placement="bottom"
+    class="kind-command"
+    ><span class="sticky-note"></span> command</span
+  >
+  {{ end }} {{ if eq . "event" }}
+  <span
+    title="An event message encapsulates information about an action that the application has already performed."
+    data-bs-toggle="tooltip"
+    data-bs-placement="bottom"
+    class="kind-event"
+    ><span class="sticky-note"></span> event</span
+  >
+  {{ end }} {{ if eq . "timeout" }}
+  <span
+    title="A timeout message schedules a process to perform some action at a specific time."
+    data-bs-toggle="tooltip"
+    data-bs-placement="bottom"
+    class="kind-timeout"
+    ><span class="sticky-note"></span> timeout</span
+  >
+  {{ end }}
+</span>

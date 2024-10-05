@@ -18,12 +18,12 @@
             Name
         </span></th>
         <th><span
-            title="The role that the message plays within the applications that use it."
+            title="The kind of message (command, event or timeout)."
             data-bs-toggle="tooltip"
             data-bs-placement="top"
             data-bs-html="true"
         >
-            Role
+            Kind
         </span></th>
         <th><span
             title="The name of the Go type that defines the message."
@@ -59,11 +59,11 @@
             <tr>
                 <td><a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}">{{ $m.Impl.Name }}</a></td>
                 <td>
-                    {{ role $m.Role }}
+                    {{ kind $m.Kind }}
 
-                    {{ if $m.HasRoleMismatch }}
-                    <a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#role-mismatch"><i
-                        title="Not all handlers agree that <strong>{{ $m.Impl.Name }}</strong> is {{ if eq $m.Role "event" }}an{{ else }}a{{ end }} <strong>{{ $m.Role }}</strong>."
+                    {{ if $m.HasKindMismatch }}
+                    <a href="/messages/{{ $m.Impl.Package }}.{{ $m.Impl.Name }}#kind-mismatch"><i
+                        title="Not all handlers agree that <strong>{{ $m.Impl.Name }}</strong> is {{ if eq $m.Kind "event" }}an{{ else }}a{{ end }} <strong>{{ $m.Kind }}</strong>."
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
                         data-bs-html="true"
