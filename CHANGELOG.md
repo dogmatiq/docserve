@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog], and this project adheres to
 [keep a changelog]: https://keepachangelog.com/en/1.0.0/
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 
+## [0.1.12] - 2024-12-05
+
+- Updated to Go v1.23
+
 ## [0.1.11] - 2024-08-12
 
 - Updated `dogmatiq/configkit` to v0.13.2.
@@ -94,6 +98,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [0.1.9]: https://github.com/dogmatiq/browser/releases/v0.1.9
 [0.1.10]: https://github.com/dogmatiq/browser/releases/v0.1.10
 [0.1.11]: https://github.com/dogmatiq/browser/releases/v0.1.11
+[0.1.12]: https://github.com/dogmatiq/browser/releases/v0.1.12
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD
